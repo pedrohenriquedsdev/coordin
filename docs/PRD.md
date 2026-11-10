@@ -1,6 +1,6 @@
 # PRD — Coordin
 
-- **Status:** em elaboração — seções 1 a 4 aprovadas
+- **Status:** em elaboração — seções 1 a 4 e 5.1 (Must) aprovadas
 - **Última atualização:** 2026-11-10
 - **Fonte original:** [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -136,3 +136,113 @@ O planejamento é contínuo. O gestor volta ao cálculo (etapa 5) sempre que alg
 - ele aprova um cenário com outra sequência de execução.
 
 Em todos os casos, o sistema recalcula as previsões e mostra o impacto. Ele nunca reordena demandas sozinho: qualquer mudança de sequência é apresentada como cenário e só vale após aprovação do gestor de desenvolvimento.
+
+---
+
+## 5. Requisitos funcionais
+
+Os requisitos são priorizados com **MoSCoW**:
+
+- **Must:** indispensável para a entrega do TCC; sem ele o sistema não cumpre o objetivo central.
+- **Should:** importante, entra se o prazo permitir depois dos Must.
+- **Could:** desejável, só entra se sobrar tempo.
+
+Cada requisito tem um ID `RF-*` e critérios de aceite verificáveis. O *como* (modelo de capacidade, cálculo, margem, paralelismo) é definido no TDD; os critérios abaixo descrevem apenas o comportamento esperado. Todo esforço e toda capacidade são expressos em horas.
+
+### 5.1 Must
+
+#### RF-01 — Cadastrar times
+
+O gestor cadastra, edita e consulta os times do setor.
+
+- É possível cadastrar 7 ou mais times.
+- Cada time tem um nome que o identifica de forma única.
+
+#### RF-02 — Cadastrar pessoas e sua capacidade
+
+O gestor cadastra as pessoas, associa cada uma a um time e informa a capacidade disponível dela em horas.
+
+- Cada pessoa pertence a um único time.
+- Não é possível salvar uma pessoa sem capacidade informada; capacidade zero é aceita e significa que a pessoa não contribui para as previsões.
+- A capacidade de um time é derivada da capacidade das pessoas associadas a ele.
+- Um time sem pessoas, ou cujas pessoas têm capacidade zero, é tratado como sem capacidade: as demandas que dependem só dele não recebem data prevista e o sistema indica o motivo.
+
+#### RF-03 — Registrar ausências
+
+O gestor registra ausências de uma pessoa (férias e outras ausências) com data de início e de fim.
+
+- Durante a ausência, a pessoa não contribui com capacidade.
+- Uma ausência no meio da execução de uma demanda empurra a data prevista para depois, na proporção da capacidade perdida.
+- Registrar, alterar ou remover uma ausência recalcula as previsões afetadas.
+
+#### RF-04 — Cadastrar demandas com prioridade
+
+O gestor cadastra as demandas com sua prioridade, definida no alinhamento com o gestor de produto.
+
+- A demanda pode ser salva **sem estimativa de esforço**.
+- As demandas têm uma ordem de prioridade única e explícita, que o gestor pode alterar manualmente.
+- A ordem de prioridade é a ordem de execução usada no cálculo da previsão.
+
+#### RF-05 — Alocar times e pessoas à demanda
+
+O gestor define quais times atuarão em cada demanda e as pessoas alocadas.
+
+- Uma demanda pode ter um ou vários times; um time pode estar em várias demandas.
+- Quando um time está em várias demandas, sua capacidade é compartilhada entre elas respeitando a ordem de prioridade, sem nunca ultrapassar a capacidade disponível.
+
+#### RF-06 — Registrar estimativa de esforço
+
+O gestor registra o esforço estimado de cada demanda, em horas, conforme informado pelos times.
+
+- A estimativa pode ser registrada ou alterada a qualquer momento.
+- Esforço deve ser maior que zero; zero ou valor negativo é rejeitado com mensagem clara.
+- Registrar ou alterar a estimativa recalcula as previsões.
+
+#### RF-07 — Registrar datas de início e de fim informada
+
+O gestor registra a data de início planejada da demanda e, opcionalmente, uma data de fim informada por ele (prazo desejado ou combinado).
+
+- A data de início é obrigatória para que a demanda receba previsão.
+- A data de fim informada não altera o cálculo da previsão.
+
+#### RF-08 — Calcular a data prevista de conclusão
+
+O sistema calcula, para cada demanda previsível, a data prevista de conclusão a partir do esforço, da data de início, das pessoas e times alocados, da capacidade disponível (descontadas as ausências) e da ordem de execução.
+
+- O cálculo é refeito sempre que um dado que o afeta muda (estimativa, alocação, capacidade, ausência, ordem ou data de início).
+- Para os mesmos dados, o resultado é sempre o mesmo.
+- Adicionar um time a uma demanda **não divide o prazo automaticamente** pelo número de times: a previsão considera a capacidade efetiva alocada.
+- Uma demanda de menor prioridade não toma capacidade de uma de maior prioridade no mesmo time.
+
+#### RF-09 — Aplicar margem de segurança
+
+O sistema aplica automaticamente uma margem de segurança à previsão.
+
+- A data prevista com margem é sempre **igual ou posterior** à data calculada sem margem; a margem nunca reduz o prazo.
+- O resultado da margem é arredondado para cima.
+- O gestor vê a previsão com margem e consegue identificar quanto dela vem da margem.
+
+#### RF-10 — Tratar demandas não previsíveis
+
+Uma demanda sem estimativa de esforço, sem data de início ou sem capacidade disponível é exibida como **não previsível**.
+
+- Demandas não previsíveis aparecem no cronograma, sem data prevista, com o motivo indicado.
+- Demandas não previsíveis não consomem capacidade dos times no cálculo das demais.
+- Quando o dado faltante é registrado, a demanda passa a ser previsível e recebe data prevista.
+
+#### RF-11 — Visualizar o cronograma
+
+O gestor visualiza o cronograma consolidado de todas as demandas.
+
+- Para cada demanda: prioridade, times alocados, esforço, data de início, data prevista (com margem), data de fim informada (se houver) e situação (previsível ou não previsível).
+- As demandas aparecem na ordem de prioridade.
+- Quando a data prevista ultrapassa a data de fim informada, a demanda é sinalizada com um alerta.
+- O cronograma pode ser apresentado em reunião ao gestor de produto, sem exportação.
+
+#### RF-12 — Registrar a conclusão real e o desvio
+
+O gestor registra a data real de conclusão de uma demanda.
+
+- A data real de conclusão não pode ser anterior à data de início.
+- O sistema guarda a **primeira previsão** calculada para a demanda (linha de base); replanejamentos posteriores não a alteram.
+- Para cada demanda concluída, o sistema mostra a data real e dois desvios, em dias: em relação à primeira previsão e em relação à previsão vigente no momento da conclusão.
