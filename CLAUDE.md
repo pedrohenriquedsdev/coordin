@@ -241,12 +241,13 @@ Pode fazer sem perguntar: ler arquivos, buscar no repositório, rodar build/test
 - [ ] `.github/pull_request_template.md`
 - [ ] PRD (`docs/PRD.md`), na branch `docs/prd`:
   - [x] 1 Visão geral · 2 Problema · 3 Personas · 4 Fluxo de uso (aprovadas em 2026-11-10)
-  - [ ] 5 Requisitos funcionais (MoSCoW) · 6 Requisitos não funcionais e regras invioláveis · 7 Métricas de sucesso · 8 Escopo e não objetivos · 9 Premissas, riscos e decisões delegadas ao TDD · 10 Marcos até 2026-11-28
+  - [x] 5.1 Requisitos funcionais Must, RF-01 a RF-12 (aprovada em 2026-11-10)
+  - [ ] 5.2 Should · 5.3 Could · 6 Requisitos não funcionais e regras invioláveis · 7 Métricas de sucesso · 8 Escopo e não objetivos · 9 Premissas, riscos e decisões delegadas ao TDD · 10 Marcos até 2026-11-28
 - [ ] TDD (`docs/TDD.md`)
 - [ ] Changes do OpenSpec, implementação e PRs, conforme o roadmap do TDD
 
 **Desvio registrado (2026-11-10):** a branch `docs/prd` foi criada a partir da `chore/project-setup`, e não da `main`, porque a `main` ainda não contém este arquivo, a proposta nem o OpenSpec (decisão do usuário). A `chore/project-setup` deve ser integrada à `main` antes, e a `docs/prd` rebaseada sobre a `main` antes do seu PR.
 
-**Próximo passo:** escrever a seção 5 (Requisitos funcionais, MoSCoW) do PRD, incluindo a exportação do cronograma (formato e prioridade a decidir).
+**Próximo passo:** escrever a seção 5.2 (Should) do PRD. Já decidido para ela: cenários de sequenciamento com aprovação do gestor, relatório por time, dependências entre demandas e exportação do cronograma em planilha.
 
 Mantenha esta seção atualizada ao concluir cada etapa.
