@@ -1,6 +1,6 @@
 # PRD — Coordin
 
-- **Status:** em elaboração — seções 1 a 6 aprovadas
+- **Status:** em elaboração — seções 1 a 7 aprovadas
 - **Última atualização:** 2026-11-10
 - **Fonte original:** [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -409,3 +409,37 @@ Valem para todo o sistema. Nenhum requisito, cenário ou decisão técnica pode 
 #### RNF-08 — Verificabilidade das regras de cálculo
 
 - Os critérios de aceite dos requisitos de cálculo (RF-02, RF-03, RF-05, RF-08 a RF-10, RF-12 e RF-18) e as regras invioláveis são verificados por testes automatizados, incluindo casos de borda: esforço ausente, time sem capacidade, ausência no meio do período, vários times na mesma demanda, dependência em cadeia, ciclo de dependência e margem arredondada para cima.
+
+---
+
+## 7. Métricas de sucesso
+
+### 7.1 Métrica principal: desvio entre previsto e realizado
+
+- **Definição:** para cada demanda concluída, desvio = data real de conclusão − data prevista, em dias. Valor positivo indica atraso; negativo, entrega antecipada.
+- **Leituras:** em relação à primeira previsão (linha de base da demanda) e à previsão vigente na conclusão (RF-12). A primeira mostra a qualidade da previsão original; a segunda, o efeito dos replanejamentos.
+- **Agregação:** desvio médio e percentual de demandas concluídas até a data prevista, no setor e por time (RF-23).
+- **Meta:** não há meta numérica, porque o setor não tem medição atual do atraso. O sucesso é o desvio do Coordin ser **menor que a linha de base** do processo atual (7.2).
+
+### 7.2 Validação no TCC com demandas históricas
+
+O prazo do TCC não permite acompanhar demandas reais do início à conclusão com o sistema. A métrica principal é demonstrada com demandas já concluídas no setor:
+
+1. Selecionar demandas concluídas, com seus dados **anonimizados** (sem nomes reais de pessoas, times ou clientes).
+2. Cadastrar os times, as pessoas, a capacidade e as ausências do período, além das estimativas e datas de início que existiam quando cada demanda começou.
+3. Calcular a previsão do Coordin para cada demanda e comparar com a data real de conclusão: este é o **desvio do Coordin**.
+4. Comparar com a **linha de base**: o desvio entre a data real e a data que foi comunicada na época pelo processo manual, para as demandas em que esse registro existir.
+5. Considerar a validação bem-sucedida se o desvio médio do Coordin for menor que o da linha de base.
+
+A existência de registros das datas comunicadas na época ainda não foi confirmada (premissa na seção 9). **Plano B:** sem esses registros, a validação apresenta o desvio do Coordin nas demandas históricas sem comparação com a linha de base, e o resultado é avaliado junto com o gestor de desenvolvimento.
+
+### 7.3 Métricas secundárias
+
+| Métrica | Como medir | Resultado esperado relacionado | Requisitos |
+|---|---|---|---|
+| Demandas previsíveis | Percentual de demandas cadastradas que têm data prevista | Visão centralizada das demandas e da capacidade | RF-10, RF-11 |
+| Ociosidade e sobrecarga detectadas | Horas ociosas e períodos de sobrecarga identificados por time | Identificação antecipada de ociosidade, sobrecarga e realocação | RF-17 |
+| Cenários avaliados | Quantidade de cenários recomendados ou simulados, e quantos foram aprovados ou rejeitados | Comparação de cenários para apoiar o sequenciamento | RF-13 a RF-15 |
+| Avaliação do gestor | Questionário curto respondido pelo gestor de desenvolvimento após usar o sistema na validação (clareza das previsões, utilidade dos cenários e relatórios, apoio à comunicação com o gestor de produto) | Previsibilidade e comunicação mais clara entre os gestores | — |
+
+Métricas que dependem de requisitos Should ou Could só são medidas se esses requisitos forem entregues.
