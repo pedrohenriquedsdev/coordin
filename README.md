@@ -1,8 +1,8 @@
-# Meridian
+# Coordin
 
 > A decision-support system that forecasts delivery dates, balances team capacity, and recommends optimized demand sequencing for software development teams.
 
-Meridian helps development managers turn a list of demands, their effort estimates, and team availability into a **predictable delivery schedule**. Beyond calculating dates, it compares scenarios, highlights idle capacity and overload, and recommends alternative ways to organize the work, always leaving the final decision to the manager.
+Coordin helps development managers turn a list of demands, their effort estimates, and team availability into a **predictable delivery schedule**. Beyond calculating dates, it compares scenarios, highlights idle capacity and overload, and recommends alternative ways to organize the work, always leaving the final decision to the manager.
 
 > **Project status:** 🚧 Early stage. This repository starts from an academic project (TCC) proposal. Several calculation rules are still being specified (see [Open Design Decisions](#open-design-decisions)).
 
@@ -31,7 +31,7 @@ Meridian helps development managers turn a list of demands, their effort estimat
 
 ## Overview
 
-The central goal of Meridian is to give managers enough visibility to answer the product team one question with confidence:
+The central goal of Coordin is to give managers enough visibility to answer the product team one question with confidence:
 
 > **"When can each demand be delivered, considering the real capacity of the teams?"**
 
@@ -104,11 +104,11 @@ The system converts estimated effort into a forecasted duration and, from the st
 
 **Safety margin:** the system automatically adds a margin to the calculated deadline. This margin must always *extend* the forecast, never reduce it, to avoid overly optimistic dates.
 
-**A note on parallelism:** a demand estimated at 100 hours for one team may, under balanced division and parallelizable work, have its duration reduced when a second team joins. Meridian recalculates the forecast based on *effective* capacity and does **not** assume that adding a team always cuts the deadline exactly in half.
+**A note on parallelism:** a demand estimated at 100 hours for one team may, under balanced division and parallelizable work, have its duration reduced when a second team joins. Coordin recalculates the forecast based on *effective* capacity and does **not** assume that adding a team always cuts the deadline exactly in half.
 
 ## Sequencing Optimization
 
-Besides calculating dates for the sequence defined by the manager, Meridian analyzes alternative execution combinations and identifies those that could improve the overall result, for example by reducing total duration, bringing deliveries forward, or making better use of available capacity.
+Besides calculating dates for the sequence defined by the manager, Coordin analyzes alternative execution combinations and identifies those that could improve the overall result, for example by reducing total duration, bringing deliveries forward, or making better use of available capacity.
 
 **Example scenario**
 
@@ -175,8 +175,8 @@ Some rules still need to be detailed during specification and development. They 
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/meridian-planner.git
-cd meridian-planner
+git clone https://github.com/<your-username>/coordin-planner.git
+cd coordin-planner
 
 # Installation and run instructions coming soon
 ```
@@ -205,7 +205,7 @@ Contributions, ideas, and feedback are welcome. Since the project is still takin
 
 ## Academic Context
 
-Meridian originated as a final undergraduate project (TCC) proposal: *Planning and Demand Optimization — a system to support delivery forecasting and the distribution of development team capacity.* The manager remains responsible for decisions; the system provides the calculations, visibility, and scenarios needed to make them.
+Coordin originated as a final undergraduate project (TCC) proposal: *Planning and Demand Optimization — a system to support delivery forecasting and the distribution of development team capacity.* The manager remains responsible for decisions; the system provides the calculations, visibility, and scenarios needed to make them.
 
 ## License
 
