@@ -113,7 +113,7 @@ Verifique a disponibilidade antes da etapa que depende de cada ferramenta. Esta 
 |---|---|---|
 | `AskUserQuestion` | Toda interação que exige resposta minha | Obrigatória. Indisponível → informar o bloqueio e parar. |
 | Read / Glob / Grep / Edit / Write | Consultar fontes; manter PRD, TDD, specs, código e template de PR | Obrigatórias. Prefira as ferramentas dedicadas ao shell para ler e editar. |
-| Terminal + Git | Inspecionar o repositório, criar branches, rodar verificações, commitar | Obrigatórios. Confira `git status` e preserve alterações existentes antes de operar. |
+| Terminal + Git | Inspecionar o repositório, criar branches, rodar verificações, preparar os comandos de commit | Obrigatórios. Confira `git status` e preserve alterações existentes antes de operar. |
 | OpenSpec CLI + comandos `/opsx:*` | Etapa SDD | Obrigatória no SDD. A existência de `openspec/` não prova configuração válida. |
 | Documentação oficial (Context7 ou sites oficiais) | Confirmar APIs, versões e compatibilidade da stack | Necessária sempre que uma decisão ou implementação depender disso. Não presuma suporte sem verificar. |
 | Runtime, gerenciador de pacotes e ferramentas de qualidade definidos no TDD | Build, testes, lint, formatação | Conforme a stack aprovada; não presuma stack antes do TDD. |
@@ -182,7 +182,7 @@ Modelo de capacidade (horas por pessoa e por time, férias, ausências, outras a
   - Tipos: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `build`, `ci`, `style`, `perf`.
 - **Um commit por bloco lógico. Não economize commits.** Cada mudança coesa e independente vira um commit próprio: uma seção de documento, uma entidade, uma regra com seus testes, uma configuração. Nunca misture documentação, refatoração e funcionalidade sem relação no mesmo commit.
 - Cada commit deve ser verificável; não commite código que quebre build ou testes.
-- **Antes de commitar**, mostre a lista de commits planejados (mensagem + arquivos de cada um) e aguarde minha aprovação.
+- **Eu sempre faço os commits.** Ao fim de cada bloco lógico, mostre a lista de commits planejados (mensagem + arquivos de cada um) com os comandos `git add`/`git commit` prontos para copiar. Nunca execute `git commit` nem `git push`.
 
 ---
 
@@ -219,7 +219,7 @@ Preencha todas as seções do template, sem deixar comentários de orientação 
 Pergunte antes (via `AskUserQuestion`) de:
 - instalar, atualizar ou remover dependências;
 - apagar arquivos ou pastas;
-- fazer push, abrir PR ou fazer merge;
+- abrir PR ou fazer merge (commit e push são sempre feitos por mim; entregue apenas os comandos);
 - alterar regras invioláveis (§7.1), decisões já tomadas (§7.2) ou documentos já aprovados;
 - mudar a stack, a estrutura de pastas ou as convenções deste arquivo.
 
