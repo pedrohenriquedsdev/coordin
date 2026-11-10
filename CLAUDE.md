@@ -36,7 +36,7 @@ Instruções permanentes para o Claude Code neste repositório. Leia este arquiv
 ```
 coordin/
 ├── CLAUDE.md                     # este arquivo
-├── .claude/                      # comandos e skills do OpenSpec para o Claude Code
+├── .claude/                      # comandos e skills do OpenSpec + skills generate-prd e generate-tdd
 ├── .github/
 │   └── pull_request_template.md  # template obrigatório de PR
 ├── docs/
@@ -67,10 +67,12 @@ Toda funcionalidade ou mudança de comportamento segue o fluxo completo, em uma 
 | 4. Pull Request | PR da feature branch → `main` | Implementação concluída, verificações executadas, PR aberto com o template preenchido |
 
 ### 4.1 PRD
+- Conduzido pela skill `/generate-prd [seção]` (`.claude/skills/generate-prd/`).
 - Define **o quê e por quê**: problema, personas, fluxo de uso, requisitos com critérios de aceite verificáveis, métricas, escopo e não objetivos, premissas e riscos.
 - **Sem solução técnica.** Algoritmos, stack e modelo de dados vão para o TDD. Os pontos em aberto da proposta entram como "decisões delegadas ao TDD".
 
 ### 4.2 TDD
+- Conduzido pela skill `/generate-tdd [seção]` (`.claude/skills/generate-tdd/`).
 - Define **o como**, alinhado ao PRD: arquitetura, stack, modelo de dados, contratos de API, algoritmos (previsão, margem, paralelismo, dependências, otimização), segurança, estratégia de testes e **roadmap de implementação** (ordem das changes).
 - Cada decisão recebe um ID `DT-*`, com alternativas consideradas e justificativa.
 - Fecha os pontos em aberto listados em §7.3.
@@ -238,6 +240,7 @@ Pode fazer sem perguntar: ler arquivos, buscar no repositório, rodar build/test
 
 - [x] OpenSpec inicializado para o Claude Code
 - [x] `CLAUDE.md` criado
+- [x] Skills `generate-prd` e `generate-tdd` criadas (branch `chore/prd-tdd-skills`, integrada à `docs/prd` por fast-forward)
 - [ ] `.github/pull_request_template.md`
 - [ ] PRD (`docs/PRD.md`), na branch `docs/prd`:
   - [x] 1 Visão geral · 2 Problema · 3 Personas · 4 Fluxo de uso (aprovadas em 2026-11-10)
@@ -249,6 +252,6 @@ Pode fazer sem perguntar: ler arquivos, buscar no repositório, rodar build/test
 
 **Desvio registrado (2026-11-10):** a branch `docs/prd` foi criada a partir da `chore/project-setup`, e não da `main`, porque a `main` ainda não contém este arquivo, a proposta nem o OpenSpec (decisão do usuário). A `chore/project-setup` deve ser integrada à `main` antes, e a `docs/prd` rebaseada sobre a `main` antes do seu PR.
 
-**Próximo passo:** escrever a seção 5.3 (Could) do PRD. Já decidido para ela: previsto × realizado detalhado.
+**Próximo passo:** escrever a seção 5.3 (Could) do PRD com `/generate-prd 5.3`. Já decidido para ela: previsto × realizado detalhado.
 
 Mantenha esta seção atualizada ao concluir cada etapa.
