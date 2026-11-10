@@ -247,12 +247,13 @@ Pode fazer sem perguntar: ler arquivos, buscar no repositório, rodar build/test
   - [x] 5.1 Requisitos funcionais Must, RF-01 a RF-12 (aprovada em 2026-11-10)
   - [x] 5.2 Requisitos funcionais Should, RF-13 a RF-19 (aprovada em 2026-11-10)
   - [x] 5.3 Requisitos funcionais Could, RF-20 a RF-23 (aprovada em 2026-11-10)
-  - [ ] 6 Requisitos não funcionais e regras invioláveis · 7 Métricas de sucesso · 8 Escopo e não objetivos · 9 Premissas, riscos e decisões delegadas ao TDD · 10 Marcos até 2026-11-28
+  - [x] 6 Requisitos não funcionais e regras invioláveis, RNF-01 a RNF-08 (aprovada em 2026-11-10)
+  - [ ] 7 Métricas de sucesso · 8 Escopo e não objetivos · 9 Premissas, riscos e decisões delegadas ao TDD · 10 Marcos até 2026-11-28
 - [ ] TDD (`docs/TDD.md`)
 - [ ] Changes do OpenSpec, implementação e PRs, conforme o roadmap do TDD
 
 **Desvio registrado (2026-11-10):** a branch `docs/prd` foi criada a partir da `chore/project-setup`, e não da `main`, porque a `main` ainda não contém este arquivo, a proposta nem o OpenSpec (decisão do usuário). A `chore/project-setup` deve ser integrada à `main` antes, e a `docs/prd` rebaseada sobre a `main` antes do seu PR.
 
-**Próximo passo:** escrever a seção 6 (Requisitos não funcionais e regras invioláveis) do PRD com `/generate-prd 6`. Já decidido para ela: previsto × realizado detalhado.
+**Próximo passo:** escrever a seção 7 (Métricas de sucesso) do PRD com `/generate-prd 7`. Registrar na seção 9 o risco de hospedagem: uso no computador e no celular exige servidor acessível pela rede. Já decidido para ela: previsto × realizado detalhado.
 
 Mantenha esta seção atualizada ao concluir cada etapa.
