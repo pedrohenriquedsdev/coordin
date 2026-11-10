@@ -16,7 +16,7 @@ O **Coordin** é um sistema de planejamento e apoio à decisão para a gestão d
 
 **Envolvidos** (detalhados na seção 3):
 
-- **Gestor de desenvolvimento:** usuário principal; organiza demandas, times e capacidade e toma as decisões de planejamento.
+- **Gestor de desenvolvimento:** usuário único do sistema; organiza demandas, times e capacidade e toma as decisões de planejamento.
 - **Gestor de produto:** recebe as previsões de entrega e define, junto com o gestor de desenvolvimento, as prioridades.
 - **Times de desenvolvimento:** fornecem as estimativas de esforço.
 
