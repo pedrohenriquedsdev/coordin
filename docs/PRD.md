@@ -1,6 +1,6 @@
 # PRD — Coordin
 
-- **Status:** em elaboração — seções 1 a 4 e 5.1 (Must) aprovadas
+- **Status:** em elaboração — seções 1 a 4, 5.1 (Must) e 5.2 (Should) aprovadas
 - **Última atualização:** 2026-11-10
 - **Fonte original:** [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -246,3 +246,69 @@ O gestor registra a data real de conclusão de uma demanda.
 - A data real de conclusão não pode ser anterior à data de início.
 - O sistema guarda a **primeira previsão** calculada para a demanda (linha de base); replanejamentos posteriores não a alteram.
 - Para cada demanda concluída, o sistema mostra a data real e dois desvios, em dias: em relação à primeira previsão e em relação à previsão vigente no momento da conclusão.
+
+### 5.2 Should
+
+O relatório de planejamento geral previsto na proposta (comparar sequências e seu impacto no cronograma do setor) é atendido pelos cenários (RF-13 a RF-15). O critério que define um cenário "melhor" (prazo total, entregas prioritárias, utilização ou combinação) é decidido no TDD.
+
+#### RF-13 — Recomendar cenários de sequenciamento
+
+O sistema analisa ordens de execução alternativas e recomenda as que melhoram o resultado geral do planejamento.
+
+- Cada cenário mostra a sequência proposta e, para cada demanda, as novas datas de início e prevista, com a diferença em dias em relação ao cronograma atual.
+- Cada cenário mostra também o efeito no conjunto do setor (por exemplo, a data de conclusão da última demanda).
+- A prioridade registrada de cada demanda aparece ao lado da nova posição, deixando visível o que muda em relação a ela.
+- Quando nenhuma alternativa melhora o resultado, o sistema informa isso.
+- Nenhum cenário é aplicado automaticamente.
+
+#### RF-14 — Simular uma sequência proposta pelo gestor
+
+O gestor monta uma ordem de execução alternativa (por exemplo, trocar a posição de duas demandas) e o sistema calcula o impacto.
+
+- O resultado é apresentado no mesmo formato dos cenários recomendados (RF-13).
+- A simulação não altera o cronograma vigente até ser aprovada (RF-15).
+
+#### RF-15 — Aprovar ou rejeitar um cenário
+
+O gestor aprova ou rejeita cada cenário, recomendado ou simulado.
+
+- Ao aprovar, a ordem de execução passa a ser a do cenário e as previsões são recalculadas; a prioridade registrada não muda.
+- Ao rejeitar, nada muda no cronograma.
+- O cronograma indica quando a ordem de execução difere da ordem de prioridade e quais demandas foram deslocadas.
+- O gestor pode voltar a ordem de execução para a ordem de prioridade a qualquer momento.
+
+#### RF-16 — Simular o impacto de uma nova demanda
+
+Antes de incluir uma nova demanda no planejamento, o gestor simula seu efeito no cronograma.
+
+- O sistema mostra quais demandas têm a data prevista alterada e em quantos dias.
+- O gestor confirma a inclusão, que passa a valer no cronograma, ou descarta a simulação, sem nenhum efeito.
+
+#### RF-17 — Relatório por time
+
+Para cada time, o sistema mostra por período a capacidade disponível (descontadas as ausências), as horas alocadas e a ocupação.
+
+- **Ociosidade:** período em que o time tem capacidade sem trabalho alocado; o relatório indica quantas horas estão livres.
+- **Sobrecarga:** período em que o trabalho na fila do time excede sua capacidade, empurrando entregas para depois; o relatório indica as demandas afetadas.
+- O relatório permite identificar times com capacidade livre para receber novas demandas ou apoiar outros times.
+- Demandas não previsíveis do time não entram nas horas alocadas, mas o relatório informa quantas existem.
+- O tamanho do período (semana, mês) é decidido no TDD.
+
+#### RF-18 — Dependências entre demandas
+
+O gestor registra que uma demanda só pode começar depois que outra terminar.
+
+- A demanda dependente nunca tem início previsto antes da conclusão prevista da demanda de que depende, mesmo que sua data de início registrada seja anterior.
+- Dependências em cadeia (A → B → C) são respeitadas.
+- Uma dependência que forme ciclo (A → B → A, direta ou indiretamente) é rejeitada com mensagem clara.
+- Se a demanda de que se depende for não previsível, a dependente também fica não previsível, com o motivo indicado.
+- Cenários (RF-13 e RF-14) nunca violam dependências.
+- Dependências são entre demandas inteiras, não entre etapas de uma demanda.
+
+#### RF-19 — Exportar o cronograma em planilha
+
+O gestor exporta o cronograma para um arquivo de planilha, para enviar ao gestor de produto.
+
+- O arquivo contém, por demanda, as mesmas informações do cronograma (RF-11), incluindo prioridade e ordem de execução.
+- O arquivo abre em ferramentas de planilha de uso comum.
+- O conteúdo reflete o cronograma vigente no momento da exportação.
