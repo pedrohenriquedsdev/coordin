@@ -181,14 +181,14 @@ O gestor cadastra as demandas com sua prioridade, definida no alinhamento com o 
 
 - A demanda pode ser salva **sem estimativa de esforço**.
 - As demandas têm uma ordem de prioridade única e explícita, que o gestor pode alterar manualmente.
-- A ordem de prioridade é a ordem de execução usada no cálculo da previsão.
+- A ordem de execução usada no cálculo da previsão é, por padrão, a ordem de prioridade. Ela só passa a diferir quando o gestor aprova um cenário (RF-15); mesmo assim, a prioridade registrada é preservada.
 
 #### RF-05 — Alocar times e pessoas à demanda
 
 O gestor define quais times atuarão em cada demanda e as pessoas alocadas.
 
 - Uma demanda pode ter um ou vários times; um time pode estar em várias demandas.
-- Quando um time está em várias demandas, sua capacidade é compartilhada entre elas respeitando a ordem de prioridade, sem nunca ultrapassar a capacidade disponível.
+- Quando um time está em várias demandas, sua capacidade é compartilhada entre elas respeitando a ordem de execução, sem nunca ultrapassar a capacidade disponível.
 
 #### RF-06 — Registrar estimativa de esforço
 
@@ -212,7 +212,7 @@ O sistema calcula, para cada demanda previsível, a data prevista de conclusão 
 - O cálculo é refeito sempre que um dado que o afeta muda (estimativa, alocação, capacidade, ausência, ordem ou data de início).
 - Para os mesmos dados, o resultado é sempre o mesmo.
 - Adicionar um time a uma demanda **não divide o prazo automaticamente** pelo número de times: a previsão considera a capacidade efetiva alocada.
-- Uma demanda de menor prioridade não toma capacidade de uma de maior prioridade no mesmo time.
+- Uma demanda posterior na ordem de execução não toma capacidade de uma anterior no mesmo time.
 
 #### RF-09 — Aplicar margem de segurança
 
@@ -235,7 +235,7 @@ Uma demanda sem estimativa de esforço, sem data de início ou sem capacidade di
 O gestor visualiza o cronograma consolidado de todas as demandas.
 
 - Para cada demanda: prioridade, times alocados, esforço, data de início, data prevista (com margem), data de fim informada (se houver) e situação (previsível ou não previsível).
-- As demandas aparecem na ordem de prioridade.
+- As demandas aparecem na ordem de execução, com a prioridade visível ao lado.
 - Quando a data prevista ultrapassa a data de fim informada, a demanda é sinalizada com um alerta.
 - O cronograma pode ser apresentado em reunião ao gestor de produto, sem exportação.
 
