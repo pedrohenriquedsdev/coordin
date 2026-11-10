@@ -239,10 +239,14 @@ Pode fazer sem perguntar: ler arquivos, buscar no repositório, rodar build/test
 - [x] OpenSpec inicializado para o Claude Code
 - [x] `CLAUDE.md` criado
 - [ ] `.github/pull_request_template.md`
-- [ ] PRD (`docs/PRD.md`), na branch `docs/prd`: seções 1 Visão geral · 2 Problema · 3 Personas · 4 Fluxo de uso · 5 Requisitos funcionais (MoSCoW) · 6 Requisitos não funcionais e regras invioláveis · 7 Métricas de sucesso · 8 Escopo e não objetivos · 9 Premissas, riscos e decisões delegadas ao TDD · 10 Marcos até 2026-11-28
+- [ ] PRD (`docs/PRD.md`), na branch `docs/prd`:
+  - [x] 1 Visão geral · 2 Problema (aprovadas em 2026-11-10)
+  - [ ] 3 Personas · 4 Fluxo de uso · 5 Requisitos funcionais (MoSCoW) · 6 Requisitos não funcionais e regras invioláveis · 7 Métricas de sucesso · 8 Escopo e não objetivos · 9 Premissas, riscos e decisões delegadas ao TDD · 10 Marcos até 2026-11-28
 - [ ] TDD (`docs/TDD.md`)
 - [ ] Changes do OpenSpec, implementação e PRs, conforme o roadmap do TDD
 
-**Próximo passo:** criar a branch `docs/prd` e escrever as seções 1 e 2 do PRD.
+**Desvio registrado (2026-11-10):** a branch `docs/prd` foi criada a partir da `chore/project-setup`, e não da `main`, porque a `main` ainda não contém este arquivo, a proposta nem o OpenSpec (decisão do usuário). A `chore/project-setup` deve ser integrada à `main` antes, e a `docs/prd` rebaseada sobre a `main` antes do seu PR.
+
+**Próximo passo:** escrever a seção 3 (Personas) do PRD.
 
 Mantenha esta seção atualizada ao concluir cada etapa.
