@@ -1,2 +1,212 @@
-# meridian
-Meridian is a decision-support system that forecasts delivery dates, balances team capacity, and recommends optimized demand sequencing for software development teams.
+# Meridian
+
+> A decision-support system that forecasts delivery dates, balances team capacity, and recommends optimized demand sequencing for software development teams.
+
+Meridian helps development managers turn a list of demands, their effort estimates, and team availability into a **predictable delivery schedule**. Beyond calculating dates, it compares scenarios, highlights idle capacity and overload, and recommends alternative ways to organize the work, always leaving the final decision to the manager.
+
+> **Project status:** 🚧 Early stage. This repository starts from an academic project (TCC) proposal. Several calculation rules are still being specified (see [Open Design Decisions](#open-design-decisions)).
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [The Problem](#the-problem)
+- [How It Works](#how-it-works)
+- [Key Features](#key-features)
+- [Inputs](#inputs)
+- [Forecast Calculation](#forecast-calculation)
+- [Sequencing Optimization](#sequencing-optimization)
+- [Reports and Indicators](#reports-and-indicators)
+- [Expected Outcomes](#expected-outcomes)
+- [Open Design Decisions](#open-design-decisions)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [Academic Context](#academic-context)
+- [License](#license)
+
+---
+
+## Overview
+
+The central goal of Meridian is to give managers enough visibility to answer the product team one question with confidence:
+
+> **"When can each demand be delivered, considering the real capacity of the teams?"**
+
+The system takes the demands, the effort estimated by the teams, and each team's availability, and produces:
+
+- A **delivery schedule** with forecasted completion dates.
+- **Alternative scenarios** for demand sequencing.
+- **Capacity insights** per team (idle periods, overload, available capacity).
+- **Recommendations** that the manager can approve or reject.
+
+## The Problem
+
+Planning deliveries becomes hard when many demands compete for attention and several teams are involved. Not every demand needs every team: some are executed by a single team, while others require several teams working together.
+
+Common pain points:
+
+- No consolidated view of demands, owners, effort, and forecasted dates.
+- Uneven distribution of work, with some teams idle while others are overloaded.
+- Difficulty understanding the impact of new demands on an existing schedule.
+- Difficulty comparing alternative sequences to find a more efficient organization.
+- Delivery forecasts that depend on estimates made by the teams themselves, not only on demand priority.
+
+The challenge is not just tracking tasks. It is **coordinating the capacity of multiple teams** to forecast and improve the department's deliveries.
+
+## How It Works
+
+The workflow starts with product and development alignment and ends with forecasting and tracking deliveries.
+
+| Step | Stage | Responsibility / Outcome |
+|------|-------|--------------------------|
+| 1 | **Prioritization** | The development manager aligns the list of demands and their priorities with the product manager. |
+| 2 | **Distribution** | The manager defines which teams will work on each demand. A demand can involve one or several teams, and a team can work on multiple demands within its capacity. |
+| 3 | **Estimation** | The teams analyze the work and report the required effort (e.g., in hours or estimated duration). This information does not need to exist when the demand is received. |
+| 4 | **Planning** | The manager records the information in the system, including allocation and start date. An end date can be provided when applicable. |
+| 5 | **Calculation** | The system considers effort, people, teams, availability, sequence, and a safety margin to calculate forecasts. |
+| 6 | **Decision** | The system presents the schedule and alternative scenarios. The manager approves or rejects the recommendations. |
+
+## Key Features
+
+- **Demand management** with priorities, involved teams, and effort estimates.
+- **Delivery forecasting** based on effort, allocated people, availability, and execution order.
+- **Automatic safety margin** that makes forecasts more conservative (it only extends the deadline, never shortens it).
+- **Scenario comparison** between the current sequence and alternative orderings.
+- **Sequencing recommendations** that are suggestions, never silent changes.
+- **Team capacity reports** showing occupancy, idle time, and overload.
+- **General planning report** to compare sequences and their impact on the department schedule.
+
+## Inputs
+
+A demand arrives with its priority. The remaining information is completed throughout planning, especially after the teams provide their estimates.
+
+| Input | How it is used |
+|-------|----------------|
+| **Demand and priority** | Identifies the work and its order of importance, as defined in the product/development alignment. |
+| **Involved teams** | Defines which teams will take part in executing each demand. |
+| **Estimated effort** | Represents the work required, as estimated by the teams and recorded by the manager. |
+| **Number of people / capacity** | Helps estimate the possible duration according to the resources actually allocated and available. |
+| **Start date** | Indicates when execution is planned to begin. |
+| **End date** *(optional)* | Lets the manager provide a date when needed, in addition to the calculated forecast. |
+| **Safety margin** | Applied automatically to make the forecast more conservative. |
+
+## Forecast Calculation
+
+The system converts estimated effort into a forecasted duration and, from the start date and available capacity, calculates the expected completion date. The forecast takes into account:
+
+- The participation of one or more teams.
+- The number of people allocated.
+- Availability of people and teams.
+- The execution order of the demands.
+
+**Safety margin:** the system automatically adds a margin to the calculated deadline. This margin must always *extend* the forecast, never reduce it, to avoid overly optimistic dates.
+
+**A note on parallelism:** a demand estimated at 100 hours for one team may, under balanced division and parallelizable work, have its duration reduced when a second team joins. Meridian recalculates the forecast based on *effective* capacity and does **not** assume that adding a team always cuts the deadline exactly in half.
+
+## Sequencing Optimization
+
+Besides calculating dates for the sequence defined by the manager, Meridian analyzes alternative execution combinations and identifies those that could improve the overall result, for example by reducing total duration, bringing deliveries forward, or making better use of available capacity.
+
+**Example scenario**
+
+| Current sequence | Suggested alternative |
+|------------------|-----------------------|
+| `A → B → C → D` | `B → A → C → D` |
+| Dates calculated with the current order. | New start and end dates calculated for the alternative order. |
+
+Important principles:
+
+- A change is a **recommendation, not an automatic modification**.
+- The system shows the schedule impact of the alternative and **waits for the manager's approval or rejection**.
+- Priority remains a relevant input. Any change of order is presented as a scenario to evaluate, never as a silent replacement of priority.
+
+## Reports and Indicators
+
+### General productivity and planning report
+
+- Compare possible demand sequences and their delivery forecasts.
+- Show the impact of alternatives on the department schedule.
+- Help identify a combination that speeds up deliveries and makes better use of combined capacity.
+
+### Individual team report
+
+- View occupancy, availability, idle periods, and possible overload.
+- Identify improvement opportunities and potential productivity gaps.
+- Find teams with capacity to take on new demands or support other teams.
+- Support workload redistribution based on identified availability.
+
+## Expected Outcomes
+
+- Greater predictability of delivery dates.
+- Centralized view of demands and team capacity.
+- Better synchronization between teams working on the same demand.
+- Early identification of idle time, overload, and reallocation opportunities.
+- Scenario comparison to support sequencing decisions.
+- Clearer communication between development and product managers.
+
+## Open Design Decisions
+
+Some rules still need to be detailed during specification and development. They do not invalidate the proposal; they are decisions required for the calculations to be reliable.
+
+- **Capacity model:** how to represent available hours per person and per team, considering vacations, absences, and other allocations.
+- **Parallelism:** how to estimate duration reduction when several teams work on the same demand, and which activities can truly run in parallel.
+- **Dependencies:** how to represent demands or stages that must wait for others to finish.
+- **Safety margin:** whether it will be a percentage, a fixed value, or configurable, and at which stage it is applied.
+- **Optimization criteria:** whether recommendations will prioritize total duration, priority deliveries, team utilization, or a combination.
+- **Estimate updates:** how to record effort changes and compare forecasts against actual results.
+
+## Tech Stack
+
+> To be defined. Update this section as technology decisions are made.
+
+| Layer | Technology |
+|-------|------------|
+| Backend | _TBD_ |
+| Frontend | _TBD_ |
+| Database | _TBD_ |
+| Infrastructure | _TBD_ |
+
+## Getting Started
+
+> Setup instructions will be added once the first implementation is available.
+
+```bash
+# Clone the repository
+git clone https://github.com/<your-username>/meridian-planner.git
+cd meridian-planner
+
+# Installation and run instructions coming soon
+```
+
+## Roadmap
+
+- Finalize the specification of the open design decisions
+- Domain model: demands, teams, people, capacity, and estimates
+- Forecast engine (effort → duration → completion date) with safety margin
+- Schedule view with the manager's sequence
+- Scenario generation and comparison for alternative sequences
+- Approval/rejection flow for recommendations
+- General planning report
+- Individual team report (occupancy, idle time, overload)
+- Tracking of forecast vs. actual results
+
+## Contributing
+
+Contributions, ideas, and feedback are welcome. Since the project is still taking shape, please open an issue to discuss what you would like to change before submitting a pull request.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/my-feature`)
+3. Commit your changes (`git commit -m "Add my feature"`)
+4. Push to the branch (`git push origin feature/my-feature`)
+5. Open a pull request
+
+## Academic Context
+
+Meridian originated as a final undergraduate project (TCC) proposal: *Planning and Demand Optimization — a system to support delivery forecasting and the distribution of development team capacity.* The manager remains responsible for decisions; the system provides the calculations, visibility, and scenarios needed to make them.
+
+## License
+
+License to be defined. Add a `LICENSE` file to the repository root (for example, MIT) and update this section.
