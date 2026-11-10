@@ -1,6 +1,6 @@
 # PRD — Coordin
 
-- **Status:** em elaboração — seções 1 a 5 aprovadas
+- **Status:** em elaboração — seções 1 a 6 aprovadas
 - **Última atualização:** 2026-11-10
 - **Fonte original:** [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -352,3 +352,60 @@ O sistema apresenta indicadores de precisão calculados sobre as demandas conclu
 - O gestor filtra os indicadores por período de conclusão.
 - Uma demanda com vários times entra nos indicadores de cada time envolvido.
 - Times com diferença recorrente entre estimado e realizado ficam evidenciados na comparação entre times.
+
+---
+
+## 6. Requisitos não funcionais e regras invioláveis
+
+### 6.1 Regras invioláveis
+
+Valem para todo o sistema. Nenhum requisito, cenário ou decisão técnica pode contrariá-las; qualquer mudança exige revisão e aprovação deste PRD.
+
+| # | Regra | Onde se aplica |
+|---|---|---|
+| 1 | A margem de segurança nunca reduz o prazo: ela só pode ampliar a previsão. | RF-09 |
+| 2 | O sistema nunca reordena demandas sozinho. Mudança de sequência é sempre um cenário apresentado com seu impacto, aguardando aprovação ou rejeição do gestor. | RF-13, RF-14, RF-15 |
+| 3 | A prioridade definida entre produto e desenvolvimento é preservada; alternativas aparecem como recomendação, nunca como substituição silenciosa. | RF-04, RF-13, RF-15 |
+| 4 | Adicionar um time não divide o prazo automaticamente pela metade: a previsão considera a capacidade efetiva. | RF-05, RF-08 |
+| 5 | O esforço pode não existir quando a demanda é cadastrada: o sistema aceita demandas sem estimativa e as trata como não previsíveis até que a estimativa chegue. | RF-04, RF-10 |
+
+### 6.2 Requisitos não funcionais
+
+#### RNF-01 — Desempenho
+
+- Com até **15 times, 150 pessoas e 200 demandas**, o cronograma recalculado após qualquer alteração aparece para o gestor em até **2 segundos**.
+- Nesse mesmo volume, os cenários recomendados (RF-13) são apresentados em até **10 segundos**.
+
+#### RNF-02 — Determinismo do cálculo
+
+- Para os mesmos dados de entrada, previsões, cenários e indicadores são sempre os mesmos, independentemente de quando ou quantas vezes o cálculo é executado.
+
+#### RNF-03 — Acesso pelo navegador, no computador e no celular
+
+- O sistema é usado pelo navegador, em computador e em celular, sem instalação.
+- **No computador**, todas as funcionalidades estão disponíveis.
+- **No celular**, o gestor consulta o cronograma, as previsões e os relatórios (RF-11, RF-12, RF-17 e RF-23) em telas a partir de 360 px de largura, sem rolagem horizontal da página. Cadastros, simulações e aprovação de cenários são feitos no computador.
+- O cronograma é legível quando projetado em reunião.
+
+#### RNF-04 — Acesso protegido
+
+- O acesso exige login do gestor; sem autenticação, nenhum dado é exibido.
+- Senhas nunca são armazenadas nem exibidas em texto puro.
+
+#### RNF-05 — Dados pessoais mínimos
+
+- Das pessoas, o sistema guarda apenas o necessário para o planejamento: nome, time, capacidade e ausências (tipo e período), sem motivo detalhado da ausência.
+- Nenhum dado real do setor ou credencial é versionado no repositório do projeto.
+
+#### RNF-06 — Persistência
+
+- Toda alteração confirmada pelo gestor permanece salva entre sessões e dispositivos; fechar o navegador não perde dados.
+
+#### RNF-07 — Idioma e unidades
+
+- A interface é em português do Brasil.
+- Esforço e capacidade são sempre exibidos em horas; datas consideram o fuso `America/Sao_Paulo`.
+
+#### RNF-08 — Verificabilidade das regras de cálculo
+
+- Os critérios de aceite dos requisitos de cálculo (RF-02, RF-03, RF-05, RF-08 a RF-10, RF-12 e RF-18) e as regras invioláveis são verificados por testes automatizados, incluindo casos de borda: esforço ausente, time sem capacidade, ausência no meio do período, vários times na mesma demanda, dependência em cadeia, ciclo de dependência e margem arredondada para cima.
