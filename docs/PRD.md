@@ -1,6 +1,6 @@
 # PRD — Coordin
 
-- **Status:** em elaboração — seções 1 a 7 aprovadas
+- **Status:** em elaboração — seções 1 a 8 aprovadas
 - **Última atualização:** 2026-11-10
 - **Fonte original:** [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -443,3 +443,35 @@ A existência de registros das datas comunicadas na época ainda não foi confir
 | Avaliação do gestor | Questionário curto respondido pelo gestor de desenvolvimento após usar o sistema na validação (clareza das previsões, utilidade dos cenários e relatórios, apoio à comunicação com o gestor de produto) | Previsibilidade e comunicação mais clara entre os gestores | — |
 
 Métricas que dependem de requisitos Should ou Could só são medidas se esses requisitos forem entregues.
+
+---
+
+## 8. Escopo e não objetivos
+
+### 8.1 No escopo
+
+| Prioridade | Requisitos | O que cobre |
+|---|---|---|
+| Must | RF-01 a RF-12 | Cadastros de times, pessoas, capacidade, ausências e demandas; alocação; estimativas; cálculo da previsão com margem de segurança; demandas não previsíveis; cronograma; conclusão real e desvio |
+| Should | RF-13 a RF-19 | Cenários de sequenciamento (recomendados e simulados) com aprovação do gestor; simulação de nova demanda; relatório por time; dependências entre demandas; exportação em planilha |
+| Could | RF-20 a RF-23 | Histórico de estimativas e da data prevista; esforço real; indicadores de precisão |
+| Não funcionais | RNF-01 a RNF-08 | Valem para tudo o que for entregue |
+
+O escopo é protegido na ordem **Must → Should → Could**. Se o prazo exigir cortes, eles começam pelos Could, são propostos com justificativa e dependem de aprovação; nenhum Must é cortado sem decisão explícita.
+
+### 8.2 Não objetivos
+
+O Coordin **não** vai:
+
+- **Dar acesso ao gestor de produto nem aos times.** O gestor de desenvolvimento é o único usuário (seção 3).
+- **Ter vários gestores ou perfis de acesso.** Há um único planejamento, mantido por um gestor.
+- **Atender vários setores ou organizações.** O sistema cobre um único setor de desenvolvimento.
+- **Permitir cadastros, simulações ou aprovações pelo celular.** No celular, apenas consulta (RNF-03).
+- **Integrar-se a ferramentas externas** (planilhas, Jira, Azure DevOps ou similares), nem importar dados delas. Os dados são cadastrados no Coordin; a exportação em planilha (RF-19) é o único canal de saída.
+- **Substituir a gestão de tarefas do dia a dia** dos times (quadros, subtarefas, status diário). O Coordin planeja demandas, não acompanha tarefas.
+- **Enviar notificações** (e-mail, push ou mensagens). O gestor consulta o sistema; alertas aparecem apenas na tela (por exemplo, RF-11).
+- **Controlar apontamento de horas.** Existe apenas o esforço real total, opcional, informado na conclusão (RF-22).
+- **Medir produtividade individual.** Indicadores são por time e por setor (RF-23).
+- **Reordenar demandas automaticamente.** Toda mudança de sequência é um cenário que depende de aprovação (regra inviolável 2).
+- **Representar etapas dentro de uma demanda** nem dependências entre etapas (RF-18).
+- **Dividir uma pessoa entre vários times** (RF-02).
