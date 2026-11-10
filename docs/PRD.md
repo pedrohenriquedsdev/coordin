@@ -1,6 +1,6 @@
 # PRD — Coordin
 
-- **Status:** em elaboração — seções 1 a 3 aprovadas
+- **Status:** em elaboração — seções 1 a 4 aprovadas
 - **Última atualização:** 2026-11-10
 - **Fonte original:** [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -94,3 +94,45 @@ Define, junto com o gestor de desenvolvimento, a lista de demandas e suas priori
 Executam as demandas. Uma demanda pode envolver um ou vários times, e um time pode atuar em diferentes demandas. Os times analisam o trabalho e informam o esforço necessário, em horas; o gestor de desenvolvimento registra essa estimativa no sistema. A estimativa pode chegar depois do cadastro da demanda.
 
 Não acessam o Coordin, mas são diretamente afetados pelo planejamento: a distribuição de trabalho entre os times (ociosidade e sobrecarga) é uma das principais informações que o sistema expõe ao gestor.
+
+---
+
+## 4. Fluxo de uso
+
+O fluxo começa no alinhamento entre produto e desenvolvimento e termina com a previsão e o acompanhamento das entregas. Todas as ações no sistema são feitas pelo gestor de desenvolvimento; as etapas que envolvem o gestor de produto ou os times acontecem fora do sistema.
+
+```
+Pré-requisito: times, pessoas e capacidade cadastrados
+        │
+1. Priorização → 2. Distribuição → 3. Estimativa → 4. Planejamento
+        │
+5. Cálculo → 6. Decisão → 7. Comunicação → 8. Acompanhamento
+        │
+        └── Replanejamento: qualquer mudança volta ao cálculo (4.2)
+```
+
+### 4.1 Etapas
+
+**Pré-requisito: cadastro da capacidade.** O gestor cadastra os times, as pessoas de cada time e a capacidade disponível. Essa base é reaproveitada em todo o planejamento e atualizada quando a disponibilidade muda.
+
+| # | Etapa | Quem | O que acontece | Resultado |
+|---|---|---|---|---|
+| 1 | Priorização | Gestor de desenvolvimento e gestor de produto (fora do sistema); gestor de desenvolvimento (no sistema) | Os gestores alinham a lista de demandas e suas prioridades. O gestor de desenvolvimento cadastra cada demanda com sua prioridade. | Demandas cadastradas e priorizadas, ainda sem estimativa |
+| 2 | Distribuição | Gestor de desenvolvimento | Define quais times atuarão em cada demanda. Uma demanda pode envolver um ou vários times; um time pode atuar em várias demandas, respeitando sua capacidade. | Times associados a cada demanda |
+| 3 | Estimativa | Times (fora do sistema); gestor de desenvolvimento (no sistema) | Os times analisam o trabalho e informam o esforço em horas. O gestor registra a estimativa. Enquanto ela não existir, a demanda permanece cadastrada como **não previsível**. | Esforço estimado registrado |
+| 4 | Planejamento | Gestor de desenvolvimento | Registra a alocação (pessoas e times), a data de início e, quando necessário, uma data de fim informada por ele, além da previsão que o sistema calculará. | Demanda pronta para o cálculo |
+| 5 | Cálculo | Sistema | Calcula a data prevista de conclusão de cada demanda considerando esforço, pessoas, times, disponibilidade, ordem de execução e margem de segurança. A margem só amplia o prazo, nunca o reduz, e adicionar um time não divide o prazo automaticamente. | Cronograma previsto |
+| 6 | Decisão | Sistema e gestor de desenvolvimento | O sistema apresenta o cronograma, os cenários alternativos de sequência com seu impacto e o relatório por time (ocupação, ociosidade, sobrecarga). O gestor aprova ou rejeita cada recomendação; sem aprovação, nada muda. | Cronograma decidido pelo gestor |
+| 7 | Comunicação | Gestor de desenvolvimento | Apresenta as previsões ao gestor de produto em reunião, usando as telas do sistema, e/ou exporta um arquivo com o cronograma para enviar a ele. | Gestor de produto informado das previsões |
+| 8 | Acompanhamento | Gestor de desenvolvimento | Ao fim de cada demanda, registra a data real de conclusão. O sistema compara a data prevista com a realizada. | Desvio previsto × realizado por demanda |
+
+### 4.2 Replanejamento
+
+O planejamento é contínuo. O gestor volta ao cálculo (etapa 5) sempre que algo muda, por exemplo:
+
+- chega uma nova demanda, e ele precisa ver o impacto dela no cronograma já planejado;
+- uma estimativa é registrada, para uma demanda até então não previsível, ou alterada;
+- a capacidade de um time ou pessoa muda;
+- ele aprova um cenário com outra sequência de execução.
+
+Em todos os casos, o sistema recalcula as previsões e mostra o impacto. Ele nunca reordena demandas sozinho: qualquer mudança de sequência é apresentada como cenário e só vale após aprovação do gestor de desenvolvimento.
