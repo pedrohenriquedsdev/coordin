@@ -249,12 +249,13 @@ Pode fazer sem perguntar: ler arquivos, buscar no repositório, rodar build/test
   - [x] 5.3 Requisitos funcionais Could, RF-20 a RF-23 (aprovada em 2026-11-10)
   - [x] 6 Requisitos não funcionais e regras invioláveis, RNF-01 a RNF-08 (aprovada em 2026-11-10)
   - [x] 7 Métricas de sucesso (aprovada em 2026-11-10)
-  - [ ] 8 Escopo e não objetivos · 9 Premissas, riscos e decisões delegadas ao TDD · 10 Marcos até 2026-11-28
+  - [x] 8 Escopo e não objetivos (aprovada em 2026-11-10)
+  - [ ] 9 Premissas, riscos e decisões delegadas ao TDD · 10 Marcos até 2026-11-28
 - [ ] TDD (`docs/TDD.md`)
 - [ ] Changes do OpenSpec, implementação e PRs, conforme o roadmap do TDD
 
 **Desvio registrado (2026-11-10):** a branch `docs/prd` foi criada a partir da `chore/project-setup`, e não da `main`, porque a `main` ainda não contém este arquivo, a proposta nem o OpenSpec (decisão do usuário). A `chore/project-setup` deve ser integrada à `main` antes, e a `docs/prd` rebaseada sobre a `main` antes do seu PR.
 
-**Próximo passo:** escrever a seção 8 (Escopo e não objetivos) do PRD com `/generate-prd 8`. Já decidido para a seção 9: risco de hospedagem (computador e celular exigem servidor acessível pela rede); premissa de que existem demandas históricas e registros das datas comunicadas na época (validação 7.2, com plano B); risco de a agregação da métrica principal depender do RF-23 (Could). Já decidido para ela: previsto × realizado detalhado.
+**Próximo passo:** escrever a seção 9 (Premissas, riscos e decisões delegadas ao TDD) do PRD com `/generate-prd 9`. Já decidido para ela: risco de cadastro manual das demandas históricas da validação (sem importação); risco de hospedagem (computador e celular exigem servidor acessível pela rede); premissa de que existem demandas históricas e registros das datas comunicadas na época (validação 7.2, com plano B); risco de a agregação da métrica principal depender do RF-23 (Could). Já decidido para ela: previsto × realizado detalhado.
 
 Mantenha esta seção atualizada ao concluir cada etapa.
