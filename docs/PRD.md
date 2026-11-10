@@ -1,6 +1,6 @@
 # PRD — Coordin
 
-- **Status:** em elaboração — seções 1 a 4, 5.1 (Must) e 5.2 (Should) aprovadas
+- **Status:** em elaboração — seções 1 a 5 aprovadas
 - **Última atualização:** 2026-11-10
 - **Fonte original:** [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -312,3 +312,43 @@ O gestor exporta o cronograma para um arquivo de planilha, para enviar ao gestor
 - O arquivo contém, por demanda, as mesmas informações do cronograma (RF-11), incluindo prioridade e ordem de execução.
 - O arquivo abre em ferramentas de planilha de uso comum.
 - O conteúdo reflete o cronograma vigente no momento da exportação.
+
+### 5.3 Could
+
+Detalham a comparação entre previsto e realizado, além do mínimo garantido pelo RF-12. Também atendem à identificação de possíveis gaps de produtividade por time prevista na proposta, entendidos aqui como diferenças recorrentes entre o estimado e o realizado, sem métricas de produtividade individual.
+
+#### RF-20 — Histórico de estimativas
+
+O sistema registra cada alteração na estimativa de esforço de uma demanda.
+
+- Cada registro guarda o valor anterior, o novo valor e a data da alteração.
+- O gestor pode informar um motivo opcional para a alteração.
+- O histórico não pode ser editado nem apagado; o gestor o consulta por demanda.
+
+#### RF-21 — Histórico da data prevista
+
+O sistema registra a evolução da data prevista de cada demanda ao longo do tempo.
+
+- Cada vez que a data prevista de uma demanda muda, o sistema guarda a data anterior, a nova, quando mudou e o evento que causou a mudança (estimativa, alocação, capacidade, ausência, dependência, cenário aprovado ou nova demanda).
+- O primeiro registro é a primeira previsão (linha de base do RF-12).
+- O gestor consulta o histórico por demanda, em ordem cronológica.
+
+#### RF-22 — Registrar o esforço real
+
+Ao registrar a conclusão de uma demanda (RF-12), o gestor pode informar as horas realmente gastas.
+
+- O esforço real é opcional: a conclusão pode ser registrada sem ele.
+- Quando informado, deve ser maior que zero.
+- O sistema mostra o esforço estimado (o vigente na conclusão), o real e a diferença, em horas e em percentual.
+- O esforço real é registrado para a demanda como um todo, não por time.
+
+#### RF-23 — Indicadores de precisão
+
+O sistema apresenta indicadores de precisão calculados sobre as demandas concluídas, para o setor e para cada time.
+
+- **Desvio médio de prazo**, em dias, em relação à primeira previsão e em relação à previsão vigente na conclusão.
+- **Percentual de demandas concluídas até a data prevista**, considerando a primeira previsão.
+- **Diferença média entre esforço estimado e real**, em percentual, apenas para as demandas com esforço real registrado (RF-22).
+- O gestor filtra os indicadores por período de conclusão.
+- Uma demanda com vários times entra nos indicadores de cada time envolvido.
+- Times com diferença recorrente entre estimado e realizado ficam evidenciados na comparação entre times.
