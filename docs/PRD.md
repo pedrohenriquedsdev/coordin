@@ -1,6 +1,6 @@
 # PRD — Coordin
 
-- **Status:** em elaboração — seções 1 a 8 aprovadas
+- **Status:** em elaboração — seções 1 a 9 aprovadas
 - **Última atualização:** 2026-11-10
 - **Fonte original:** [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -475,3 +475,46 @@ O Coordin **não** vai:
 - **Reordenar demandas automaticamente.** Toda mudança de sequência é um cenário que depende de aprovação (regra inviolável 2).
 - **Representar etapas dentro de uma demanda** nem dependências entre etapas (RF-18).
 - **Dividir uma pessoa entre vários times** (RF-02).
+
+---
+
+## 9. Premissas, riscos e decisões delegadas ao TDD
+
+### 9.1 Premissas
+
+| ID | Premissa | Se não se confirmar |
+|---|---|---|
+| P-01 | O sistema é usado em um setor de desenvolvimento real, com 7 ou mais times, cujas estimativas são feitas em horas. | Revisar volume (RNF-01) e unidade de esforço. |
+| P-02 | O gestor de desenvolvimento tem as informações de capacidade (pessoas, horas disponíveis e ausências) para cadastrar. | As previsões ficam não previsíveis ou imprecisas; reduzir a validação ao que houver de dado. |
+| P-03 | Existem demandas concluídas com estimativa, data de início e data real de conclusão para a validação (7.2). | A métrica principal não pode ser demonstrada com dados reais; usar dados de demonstração e deixar a limitação explícita no TCC. |
+| P-04 | Existem registros das datas comunicadas ao produto na época dessas demandas (linha de base). **A confirmar.** | Aplicar o plano B do 7.2: desvio do Coordin sem comparação com a linha de base. |
+| P-05 | O gestor de desenvolvimento está disponível para usar o sistema na validação e responder ao questionário (7.3). | A avaliação do gestor deixa de ser medida. |
+
+### 9.2 Riscos
+
+| ID | Risco | Impacto | Mitigação |
+|---|---|---|---|
+| R-01 | **Prazo:** 23 requisitos funcionais, TDD e implementação até 2026-11-28. | Should e Could não entregues. | Proteger Must → Should → Could (seção 8); revisar o andamento ao fim de cada etapa e propor cortes cedo. |
+| R-02 | **Hospedagem:** o uso no computador e no celular (RNF-03) exige que o sistema esteja acessível pela rede. | Sem hospedagem, o celular não acessa os dados; custo e configuração extras. | Decidir hospedagem e implantação no TDD, cedo no roadmap. |
+| R-03 | **Dados históricos insuficientes** para a validação (P-03, P-04). | Métrica principal sem demonstração com dados reais ou sem linha de base. | Verificar os dados disponíveis antes da implementação; plano B do 7.2. |
+| R-04 | **Cadastro manual do histórico:** sem importação (seção 8), as demandas da validação são digitadas uma a uma. | Horas de cadastro perto do prazo. | Limitar a validação a uma amostra de demandas definida antes; reservar tempo nos marcos (seção 10). |
+| R-05 | **Agregação da métrica principal depende do RF-23 (Could).** | Sem média e % no prazo calculados pelo sistema. | Calcular a partir da exportação (RF-19) ou manualmente na validação. |
+| R-06 | **Complexidade do cálculo:** ausências, vários times por demanda, dependências e busca de cenários com até 200 demandas. | Erros de previsão ou cenários acima do tempo do RNF-01. | Motor de cálculo isolado e testado (RNF-08); método de busca de cenários definido no TDD respeitando o RNF-01. |
+| R-07 | **Exposição de dados reais** do setor na validação ou no repositório. | Problema de confidencialidade e de dados pessoais. | Anonimizar os dados da validação; nada real versionado (RNF-05). |
+| R-08 | **Telas no celular:** o cronograma tem muitas informações para telas de 360 px. | Retrabalho de interface. | Celular só para consulta (RNF-03); definir no TDD a apresentação compacta. |
+
+### 9.3 Decisões delegadas ao TDD
+
+O PRD define o comportamento; as decisões abaixo definem **como** atendê-lo e devem ser fechadas no TDD, cada uma como `DT-*`.
+
+| # | Decisão | Requisitos afetados |
+|---|---|---|
+| 1 | **Modelo de capacidade:** como representar horas disponíveis por pessoa e por time ao longo do tempo, ausências e calendário (dias úteis, fins de semana e feriados). | RF-02, RF-03, RF-08, RF-17 |
+| 2 | **Paralelismo:** como estimar a duração quando vários times atuam na mesma demanda, sem presumir divisão exata do prazo. | RF-05, RF-08 |
+| 3 | **Dependências:** como representá-las e detectar ciclos. | RF-18 |
+| 4 | **Margem de segurança:** se é percentual, fixa ou configurável, em que etapa do cálculo é aplicada e em que unidade é arredondada para cima. | RF-09 |
+| 5 | **Critério de otimização** dos cenários: prazo total, entregas prioritárias, utilização dos times ou combinação, e o método de busca. | RF-13 |
+| 6 | **Registro de mudanças** de estimativa e de previsão, e comparação previsto × realizado. | RF-12, RF-20, RF-21, RF-23 |
+| 7 | **Tamanho do período** do relatório por time (semana, mês). | RF-17 |
+| 8 | **Formato do arquivo** exportado (por exemplo, CSV ou XLSX). | RF-19 |
+| 9 | **Stack, autenticação e hospedagem**, incluindo a confirmação da preferência por C#/.NET. | RNF-01, RNF-03, RNF-04, RNF-06 |
