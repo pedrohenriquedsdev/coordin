@@ -1,7 +1,7 @@
 # PRD — Coordin
 
-- **Status:** aprovado (2026-11-10)
-- **Última atualização:** 2026-11-10
+- **Status:** aprovado (2026-11-10); ajustes aprovados em 2026-11-11 em RF-02, RF-03, RF-06, RF-10 e 8.1, decorrentes do TDD
+- **Última atualização:** 2026-11-11
 - **Fonte original:** [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
 ---
@@ -160,20 +160,21 @@ O gestor cadastra, edita e consulta os times do setor.
 
 #### RF-02 — Cadastrar pessoas e sua capacidade
 
-O gestor cadastra as pessoas, associa cada uma a um time e informa a capacidade disponível dela em horas.
+O gestor cadastra as pessoas, associa cada uma a um time e informa a capacidade disponível dela em horas por dia útil (segunda a sexta).
 
 - Cada pessoa pertence a um único time.
 - Não é possível salvar uma pessoa sem capacidade informada; capacidade zero é aceita e significa que a pessoa não contribui para as previsões.
 - A capacidade de um time é derivada da capacidade das pessoas associadas a ele.
 - Um time sem pessoas, ou cujas pessoas têm capacidade zero, é tratado como sem capacidade: as demandas que dependem só dele não recebem data prevista e o sistema indica o motivo.
 
-#### RF-03 — Registrar ausências
+#### RF-03 — Registrar ausências e feriados
 
-O gestor registra ausências de uma pessoa (férias e outras ausências) com data de início e de fim.
+O gestor registra ausências de uma pessoa (férias e outras ausências) com data de início e de fim, e cadastra os feriados do setor (datas sem expediente), válidos para todas as pessoas.
 
 - Durante a ausência, a pessoa não contribui com capacidade.
-- Uma ausência no meio da execução de uma demanda empurra a data prevista para depois, na proporção da capacidade perdida.
-- Registrar, alterar ou remover uma ausência recalcula as previsões afetadas.
+- Em um feriado, nenhuma pessoa contribui com capacidade.
+- Uma ausência ou um feriado no meio da execução de uma demanda empurra a data prevista para depois, na proporção da capacidade perdida.
+- Registrar, alterar ou remover uma ausência ou um feriado recalcula as previsões afetadas.
 
 #### RF-04 — Cadastrar demandas com prioridade
 
@@ -192,8 +193,10 @@ O gestor define quais times atuarão em cada demanda e as pessoas alocadas.
 
 #### RF-06 — Registrar estimativa de esforço
 
-O gestor registra o esforço estimado de cada demanda, em horas, conforme informado pelos times.
+O gestor registra o esforço estimado de cada demanda, em horas, por time alocado (a parte de cada time), conforme informado pelos times.
 
+- O esforço total da demanda é a soma das partes dos times.
+- Enquanto algum time alocado não tiver estimativa, a demanda é não previsível (RF-10).
 - A estimativa pode ser registrada ou alterada a qualquer momento.
 - Esforço deve ser maior que zero; zero ou valor negativo é rejeitado com mensagem clara.
 - Registrar ou alterar a estimativa recalcula as previsões.
@@ -224,7 +227,7 @@ O sistema aplica automaticamente uma margem de segurança à previsão.
 
 #### RF-10 — Tratar demandas não previsíveis
 
-Uma demanda sem estimativa de esforço, sem data de início ou sem capacidade disponível é exibida como **não previsível**.
+Uma demanda sem estimativa de esforço de algum time alocado, sem data de início ou sem capacidade disponível é exibida como **não previsível**.
 
 - Demandas não previsíveis aparecem no cronograma, sem data prevista, com o motivo indicado.
 - Demandas não previsíveis não consomem capacidade dos times no cálculo das demais.
@@ -452,7 +455,7 @@ Métricas que dependem de requisitos Should ou Could só são medidas se esses r
 
 | Prioridade | Requisitos | O que cobre |
 |---|---|---|
-| Must | RF-01 a RF-12 | Cadastros de times, pessoas, capacidade, ausências e demandas; alocação; estimativas; cálculo da previsão com margem de segurança; demandas não previsíveis; cronograma; conclusão real e desvio |
+| Must | RF-01 a RF-12 | Cadastros de times, pessoas, capacidade, ausências, feriados e demandas; alocação; estimativas; cálculo da previsão com margem de segurança; demandas não previsíveis; cronograma; conclusão real e desvio |
 | Should | RF-13 a RF-19 | Cenários de sequenciamento (recomendados e simulados) com aprovação do gestor; simulação de nova demanda; relatório por time; dependências entre demandas; exportação em planilha |
 | Could | RF-20 a RF-23 | Histórico de estimativas e da data prevista; esforço real; indicadores de precisão |
 | Não funcionais | RNF-01 a RNF-08 | Valem para tudo o que for entregue |
