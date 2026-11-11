@@ -1,6 +1,6 @@
 # TDD — Coordin
 
-- **Status:** em elaboração — seções 1 a 4 aprovadas
+- **Status:** em elaboração — seções 1 a 5 aprovadas
 - **Última atualização:** 2026-11-11
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -154,6 +154,9 @@ Versões estáveis verificadas em 2026-11-11 nos registros oficiais (NuGet, npm)
 |---|---|---|
 | Runtime e linguagem | .NET 10 (LTS), C# 14 | SDK 10.0.4xx (instalado: 10.0.403) |
 | API | ASP.NET Core 10, Minimal APIs, Problem Details | 10.0.x |
+| Documento OpenAPI | Microsoft.AspNetCore.OpenApi (DT-19) | 10.0.15 |
+| Documentação interativa (só em desenvolvimento) | Swashbuckle.AspNetCore.SwaggerUI (DT-19) | 11.0.x (compatível com `net10.0`) |
+| Cliente Angular gerado | ng-openapi-gen (DT-19) | 1.1.x |
 | Persistência | EF Core 10 + Npgsql | EF Core 10.0.15 · Npgsql.EntityFrameworkCore.PostgreSQL 10.0.3 |
 | Banco | PostgreSQL | 18 |
 | Front | Angular (componentes standalone, signals) | 22.2.x (CLI 22.2.6) |
@@ -330,3 +333,151 @@ A conta de acesso do gestor é definida na seção 7. Cenários (RF-13, RF-14) e
 - Um time com pessoas não pode ser excluído; uma pessoa alocada a demanda não concluída também não.
 - Excluir uma demanda remove suas partes por time, alocações, dependências e previsão, e recompacta os rankings; demandas concluídas não são excluídas, para preservar a métrica principal.
 - Excluir uma pessoa remove suas ausências.
+
+---
+
+## 5. Contratos de API
+
+### 5.1 Convenções
+
+- Base `/api`, JSON com propriedades em `camelCase`; datas `yyyy-MM-dd`; instantes ISO 8601 em UTC; horas como número decimal.
+- Todos os endpoints, exceto login, exigem o gestor autenticado (seção 7).
+- Sucesso: `200` (leitura ou atualização com corpo), `201` com `Location` (criação), `204` (sem corpo).
+- Erros em Problem Details (DT-06, DT-18).
+- Toda escrita que afeta o cálculo recalcula e persiste as previsões na mesma transação (DT-03); o front recarrega o cronograma depois de uma escrita bem-sucedida.
+
+### 5.2 Endpoints
+
+| Recurso | Operações | Requisitos |
+|---|---|---|
+| Autenticação | `POST /api/auth/login` · `POST /api/auth/logout` · `GET /api/auth/me` | RNF-04 |
+| Times | `GET`, `POST /api/teams` · `PUT`, `DELETE /api/teams/{id}` | RF-01 |
+| Pessoas | `GET`, `POST /api/people` · `PUT`, `DELETE /api/people/{id}` | RF-02 |
+| Ausências | `GET`, `POST /api/people/{id}/absences` · `PUT`, `DELETE /api/absences/{id}` | RF-03 |
+| Feriados | `GET`, `POST /api/holidays` · `DELETE /api/holidays/{id}` | RF-03 |
+| Demandas | `GET`, `POST /api/demands` · `GET`, `PUT`, `DELETE /api/demands/{id}` | RF-04 a RF-07, RF-18 |
+| Ordem de prioridade | `PUT /api/demands/priority-order` (lista completa de ids na nova ordem) | RF-04 |
+| Conclusão | `PUT /api/demands/{id}/completion` (`completedOn`, `actualEffortHours` opcional) | RF-12, RF-22 |
+| Cronograma | `GET /api/schedule` | RF-08 a RF-11, RF-15 |
+| Exportação | `GET /api/schedule/export` → `text/csv` | RF-19 |
+| Cenários | `POST /api/scenarios/recommendations` · `POST /api/scenarios/simulate` · `POST /api/scenarios/apply` · `POST /api/scenarios/reset-to-priority` | RF-13 a RF-15 |
+| Simulação de nova demanda | `POST /api/demands/simulate` (mesmo corpo do `POST /api/demands`, sem gravar) | RF-16 |
+| Relatório por time | `GET /api/reports/teams?from=&to=` | RF-17 |
+| Indicadores de precisão | `GET /api/reports/accuracy?from=&to=` | RF-23 (Could) |
+| Históricos | `GET /api/demands/{id}/estimate-history` · `GET /api/demands/{id}/forecast-history` | RF-20, RF-21 (Could) |
+| Configurações | `GET`, `PUT /api/settings` (parâmetros da margem, conforme a seção 6) | RF-09 |
+
+### 5.3 Contratos principais
+
+**Demanda (criação, edição e simulação).** A demanda é gravada como um agregado (DT-17):
+
+```json
+{
+  "title": "Novo checkout",
+  "startDate": "2026-12-01",
+  "informedEndDate": "2026-12-20",
+  "teams": [
+    { "teamId": "…", "estimatedEffortHours": 80 },
+    { "teamId": "…", "estimatedEffortHours": null }
+  ],
+  "assignedPersonIds": ["…", "…"],
+  "prerequisiteDemandIds": ["…"],
+  "estimateChangeReason": null
+}
+```
+
+Na criação, a demanda entra no fim da ordem de prioridade (e da de execução, no modo `Custom`). `estimatedEffortHours: null` significa "time ainda não estimou".
+
+**Cronograma (`GET /api/schedule`).**
+
+```json
+{
+  "executionOrderMode": "FollowPriority",
+  "items": [
+    {
+      "demandId": "…", "title": "…",
+      "priorityRank": 2, "executionRank": 1, "isOutOfPriorityOrder": true,
+      "teams": [{ "teamId": "…", "teamName": "…", "estimatedEffortHours": 80 }],
+      "totalEstimatedEffortHours": 80,
+      "startDate": "2026-12-01",
+      "isPredictable": true, "unpredictableReason": null,
+      "forecastStartDate": "2026-12-01",
+      "endDateWithoutMargin": "2026-12-14",
+      "forecastEndDate": "2026-12-16",
+      "informedEndDate": "2026-12-20", "exceedsInformedEndDate": false,
+      "completedOn": null
+    }
+  ]
+}
+```
+
+`unpredictableReason` assume um de: `MissingEstimate`, `MissingStartDate`, `NoCapacity`, `PrerequisiteUnpredictable`.
+
+**Cenário (recomendado ou simulado).**
+
+```json
+{
+  "executionOrder": ["…", "…"],
+  "items": [
+    { "demandId": "…", "title": "…", "priorityRank": 1, "newExecutionRank": 2,
+      "forecastStartDate": "…", "forecastEndDate": "…", "deltaDays": 3 }
+  ],
+  "sectorEndDate": "2027-02-10",
+  "sectorDeltaDays": -6
+}
+```
+
+`recommendations` devolve uma lista (possivelmente vazia, RF-13) desses objetos; `apply` recebe `executionOrder`, valida de novo (dependências) e grava; `simulate` recebe `executionOrder` e não grava nada.
+
+### 5.4 Decisões
+
+#### DT-16 — REST orientado a recursos, sem versionamento nem paginação
+
+- **Contexto:** a API tem um único cliente (a SPA), implantado junto com ela (DT-01), e volume pequeno (RNF-01).
+- **Alternativas consideradas:**
+  - *REST por recurso, sem versão na URL e sem paginação:* menos código; front e API mudam juntos no mesmo PR.
+  - *Versionamento (`/api/v1`) e paginação:* úteis para clientes externos e grandes volumes, que não existem aqui.
+- **Decisão:** REST por recurso, sem versionamento e sem paginação; listas devolvidas inteiras.
+- **Justificativa:** o maior volume é de 200 demandas; versionar uma API sem clientes externos só adiciona manutenção.
+- **Atende:** RNF-01.
+
+#### DT-17 — Demanda gravada como agregado
+
+- **Contexto:** RF-16 exige simular uma demanda nova com tudo o que afeta o cálculo e confirmá-la sem efeito parcial.
+- **Alternativas consideradas:**
+  - *Agregado (dados, times com estimativas, pessoas e dependências em um corpo):* uma requisição, uma transação, um recálculo; o mesmo corpo serve para simular.
+  - *Sub-recursos separados (`/teams`, `/assignments`, `/dependencies`):* mais granular, mas a criação vira várias chamadas com estados intermediários inválidos e vários recálculos.
+- **Decisão:** `POST`, `PUT` e `POST /simulate` de demanda recebem o agregado completo. A alteração de estimativa de cada time gera um registro em `EstimateHistory` (Could), com `estimateChangeReason` opcional.
+- **Justificativa:** atomicidade e simulação idêntica à gravação real.
+- **Atende:** RF-04 a RF-07, RF-16, RF-18, RF-20.
+
+#### DT-18 — Erros com Problem Details e código estável
+
+- **Contexto:** o PRD exige mensagens claras (RF-06, RF-18) e o front precisa reagir a erros específicos.
+- **Alternativas consideradas:**
+  - *Problem Details com status adequado e uma extensão `code`:* padrão do ASP.NET Core, mensagem para o usuário em `detail`, e um código estável para o front tratar.
+  - *Formato de erro próprio:* mais liberdade, menos padronização.
+- **Decisão:** `400` com `errors` por campo para validação; `404` para recurso inexistente; `409` para conflito de regra de negócio, com `code` estável, por exemplo `dependency-cycle`, `team-has-people`, `person-has-open-assignments`, `completed-demand-locked`, `person-not-in-demand-teams`. `detail` em português.
+- **Justificativa:** um formato só para tratar no front e mensagens já prontas para exibir.
+- **Atende:** RF-06, RF-18, RNF-07.
+
+#### DT-19 — OpenAPI, Swagger UI e cliente Angular gerado
+
+- **Contexto:** manter os tipos do Angular alinhados ao C# e documentar a API para desenvolvimento e apresentação.
+- **Alternativas consideradas:**
+  - *Documento gerado pelo ASP.NET Core + Swagger UI + cliente gerado:* contrato único; mudanças incompatíveis aparecem na compilação do front.
+  - *Interfaces TypeScript escritas à mão:* sem ferramenta, com risco de divergência silenciosa.
+  - *`openapi-typescript` como gerador:* descartado porque declara compatibilidade apenas com TypeScript 5 (`^5.x`), e o Angular 22 exige 6.0.
+- **Decisão:** `Microsoft.AspNetCore.OpenApi` 10.0.x gera o documento em `/openapi/v1.json`; `Swashbuckle.AspNetCore.SwaggerUI` 11.0.x (compatível com `net10.0`) exibe a documentação interativa em `/swagger`, **apenas no ambiente de desenvolvimento**; `ng-openapi-gen` 1.1.x gera os serviços e modelos do Angular a partir do documento, por um script do `package.json`.
+- **Justificativa:** um contrato só, documentação navegável para testar e demonstrar, sem expor a documentação em produção.
+- **Atende:** RNF-08 (verificabilidade) e qualidade de manutenção.
+
+#### DT-20 — Exportação em CSV compatível com Excel pt-BR
+
+- **Contexto:** formato do arquivo exportado (PRD 9.3, item 8; RF-19).
+- **Alternativas consideradas:**
+  - *CSV pt-BR:* sem dependência; abre no Excel, Google Sheets e LibreOffice; sem formatação visual.
+  - *XLSX:* planilha formatada, com uma biblioteca a mais.
+- **Decisão:** CSV com separador `;`, codificação UTF-8 com BOM, datas `dd/MM/yyyy`, horas com vírgula decimal e cabeçalhos em português; nome `coordin-cronograma-AAAA-MM-DD.csv`. Colunas: as do cronograma (RF-11), incluindo prioridade e ordem de execução.
+- **Justificativa:** o Excel em português usa `;` como separador e só reconhece acentos em UTF-8 com BOM; sem esses dois detalhes, o arquivo abre "quebrado".
+- **Atende:** RF-19, RNF-07.
