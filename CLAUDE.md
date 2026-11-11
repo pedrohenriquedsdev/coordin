@@ -252,11 +252,12 @@ Pode fazer sem perguntar: ler arquivos, buscar no repositório, rodar build/test
   - [x] 6 Algoritmos de cálculo, DT-21 a DT-27 (aprovada em 2026-11-11; todos os pontos do §7.3 fechados; previsão baseada no plano)
   - [x] 7 Segurança e dados, DT-28 a DT-30 (aprovada em 2026-11-11; Identity + JWT próprio com refresh token em cookie HttpOnly; seções 3, 4 e 5 ajustadas)
   - [x] 8 Estratégia de testes, DT-31 a DT-34 (aprovada em 2026-11-11; Testcontainers, smoke E2E após os Must, CI no GitHub Actions)
-  - [ ] 9 Roadmap · 10 Riscos
+  - [x] 9 Roadmap de implementação, DT-35 (aprovada em 2026-11-11; 11 changes em fatias verticais, de `project-foundation` a `e2e-smoke`)
+  - [ ] 10 Riscos
 - [ ] Changes do OpenSpec, implementação e PRs, conforme o roadmap do TDD
 
 **Desvios registrados (2026-11-10 e 2026-11-11):** a `docs/prd` foi criada a partir da `chore/project-setup` porque a `main` ainda não tinha este arquivo; o PR #1 foi aberto antes do template de PR. Ambos registrados nas descrições dos PRs. PRs são integrados sempre com merge commit (`gh pr merge <n> --merge`), nunca squash ou rebase.
 
-**Próximo passo:** marco M3 (até 2026-11-13): seção 9 (Roadmap de implementação) do TDD com `/generate-tdd 9`. **Pendente com prazo:** hospedagem (DT-09) até 2026-11-14, após conversa com o orientador; recomendação registrada: container Docker em PaaS com PostgreSQL gerenciado. Em paralelo, M2 (até 2026-11-13): o usuário verifica os dados históricos da validação (P-03, P-04).
+**Próximo passo:** marco M3 (até 2026-11-13): seção 10 (Riscos técnicos e pendências) do TDD com `/generate-tdd 10`, e conclusão do TDD. **Pendente com prazo:** hospedagem (DT-09) até 2026-11-14, após conversa com o orientador; recomendação registrada: container Docker em PaaS com PostgreSQL gerenciado. Em paralelo, M2 (até 2026-11-13): o usuário verifica os dados históricos da validação (P-03, P-04).
 
 Mantenha esta seção atualizada ao concluir cada etapa.
