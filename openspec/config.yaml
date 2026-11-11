@@ -1,32 +1,23 @@
 schema: spec-driven
 
-# Project context (optional)
-# Add only constraints that should guide OpenSpec artifacts and workflows.
-# Include constraints an agent cannot infer by reading the code.
-# Keep general project documentation and discoverable codebase facts out.
-# Example:
-#   context: |
-#     Designs and tasks must cover Windows, macOS, and Linux
-#     Write all artifacts in Spanish
+context: |
+  Coordin: sistema de planejamento e apoio à decisão (TCC), entrega em 2026-11-28.
+  Fonte da verdade: docs/PRD.md (o quê e por quê; RF-*, RNF-*) e docs/TDD.md (como; DT-*).
+  Toda change segue o roadmap do TDD (seção 9) e cita os RF-*, RNF-* e DT-* que atende.
+  As regras invioláveis (PRD 6.1) nunca podem ser contrariadas.
+  Regras de cálculo vivem só em src/Coordin.Engine (puro e determinístico, DT-02);
+  API e front não contêm regra de negócio.
+  Artefatos (proposal, specs, design, tasks) em português; nomes de change, arquivos e código em inglês.
+  Se uma change exigir mudar PRD ou TDD, parar e pedir aprovação antes.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
-
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+rules:
+  proposal:
+    - Citar a linha do roadmap (TDD 9.1) e os IDs RF-*, RNF-* e DT-* atendidos
+    - Declarar explicitamente o que fica fora da change
+  specs:
+    - Derivar os cenários dos critérios de aceite do PRD, citando o RF-* de origem
+  design:
+    - Não contradizer nenhum DT-*; divergência vira pergunta ao autor
+  tasks:
+    - Cada task de implementação inclui seus testes (TDD seção 8)
+    - Terminar com uma task de verificação usando os comandos do TDD 8.6
