@@ -36,7 +36,7 @@ Instruções permanentes para o Claude Code neste repositório. Leia este arquiv
 ```
 coordin/
 ├── CLAUDE.md                     # este arquivo
-├── .claude/                      # comandos e skills do OpenSpec para o Claude Code
+├── .claude/                      # comandos e skills do OpenSpec + skills generate-prd e generate-tdd
 ├── .github/
 │   └── pull_request_template.md  # template obrigatório de PR
 ├── docs/
@@ -67,10 +67,12 @@ Toda funcionalidade ou mudança de comportamento segue o fluxo completo, em uma 
 | 4. Pull Request | PR da feature branch → `main` | Implementação concluída, verificações executadas, PR aberto com o template preenchido |
 
 ### 4.1 PRD
+- Conduzido pela skill `/generate-prd [seção]` (`.claude/skills/generate-prd/`).
 - Define **o quê e por quê**: problema, personas, fluxo de uso, requisitos com critérios de aceite verificáveis, métricas, escopo e não objetivos, premissas e riscos.
 - **Sem solução técnica.** Algoritmos, stack e modelo de dados vão para o TDD. Os pontos em aberto da proposta entram como "decisões delegadas ao TDD".
 
 ### 4.2 TDD
+- Conduzido pela skill `/generate-tdd [seção]` (`.claude/skills/generate-tdd/`).
 - Define **o como**, alinhado ao PRD: arquitetura, stack, modelo de dados, contratos de API, algoritmos (previsão, margem, paralelismo, dependências, otimização), segurança, estratégia de testes e **roadmap de implementação** (ordem das changes).
 - Cada decisão recebe um ID `DT-*`, com alternativas consideradas e justificativa.
 - Fecha os pontos em aberto listados em §7.3.
@@ -113,7 +115,7 @@ Verifique a disponibilidade antes da etapa que depende de cada ferramenta. Esta 
 |---|---|---|
 | `AskUserQuestion` | Toda interação que exige resposta minha | Obrigatória. Indisponível → informar o bloqueio e parar. |
 | Read / Glob / Grep / Edit / Write | Consultar fontes; manter PRD, TDD, specs, código e template de PR | Obrigatórias. Prefira as ferramentas dedicadas ao shell para ler e editar. |
-| Terminal + Git | Inspecionar o repositório, criar branches, rodar verificações, commitar | Obrigatórios. Confira `git status` e preserve alterações existentes antes de operar. |
+| Terminal + Git | Inspecionar o repositório, criar branches, rodar verificações, preparar os comandos de commit | Obrigatórios. Confira `git status` e preserve alterações existentes antes de operar. |
 | OpenSpec CLI + comandos `/opsx:*` | Etapa SDD | Obrigatória no SDD. A existência de `openspec/` não prova configuração válida. |
 | Documentação oficial (Context7 ou sites oficiais) | Confirmar APIs, versões e compatibilidade da stack | Necessária sempre que uma decisão ou implementação depender disso. Não presuma suporte sem verificar. |
 | Runtime, gerenciador de pacotes e ferramentas de qualidade definidos no TDD | Build, testes, lint, formatação | Conforme a stack aprovada; não presuma stack antes do TDD. |
@@ -182,7 +184,7 @@ Modelo de capacidade (horas por pessoa e por time, férias, ausências, outras a
   - Tipos: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `build`, `ci`, `style`, `perf`.
 - **Um commit por bloco lógico. Não economize commits.** Cada mudança coesa e independente vira um commit próprio: uma seção de documento, uma entidade, uma regra com seus testes, uma configuração. Nunca misture documentação, refatoração e funcionalidade sem relação no mesmo commit.
 - Cada commit deve ser verificável; não commite código que quebre build ou testes.
-- **Antes de commitar**, mostre a lista de commits planejados (mensagem + arquivos de cada um) e aguarde minha aprovação.
+- **Eu sempre faço os commits.** Ao fim de cada bloco lógico, mostre a lista de commits planejados (mensagem + arquivos de cada um) com os comandos `git add`/`git commit` prontos para copiar. Nunca execute `git commit` nem `git push`.
 
 ---
 
@@ -219,7 +221,7 @@ Preencha todas as seções do template, sem deixar comentários de orientação 
 Pergunte antes (via `AskUserQuestion`) de:
 - instalar, atualizar ou remover dependências;
 - apagar arquivos ou pastas;
-- fazer push, abrir PR ou fazer merge;
+- abrir PR ou fazer merge (commit e push são sempre feitos por mim; entregue apenas os comandos);
 - alterar regras invioláveis (§7.1), decisões já tomadas (§7.2) ou documentos já aprovados;
 - mudar a stack, a estrutura de pastas ou as convenções deste arquivo.
 
@@ -238,11 +240,14 @@ Pode fazer sem perguntar: ler arquivos, buscar no repositório, rodar build/test
 
 - [x] OpenSpec inicializado para o Claude Code
 - [x] `CLAUDE.md` criado
+- [x] Skills `generate-prd` e `generate-tdd` criadas (branch `chore/prd-tdd-skills`, integrada à `docs/prd` por fast-forward)
 - [ ] `.github/pull_request_template.md`
-- [ ] PRD (`docs/PRD.md`), na branch `docs/prd`: seções 1 Visão geral · 2 Problema · 3 Personas · 4 Fluxo de uso · 5 Requisitos funcionais (MoSCoW) · 6 Requisitos não funcionais e regras invioláveis · 7 Métricas de sucesso · 8 Escopo e não objetivos · 9 Premissas, riscos e decisões delegadas ao TDD · 10 Marcos até 2026-11-28
-- [ ] TDD (`docs/TDD.md`)
+- [x] PRD (`docs/PRD.md`), na branch `docs/prd`: seções 1 a 10 aprovadas em 2026-11-10 (RF-01 a RF-23, RNF-01 a RNF-08, marcos M0 a M8)
+- [ ] TDD (`docs/TDD.md`), até 2026-11-13 (M3)
 - [ ] Changes do OpenSpec, implementação e PRs, conforme o roadmap do TDD
 
-**Próximo passo:** criar a branch `docs/prd` e escrever as seções 1 e 2 do PRD.
+**Desvio registrado (2026-11-10):** a branch `docs/prd` foi criada a partir da `chore/project-setup`, e não da `main`, porque a `main` ainda não contém este arquivo, a proposta nem o OpenSpec (decisão do usuário). A `chore/project-setup` deve ser integrada à `main` antes do PR da `docs/prd`, com "Create a merge commit" (nunca squash), para que a `docs/prd` não precise de rebase.
+
+**Próximo passo:** marco M1 (até 2026-11-11): criar `.github/pull_request_template.md` na branch `chore/pr-template`, fazer push e abrir os PRs de `chore/project-setup`, `chore/pr-template` e `docs/prd`, nessa ordem. Em paralelo, M2: verificar os dados históricos da validação. Depois, TDD com `/generate-tdd`.
 
 Mantenha esta seção atualizada ao concluir cada etapa.
