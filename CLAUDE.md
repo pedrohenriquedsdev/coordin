@@ -244,20 +244,12 @@ Pode fazer sem perguntar: ler arquivos, buscar no repositório, rodar build/test
 - [x] `.github/pull_request_template.md` (PR #2)
 - [x] Marco M1: `chore/project-setup` (#1), `chore/pr-template` (#2) e `docs/prd` (#3) integradas à `main` em 2026-11-11, com merge commit
 - [x] PRD (`docs/PRD.md`), na branch `docs/prd`: seções 1 a 10 aprovadas em 2026-11-10 (RF-01 a RF-23, RNF-01 a RNF-08, marcos M0 a M8)
-- [ ] TDD (`docs/TDD.md`), até 2026-11-13 (M3), na branch `docs/tdd`:
-  - [x] 1 Contexto e objetivos técnicos (aprovada em 2026-11-11)
-  - [x] 2 Arquitetura · 3 Stack, DT-01 a DT-09 (aprovadas em 2026-11-11; DT-09 hospedagem **pendente**, decidir até 2026-11-14 com o orientador)
-  - [x] 4 Modelo de dados, DT-10 a DT-15 (aprovada em 2026-11-11; PRD ajustado em RF-02, RF-03 com feriados, RF-06 esforço por time, RF-10 e 8.1)
-  - [x] 5 Contratos de API, DT-16 a DT-20 (aprovada em 2026-11-11; Swagger UI só em desenvolvimento, CSV pt-BR)
-  - [x] 6 Algoritmos de cálculo, DT-21 a DT-27 (aprovada em 2026-11-11; todos os pontos do §7.3 fechados; previsão baseada no plano)
-  - [x] 7 Segurança e dados, DT-28 a DT-30 (aprovada em 2026-11-11; Identity + JWT próprio com refresh token em cookie HttpOnly; seções 3, 4 e 5 ajustadas)
-  - [x] 8 Estratégia de testes, DT-31 a DT-34 (aprovada em 2026-11-11; Testcontainers, smoke E2E após os Must, CI no GitHub Actions)
-  - [x] 9 Roadmap de implementação, DT-35 (aprovada em 2026-11-11; 11 changes em fatias verticais, de `project-foundation` a `e2e-smoke`)
-  - [ ] 10 Riscos
-- [ ] Changes do OpenSpec, implementação e PRs, conforme o roadmap do TDD
+- [x] TDD (`docs/TDD.md`), na branch `docs/tdd`: seções 1 a 10 aprovadas em 2026-11-11 (M3 antecipado), DT-01 a DT-35; todos os pontos do §7.3 fechados. PRD ajustado em RF-02, RF-03 (feriados), RF-06 (esforço por time), RF-10 e 8.1
+- [x] `openspec/config.yaml` aponta para `docs/PRD.md` e `docs/TDD.md` (context + rules por artefato)
+- [ ] Changes do OpenSpec, implementação e PRs, conforme o roadmap do TDD (9.1): 1 `project-foundation` · 2 `authentication` · 3 `capacity-registry` · 4 `forecast-engine` · 5 `demand-planning` · 6 `deployment` · 7 `dependencies-and-team-report` · 8 `sequencing-scenarios` · 9 `schedule-export` · 10 `delivery-insights` · 11 `e2e-smoke`
 
 **Desvios registrados (2026-11-10 e 2026-11-11):** a `docs/prd` foi criada a partir da `chore/project-setup` porque a `main` ainda não tinha este arquivo; o PR #1 foi aberto antes do template de PR. Ambos registrados nas descrições dos PRs. PRs são integrados sempre com merge commit (`gh pr merge <n> --merge`), nunca squash ou rebase.
 
-**Próximo passo:** marco M3 (até 2026-11-13): seção 10 (Riscos técnicos e pendências) do TDD com `/generate-tdd 10`, e conclusão do TDD. **Pendente com prazo:** hospedagem (DT-09) até 2026-11-14, após conversa com o orientador; recomendação registrada: container Docker em PaaS com PostgreSQL gerenciado. Em paralelo, M2 (até 2026-11-13): o usuário verifica os dados históricos da validação (P-03, P-04).
+**Próximo passo:** abrir e integrar o PR da `docs/tdd`; depois, criar a branch `chore/project-foundation` a partir da `main` e propor a change 1 com `/opsx:propose`. **Pendente com prazo:** hospedagem (DT-09) até 2026-11-14, após conversa com o orientador; recomendação registrada: container Docker em PaaS com PostgreSQL gerenciado. Em paralelo, M2 (até 2026-11-13): o usuário verifica os dados históricos da validação (P-03, P-04).
 
 Mantenha esta seção atualizada ao concluir cada etapa.
