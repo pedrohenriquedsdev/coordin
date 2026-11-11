@@ -1,6 +1,6 @@
 # TDD — Coordin
 
-- **Status:** em elaboração — seções 1 a 7 aprovadas
+- **Status:** em elaboração — seções 1 a 8 aprovadas
 - **Última atualização:** 2026-11-11
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -166,6 +166,7 @@ Versões estáveis verificadas em 2026-11-11 nos registros oficiais (NuGet, npm)
 | Runtime do front (build) | Node.js | 24 LTS (instalado: 24.21; o Angular 22 exige `^24.15`) |
 | Testes .NET | xUnit v3 | 3.2.x |
 | Testes front | Vitest (suportado pelo builder do Angular 22) | 5.x |
+| Testes de integração, E2E e cobertura (seção 8) | Testcontainers.PostgreSql · Microsoft.AspNetCore.Mvc.Testing · Playwright · coverlet.collector | 4.16.x · 10.0.15 · 1.65.x · 10.x |
 | Qualidade | `dotnet format`; ESLint (angular-eslint 22.x); Prettier 3.x | — |
 | Ambiente local | Docker + Docker Compose (PostgreSQL) | Docker 29 (instalado) |
 
@@ -683,3 +684,124 @@ Logout ──► POST /api/auth/logout → revoga o refresh token e apaga o cook
 - Logs não registram corpos de requisição, tokens nem senhas.
 - Os dados históricos da validação (PRD 7.2) são **anonimizados antes** de entrar no sistema e **nunca** são versionados; para demonstração, o repositório tem apenas dados fictícios de exemplo.
 - Backups do banco seguem o serviço de PostgreSQL gerenciado da hospedagem escolhida (DT-09, pendente).
+
+---
+
+## 8. Estratégia de testes
+
+### 8.1 Níveis
+
+| Nível | O que cobre | Ferramentas | Quando |
+|---|---|---|---|
+| Unidade do motor | Todas as regras de cálculo, casos de borda e regras invioláveis (8.2) | xUnit v3 3.2.x | Obrigatório em toda change que toca o motor |
+| Desempenho do motor | RNF-01 com o volume máximo (8.5) | xUnit v3 (categoria `Performance`) | A partir da change de cenários |
+| Integração da API | Endpoints, autenticação, validações, persistência e recálculo na escrita (8.3) | xUnit v3, `WebApplicationFactory` (Microsoft.AspNetCore.Mvc.Testing 10.0.x), Testcontainers.PostgreSql 4.16.x | Toda change que cria ou altera endpoints |
+| Unidade do front | Serviço de autenticação, interceptor, validadores e transformações de dados (8.4) | Vitest 5.x | Toda change com lógica no front |
+| E2E (smoke) | Caminho feliz no navegador, inclusive no celular (8.4) | Playwright 1.65.x | Depois dos Must (M4), se couber no prazo |
+
+### 8.2 Casos obrigatórios do motor
+
+Os testes usam **construtores de dados** (por exemplo, `PlanningSnapshotBuilder`) para montar cenários legíveis e seguem o padrão Arrange–Act–Assert, com nomes no formato `Metodo_Situacao_ResultadoEsperado`.
+
+| Caso | Resultado esperado | Origem |
+|---|---|---|
+| Time alocado sem estimativa | Demanda `MissingEstimate`; não consome capacidade | RF-06, RF-10; regra 5 |
+| Demanda sem data de início | `MissingStartDate` | RF-07, RF-10 |
+| Parte sem pessoa alocada ou com capacidade zero | `NoCapacity` | RF-02, RF-10 |
+| Ausência no meio da execução | Fim empurrado pelos dias de capacidade perdidos | RF-03 |
+| Feriado no meio da execução | Fim empurrado; ninguém trabalha no feriado | RF-03 |
+| Vários times na mesma demanda | Fim = fim da última parte. Com 100 h em um time e com partes de 50 h em dois times de capacidades diferentes, o novo prazo sai da capacidade de cada time e **não** é a metade do primeiro | RF-05, RF-08; regra 4 |
+| Fila da pessoa | Demanda posterior não recebe horas enquanto uma anterior elegível precisa delas; sobra do dia passa para a próxima | RF-08, DT-21 |
+| Dependência em cadeia (A → B → C) | B começa depois do fim com margem de A, e C depois do de B | RF-18, DT-23 |
+| Ciclo direto e indireto | Detectado e rejeitado | RF-18 |
+| Pré-requisito não previsível | Dependente `PrerequisiteUnpredictable` | RF-18, RF-10 |
+| Margem 0% | `ForecastEndDate = EndDateWithoutMargin` | RF-09 |
+| Margem 20% em 10 dias úteis; 20% em 1 dia útil | +2 dias úteis; +1 dia útil (arredondado para cima) | RF-09, DT-22 |
+| Margem nunca reduz | Invariante verificado em snapshots gerados (8.2.1) | Regra 1 |
+| Determinismo | Mesmo snapshot, inclusive com listas embaralhadas, gera resultado idêntico | RNF-02 |
+| Horizonte | Demanda que não termina em 5 anos vira `NoCapacity` | DT-21 |
+| Cenários | Nunca violam dependências; lista vazia quando não há melhoria; nenhum é aplicado pelo motor; `score` usa a prioridade registrada | RF-13, RF-18; regras 2 e 3 |
+| Relatório por time | Capacidade, horas alocadas, ociosidade e sobrecarga corretas em um cenário montado à mão | RF-17, DT-24 |
+| Desvio | Diferença em dias corridos, positiva para atraso | RF-12, DT-27 |
+
+#### 8.2.1 Invariantes com dados gerados
+
+Além dos exemplos, um gerador de snapshots com **semente fixa** cria algumas centenas de planejamentos aleatórios e verifica, em cada um: a margem nunca reduz o prazo; nenhuma pessoa recebe mais horas que sua capacidade no dia; nenhum dependente começa antes do fim do pré-requisito; e o resultado não muda ao embaralhar as listas de entrada. A semente fixa mantém os testes reprodutíveis sem uma biblioteca adicional.
+
+### 8.3 Integração da API
+
+- **Autenticação:** login válido e inválido; bloqueio após 5 erros; rotação do refresh token; reuso de token trocado revoga todos; endpoints protegidos respondem `401` sem token.
+- **Validação e conflitos:** `400` com erros por campo; `409` com os códigos do DT-18 (`dependency-cycle`, `team-has-people` etc.).
+- **Recálculo na escrita (DT-03):** após cada tipo de escrita, as previsões gravadas correspondem a um novo cálculo; `BaselineEndDate` não muda em replanejamentos.
+- **Cenários:** `simulate` e `recommendations` não gravam nada; `apply` grava a ordem de execução e muda o modo para `Custom`.
+- **Exportação:** CSV com separador `;`, BOM UTF-8 e datas `dd/MM/yyyy`.
+
+Cada classe de teste usa um banco PostgreSQL próprio no container, com as migrations aplicadas, para os testes não interferirem entre si.
+
+### 8.4 Front e E2E
+
+- **Vitest:** serviço de autenticação (token só em memória, renovação ao expirar), interceptor HTTP, validadores de formulário e transformações do cronograma para exibição. O cliente gerado pelo `ng-openapi-gen` não é testado diretamente.
+- **Playwright (smoke, depois dos Must):** (1) login e logout; (2) cadastrar time, pessoa e demanda com estimativa e ver a data prevista no cronograma; (3) consultar o cronograma em viewport de 360 px sem rolagem horizontal (RNF-03).
+
+### 8.5 Desempenho (RNF-01)
+
+Um teste da categoria `Performance` gera, com semente fixa, um planejamento com 15 times, 150 pessoas e 200 demandas e mede: o cálculo completo em até **2 s** e a recomendação de cenários em até **10 s**. Ele roda localmente antes do PR da change de cenários e no CI como verificação **informativa** (não bloqueia o merge), porque as máquinas de CI variam de desempenho; o resultado é registrado na descrição do PR.
+
+### 8.6 Comandos de verificação
+
+| Escopo | Comando |
+|---|---|
+| Build .NET | `dotnet build Coordin.slnx` |
+| Formatação .NET | `dotnet format Coordin.slnx --verify-no-changes` |
+| Testes .NET (com cobertura) | `dotnet test Coordin.slnx --collect:"XPlat Code Coverage"` |
+| Só desempenho | `dotnet test Coordin.slnx --filter "Category=Performance"` |
+| Front: dependências | `npm ci` (em `src/coordin-web`) |
+| Front: lint | `npm run lint` |
+| Front: testes | `npm test` |
+| Front: build | `npm run build` |
+| E2E | `npx playwright test` |
+
+A cobertura é medida com coverlet (`coverlet.collector` 10.x) e informada no PR; a meta é **90% das linhas do `Coordin.Engine`**, sem bloquear o merge.
+
+### 8.7 Decisões
+
+#### DT-31 — Testes de integração com PostgreSQL real (Testcontainers)
+
+- **Contexto:** a API depende de migrations, constraints e consultas do PostgreSQL (DT-07) e do recálculo na escrita (DT-03).
+- **Alternativas consideradas:**
+  - *Testcontainers:* PostgreSQL de verdade no Docker; detecta erros de migration, de tipo e de constraint; exige Docker.
+  - *Provedor em memória ou SQLite:* rápido e sem Docker, mas se comporta diferente do PostgreSQL e pode aprovar código que falha em produção.
+- **Decisão:** `Testcontainers.PostgreSql` 4.16.x com `WebApplicationFactory`, usando a mesma versão principal do PostgreSQL de produção.
+- **Justificativa:** os testes validam o mesmo banco que vai para produção; o Docker já está instalado localmente e disponível nos runners Linux do GitHub Actions.
+- **Atende:** RNF-06, RNF-08.
+
+#### DT-32 — E2E apenas como smoke, depois dos Must
+
+- **Contexto:** o prazo (PRD R-01) e a necessidade de demonstrar o fluxo principal funcionando, inclusive no celular (RNF-03).
+- **Alternativas consideradas:**
+  - *Smoke mínimo com Playwright:* poucos cenários de alto valor, incluindo a viewport de celular.
+  - *Sem E2E:* sem custo, com verificação manual.
+  - *E2E completo:* cobertura ampla, com custo alto de escrita e manutenção.
+- **Decisão:** três cenários de smoke com Playwright 1.65.x, implementados só depois do marco M4, se couberem no prazo; enquanto isso, um roteiro de verificação manual vai na descrição de cada PR com mudança de tela.
+- **Justificativa:** as regras de negócio já são cobertas no motor e na API; o E2E só confirma que as peças estão ligadas.
+- **Atende:** RNF-03.
+
+#### DT-33 — CI no GitHub Actions em todo PR
+
+- **Contexto:** o `CLAUDE.md` §10.3 exige diferenciar verificação local de CI; hoje só existe verificação local.
+- **Alternativas consideradas:**
+  - *GitHub Actions:* integrado ao repositório e aos PRs; runners Linux com Docker para os Testcontainers.
+  - *Só verificação local:* sem configuração, sem verificação independente.
+- **Decisão:** workflow `.github/workflows/ci.yml`, disparado em `pull_request` e `push` para a `main`, com dois jobs: **dotnet** (build, formatação, testes, cobertura e o teste de desempenho informativo) e **web** (`npm ci`, lint, testes e build). Criado na primeira change de código; as versões das actions são verificadas na implementação.
+- **Justificativa:** todo PR passa a mostrar uma verificação independente da máquina do autor.
+- **Atende:** RNF-08; `CLAUDE.md` §8.2 e §10.3.
+
+#### DT-34 — Invariantes verificados com gerador de dados de semente fixa
+
+- **Contexto:** regras como "a margem nunca reduz o prazo" devem valer para qualquer planejamento, não só para os exemplos escritos à mão.
+- **Alternativas consideradas:**
+  - *Gerador próprio com semente fixa:* sem dependência nova; reprodutível.
+  - *Biblioteca de testes baseados em propriedades:* geração e redução de contraexemplos automáticas, com uma dependência e um conceito a mais para o prazo.
+- **Decisão:** gerador próprio de snapshots com `Random` inicializado com semente fixa, usado apenas nos testes.
+- **Justificativa:** cobre as regras invioláveis em centenas de casos com o mesmo resultado a cada execução, sem ferir o determinismo exigido do motor (o `Random` vive só nos testes).
+- **Atende:** RNF-02, RNF-08; regras invioláveis 1 e 4.
