@@ -1,6 +1,6 @@
 # TDD — Coordin
 
-- **Status:** em elaboração — seções 1 a 8 aprovadas
+- **Status:** em elaboração — seções 1 a 9 aprovadas
 - **Última atualização:** 2026-11-11
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -805,3 +805,53 @@ A cobertura é medida com coverlet (`coverlet.collector` 10.x) e informada no PR
 - **Decisão:** gerador próprio de snapshots com `Random` inicializado com semente fixa, usado apenas nos testes.
 - **Justificativa:** cobre as regras invioláveis em centenas de casos com o mesmo resultado a cada execução, sem ferir o determinismo exigido do motor (o `Random` vive só nos testes).
 - **Atende:** RNF-02, RNF-08; regras invioláveis 1 e 4.
+
+---
+
+## 9. Roadmap de implementação
+
+### 9.1 Changes do OpenSpec
+
+Cada change é uma fatia vertical (motor, API, tela e testes, conforme o caso), criada com `/opsx:propose`, revisada antes de qualquer código, implementada com `/opsx:apply` em uma branch própria a partir da `main` e integrada por PR com merge commit. Datas em 2026; a implementação começa em 2026-11-12, logo depois do TDD.
+
+| # | Change | Branch | Escopo | Requisitos e decisões | MoSCoW | Data alvo |
+|---|---|---|---|---|---|---|
+| 1 | `project-foundation` | `chore/project-foundation` | Solução .NET e projetos (DT-04), Angular com Tailwind, PostgreSQL no Docker Compose, EF Core com a primeira migration, Problem Details, OpenAPI + Swagger UI + cliente gerado, cabeçalhos de segurança, Dockerfile e CI | DT-01 a DT-08, DT-15, DT-16, DT-18, DT-19, DT-30, DT-33; RNF-07 | Must | 11-13 |
+| 2 | `authentication` | `feat/authentication` | Identity + JWT + refresh token, conta por variáveis de ambiente, tela de login, guarda de rotas e interceptor | DT-28, DT-29; RNF-04 | Must | 11-14 |
+| 3 | `capacity-registry` | `feat/capacity-registry` | Times, pessoas com capacidade diária, ausências e feriados (API e telas) | RF-01, RF-02, RF-03; DT-10 | Must | 11-15 |
+| 4 | `forecast-engine` | `feat/forecast-engine` | Motor: capacidade diária, previsibilidade, simulação, margem; casos da seção 8.2 e invariantes | RF-05, RF-08, RF-09, RF-10; DT-21, DT-22, DT-34; RNF-02, RNF-08; regras 1, 4 e 5 | Must | 11-17 |
+| 5 | `demand-planning` | `feat/demand-planning` | Demandas como agregado, ordem de prioridade, estimativas por time, alocações, datas, recálculo na escrita, linha de base, configuração da margem, cronograma com alerta e conclusão real com desvio | RF-04 a RF-07, RF-11, RF-12; DT-03, DT-11 a DT-14, DT-17, DT-27; regras 2, 3 e 5 | Must | 11-19 |
+| 6 | `deployment` | `chore/deployment` | Implantação na hospedagem escolhida (DT-09), PostgreSQL gerenciado, variáveis de ambiente e roteiro de verificação | DT-09; RNF-03, RNF-06 | Must | 11-20 (M4) |
+| 7 | `dependencies-and-team-report` | `feat/dependencies-and-team-report` | Dependências com detecção de ciclo no motor, API e tela; relatório semanal por time com ociosidade e sobrecarga | RF-17, RF-18; DT-23, DT-24 | Should | 11-22 |
+| 8 | `sequencing-scenarios` | `feat/sequencing-scenarios` | Score, busca local, recomendação, simulação e aprovação de cenários, volta à prioridade, simulação de nova demanda e teste de desempenho | RF-13 a RF-16; DT-25, DT-26; RNF-01 | Should | 11-23 |
+| 9 | `schedule-export` | `feat/schedule-export` | Exportação do cronograma em CSV pt-BR | RF-19; DT-20 | Should | 11-24 (M5) |
+| 10 | `delivery-insights` | `feat/delivery-insights` | Histórico de estimativas e de previsões, esforço real e indicadores de precisão | RF-20 a RF-23; DT-14 | Could | 11-25 (M6) |
+| 11 | `e2e-smoke` | `test/e2e-smoke` | Três cenários de smoke com Playwright, inclusive viewport de celular | DT-32; RNF-03 | Could | 11-25, se couber |
+
+Depois do congelamento (2026-11-25), só correções: 11-26 validação com dados históricos (M7) e 11-27 documentação e apresentação (M8).
+
+### 9.2 Decisões
+
+#### DT-35 — Cerca de dez changes em fatias verticais, nesta ordem
+
+- **Contexto:** 23 requisitos em 12 dias (PRD R-01), com um ciclo de proposta, revisão, implementação e PR por change (`CLAUDE.md` §4.3, §10).
+- **Alternativas consideradas:**
+  - *Cerca de dez changes verticais:* cada uma entrega algo utilizável de ponta a ponta; cerca de uma por dia.
+  - *Uma change por requisito (cerca de quinze):* PRs menores, com o custo fixo do ciclo multiplicado.
+  - *Por camada (motor, depois API, depois telas):* menos ciclos, mas nada utilizável até o fim e integração concentrada no último momento.
+- **Decisão:** as onze changes da tabela 9.1, na ordem indicada.
+- **Justificativa da ordem:**
+  - a **fundação** vem primeiro, com o CI, para todas as changes seguintes já serem verificadas automaticamente;
+  - a **autenticação** vem cedo porque todos os endpoints dependem dela;
+  - os **cadastros de capacidade** vêm antes do motor e do planejamento, que precisam de dados;
+  - o **motor** é isolado em uma change própria por ser o núcleo do TCC e o ponto com mais testes;
+  - a **implantação** fecha os Must no M4, depois de a hospedagem ser decidida (até 2026-11-14);
+  - **dependências** vêm antes dos cenários, que precisam respeitá-las;
+  - os **Could** ficam por último, como manda a ordem de proteção do escopo (PRD 8.1).
+- **Atende:** PRD 8.1 e 10; `CLAUDE.md` §4.3 e §12.
+
+### 9.3 Regras de andamento
+
+- Uma change só começa depois que a anterior estiver integrada à `main`, exceto quando não houver dependência entre elas e o autor aprovar trabalhar em paralelo.
+- Nos pontos de corte do PRD (10.1): em 2026-11-20, se a change 6 não estiver concluída, as changes 10 e 11 saem do escopo e as Should são reavaliadas; em 2026-11-24, se a change 9 não estiver concluída, as changes 10 e 11 saem do escopo.
+- A **atualização para o .NET 11** (DT-05) só entra depois da change 9, se houver tempo e o Npgsql 11 estável estiver publicado, como uma change `chore/dotnet-11-upgrade`.
