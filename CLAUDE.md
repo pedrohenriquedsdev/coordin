@@ -241,13 +241,14 @@ Pode fazer sem perguntar: ler arquivos, buscar no repositório, rodar build/test
 - [x] OpenSpec inicializado para o Claude Code
 - [x] `CLAUDE.md` criado
 - [x] Skills `generate-prd` e `generate-tdd` criadas (branch `chore/prd-tdd-skills`, integrada à `docs/prd` por fast-forward)
-- [ ] `.github/pull_request_template.md`
+- [x] `.github/pull_request_template.md` (PR #2)
+- [x] Marco M1: `chore/project-setup` (#1), `chore/pr-template` (#2) e `docs/prd` (#3) integradas à `main` em 2026-11-11, com merge commit
 - [x] PRD (`docs/PRD.md`), na branch `docs/prd`: seções 1 a 10 aprovadas em 2026-11-10 (RF-01 a RF-23, RNF-01 a RNF-08, marcos M0 a M8)
 - [ ] TDD (`docs/TDD.md`), até 2026-11-13 (M3)
 - [ ] Changes do OpenSpec, implementação e PRs, conforme o roadmap do TDD
 
-**Desvio registrado (2026-11-10):** a branch `docs/prd` foi criada a partir da `chore/project-setup`, e não da `main`, porque a `main` ainda não contém este arquivo, a proposta nem o OpenSpec (decisão do usuário). A `chore/project-setup` deve ser integrada à `main` antes do PR da `docs/prd`, com "Create a merge commit" (nunca squash), para que a `docs/prd` não precise de rebase.
+**Desvios registrados (2026-11-10 e 2026-11-11):** a `docs/prd` foi criada a partir da `chore/project-setup` porque a `main` ainda não tinha este arquivo; o PR #1 foi aberto antes do template de PR. Ambos registrados nas descrições dos PRs. PRs são integrados sempre com merge commit (`gh pr merge <n> --merge`), nunca squash ou rebase.
 
-**Próximo passo:** marco M1 (até 2026-11-11): criar `.github/pull_request_template.md` na branch `chore/pr-template`, fazer push e abrir os PRs de `chore/project-setup`, `chore/pr-template` e `docs/prd`, nessa ordem. Em paralelo, M2: verificar os dados históricos da validação. Depois, TDD com `/generate-tdd`.
+**Próximo passo:** marco M3 (até 2026-11-13): escrever o TDD na branch `docs/tdd` com `/generate-tdd`, começando pela seção 1. Em paralelo, M2 (até 2026-11-13): o usuário verifica os dados históricos da validação (P-03, P-04).
 
 Mantenha esta seção atualizada ao concluir cada etapa.
