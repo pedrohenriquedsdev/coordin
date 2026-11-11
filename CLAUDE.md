@@ -242,21 +242,12 @@ Pode fazer sem perguntar: ler arquivos, buscar no repositório, rodar build/test
 - [x] `CLAUDE.md` criado
 - [x] Skills `generate-prd` e `generate-tdd` criadas (branch `chore/prd-tdd-skills`, integrada à `docs/prd` por fast-forward)
 - [ ] `.github/pull_request_template.md`
-- [ ] PRD (`docs/PRD.md`), na branch `docs/prd`:
-  - [x] 1 Visão geral · 2 Problema · 3 Personas · 4 Fluxo de uso (aprovadas em 2026-11-10)
-  - [x] 5.1 Requisitos funcionais Must, RF-01 a RF-12 (aprovada em 2026-11-10)
-  - [x] 5.2 Requisitos funcionais Should, RF-13 a RF-19 (aprovada em 2026-11-10)
-  - [x] 5.3 Requisitos funcionais Could, RF-20 a RF-23 (aprovada em 2026-11-10)
-  - [x] 6 Requisitos não funcionais e regras invioláveis, RNF-01 a RNF-08 (aprovada em 2026-11-10)
-  - [x] 7 Métricas de sucesso (aprovada em 2026-11-10)
-  - [x] 8 Escopo e não objetivos (aprovada em 2026-11-10)
-  - [x] 9 Premissas, riscos e decisões delegadas ao TDD (aprovada em 2026-11-10)
-  - [ ] 10 Marcos até 2026-11-28
-- [ ] TDD (`docs/TDD.md`)
+- [x] PRD (`docs/PRD.md`), na branch `docs/prd`: seções 1 a 10 aprovadas em 2026-11-10 (RF-01 a RF-23, RNF-01 a RNF-08, marcos M0 a M8)
+- [ ] TDD (`docs/TDD.md`), até 2026-11-13 (M3)
 - [ ] Changes do OpenSpec, implementação e PRs, conforme o roadmap do TDD
 
-**Desvio registrado (2026-11-10):** a branch `docs/prd` foi criada a partir da `chore/project-setup`, e não da `main`, porque a `main` ainda não contém este arquivo, a proposta nem o OpenSpec (decisão do usuário). A `chore/project-setup` deve ser integrada à `main` antes, e a `docs/prd` rebaseada sobre a `main` antes do seu PR.
+**Desvio registrado (2026-11-10):** a branch `docs/prd` foi criada a partir da `chore/project-setup`, e não da `main`, porque a `main` ainda não contém este arquivo, a proposta nem o OpenSpec (decisão do usuário). A `chore/project-setup` deve ser integrada à `main` antes do PR da `docs/prd`, com "Create a merge commit" (nunca squash), para que a `docs/prd` não precise de rebase.
 
-**Próximo passo:** escrever a seção 10 (Marcos até 2026-11-28) do PRD com `/generate-prd 10`, reservando tempo para o cadastro do histórico da validação (R-04). Depois: template de PR, push e PRs de `chore/project-setup` e `docs/prd`.
+**Próximo passo:** marco M1 (até 2026-11-11): criar `.github/pull_request_template.md` na branch `chore/pr-template`, fazer push e abrir os PRs de `chore/project-setup`, `chore/pr-template` e `docs/prd`, nessa ordem. Em paralelo, M2: verificar os dados históricos da validação. Depois, TDD com `/generate-tdd`.
 
 Mantenha esta seção atualizada ao concluir cada etapa.
