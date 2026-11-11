@@ -1,6 +1,6 @@
 # TDD — Coordin
 
-- **Status:** em elaboração — seções 1 a 6 aprovadas
+- **Status:** em elaboração — seções 1 a 7 aprovadas
 - **Última atualização:** 2026-11-11
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -154,6 +154,7 @@ Versões estáveis verificadas em 2026-11-11 nos registros oficiais (NuGet, npm)
 |---|---|---|
 | Runtime e linguagem | .NET 10 (LTS), C# 14 | SDK 10.0.4xx (instalado: 10.0.403) |
 | API | ASP.NET Core 10, Minimal APIs, Problem Details | 10.0.x |
+| Autenticação | ASP.NET Core Identity + JWT Bearer (DT-28) | Microsoft.AspNetCore.Identity.EntityFrameworkCore 10.0.15 · Microsoft.AspNetCore.Authentication.JwtBearer 10.0.15 |
 | Documento OpenAPI | Microsoft.AspNetCore.OpenApi (DT-19) | 10.0.15 |
 | Documentação interativa (só em desenvolvimento) | Swashbuckle.AspNetCore.SwaggerUI (DT-19) | 11.0.x (compatível com `net10.0`) |
 | Cliente Angular gerado | ng-openapi-gen (DT-19) | 1.1.x |
@@ -263,7 +264,7 @@ Tipos: identificadores `Guid` versão 7 (`uuid`); datas de planejamento `DateOnl
 | `EstimateHistory` | `Id`, `DemandId`, `TeamId`, `PreviousHours`, `NewHours`, `Reason` (opcional), `ChangedAt` | Somente inclusão | RF-20 (Could) |
 | `PlanningSettings` | `ExecutionOrderMode` (`FollowPriority`, `Custom`) e os parâmetros da margem de segurança (definidos na seção 6) | Registro único | RF-09, RF-15 |
 
-A conta de acesso do gestor é definida na seção 7. Cenários (RF-13, RF-14) e a simulação de nova demanda (RF-16) **não são persistidos** (DT-03): apenas o resultado aprovado altera `ExecutionRank` ou cria a demanda.
+A conta de acesso do gestor usa as tabelas padrão do ASP.NET Core Identity (`AspNetUsers` e relacionadas) e a entidade `RefreshToken` (`Id`, `UserId`, `TokenHash`, `ExpiresAt`, `RevokedAt`, `ReplacedById`), detalhadas na seção 7 (DT-28). Cenários (RF-13, RF-14) e a simulação de nova demanda (RF-16) **não são persistidos** (DT-03): apenas o resultado aprovado altera `ExecutionRank` ou cria a demanda.
 
 ### 4.3 Decisões
 
@@ -341,7 +342,7 @@ A conta de acesso do gestor é definida na seção 7. Cenários (RF-13, RF-14) e
 ### 5.1 Convenções
 
 - Base `/api`, JSON com propriedades em `camelCase`; datas `yyyy-MM-dd`; instantes ISO 8601 em UTC; horas como número decimal.
-- Todos os endpoints, exceto login, exigem o gestor autenticado (seção 7).
+- Todos os endpoints, exceto `login` e `refresh`, exigem o gestor autenticado por `Authorization: Bearer` (seção 7).
 - Sucesso: `200` (leitura ou atualização com corpo), `201` com `Location` (criação), `204` (sem corpo).
 - Erros em Problem Details (DT-06, DT-18).
 - Toda escrita que afeta o cálculo recalcula e persiste as previsões na mesma transação (DT-03); o front recarrega o cronograma depois de uma escrita bem-sucedida.
@@ -350,7 +351,7 @@ A conta de acesso do gestor é definida na seção 7. Cenários (RF-13, RF-14) e
 
 | Recurso | Operações | Requisitos |
 |---|---|---|
-| Autenticação | `POST /api/auth/login` · `POST /api/auth/logout` · `GET /api/auth/me` | RNF-04 |
+| Autenticação | `POST /api/auth/login` · `POST /api/auth/refresh` · `POST /api/auth/logout` · `GET /api/auth/me` (DT-28) | RNF-04 |
 | Times | `GET`, `POST /api/teams` · `PUT`, `DELETE /api/teams/{id}` | RF-01 |
 | Pessoas | `GET`, `POST /api/people` · `PUT`, `DELETE /api/people/{id}` | RF-02 |
 | Ausências | `GET`, `POST /api/people/{id}/absences` · `PUT`, `DELETE /api/absences/{id}` | RF-03 |
@@ -612,3 +613,73 @@ Demandas não previsíveis e demandas concluídas ficam fora da simulação e n�
 ### 6.5 Simulação de nova demanda (RF-16)
 
 O motor calcula duas vezes, com o snapshot atual e com o snapshot acrescido da nova demanda, e compara as previsões demanda a demanda. A diferença em dias corridos de cada `ForecastEndDate` é o impacto exibido.
+
+---
+
+## 7. Segurança e dados
+
+### 7.1 Fluxo de autenticação
+
+```
+Login ──► POST /api/auth/login {email, password}
+          ├─ Identity valida a senha (hash) e o bloqueio por tentativas
+          ├─ resposta: { accessToken (JWT, 15 min) }  → guardado só na memória do Angular
+          └─ cookie refresh_token (HttpOnly, Secure, SameSite=Strict, Path=/api/auth, 7 dias)
+
+Requisições ──► Authorization: Bearer <accessToken>  (interceptor HTTP do Angular)
+
+Token expirou / página recarregada ──► POST /api/auth/refresh (cookie enviado automaticamente)
+          ├─ refresh token válido → novo accessToken + novo refresh token (rotação)
+          └─ refresh token já usado → revoga todos os tokens do usuário (suspeita de roubo)
+
+Logout ──► POST /api/auth/logout → revoga o refresh token e apaga o cookie
+```
+
+### 7.2 Decisões
+
+#### DT-28 — ASP.NET Core Identity com JWT próprio e refresh token em cookie
+
+- **Contexto:** login do gestor e senhas nunca em texto puro (RNF-04). O autor definiu usar JWT e ASP.NET Core Identity.
+- **Alternativas consideradas:**
+  - *Identity + JWT emitido pela API + refresh token em cookie `HttpOnly`:* padrão de mercado; o access token curto fica fora do armazenamento do navegador e a renovação não é legível por JavaScript.
+  - *Identity API endpoints (`MapIdentityApi`):* pronto, mas os tokens **não são JWT** (formato proprietário do ASP.NET Core) e o conjunto expõe um endpoint público de cadastro, indesejado para um usuário único.
+  - *JWT guardado no `localStorage`:* simples, mas legível por qualquer script na página (risco de XSS).
+  - *Cookie de sessão simples:* o mais simples para a mesma origem, mas não atende à decisão de usar JWT.
+- **Decisão:**
+  - **Identity** (`Microsoft.AspNetCore.Identity.EntityFrameworkCore` 10.0.x) para o usuário, o hash da senha e o bloqueio: 5 tentativas erradas bloqueiam o login por 15 minutos; senha com no mínimo 12 caracteres.
+  - **Access token JWT** assinado com HMAC-SHA256, validade de **15 minutos**, emissor e audiência validados, claims `sub` e `email`; validado com `Microsoft.AspNetCore.Authentication.JwtBearer` 10.0.x. No Angular, fica **apenas em memória** (um signal no serviço de autenticação) e é enviado por um interceptor HTTP.
+  - **Refresh token:** valor aleatório de 256 bits, enviado em cookie `HttpOnly`, `Secure`, `SameSite=Strict`, restrito a `/api/auth`, válido por **7 dias**. É guardado no banco apenas como hash SHA-256 (entidade `RefreshToken`: `Id`, `UserId`, `TokenHash`, `ExpiresAt`, `RevokedAt`, `ReplacedById`). É **rotacionado** a cada uso; o reuso de um token já trocado revoga todos os tokens do usuário.
+  - **Endpoints:** `POST /api/auth/login`, `POST /api/auth/refresh`, `POST /api/auth/logout`, `GET /api/auth/me`. Não existe endpoint de cadastro.
+  - **Limite de requisições** (rate limiter nativo do ASP.NET Core) em `login` e `refresh`: 10 por minuto por IP.
+- **Justificativa:** une o que foi pedido (JWT e Identity) às práticas atuais para SPAs. Um script malicioso não encontra token salvo no navegador, e um token de acesso roubado expira em minutos. O cookie de refresh não sofre CSRF útil, porque é `SameSite=Strict`, só existe em `/api/auth` e só devolve um novo token para a própria página.
+- **Atende:** RNF-04.
+
+#### DT-29 — Conta do gestor criada por variáveis de ambiente
+
+- **Contexto:** usuário único (PRD 8.2), sem cadastro público.
+- **Alternativas consideradas:**
+  - *Variáveis de ambiente na inicialização:* nenhuma tela de cadastro; a credencial fica nos segredos da hospedagem.
+  - *Tela de primeiro acesso:* prática, mas quem chegar primeiro a um deploy recém-publicado define a senha.
+- **Decisão:** na inicialização, se não houver usuário, a API cria a conta com `Manager__Email` e `Manager__Password`. Com `Manager__ResetPassword=true`, redefine a senha a partir da variável e revoga os refresh tokens; o sinalizador é removido depois.
+- **Justificativa:** não há superfície de cadastro a proteger, e a credencial nunca passa pelo repositório.
+- **Atende:** RNF-04, RNF-05.
+
+#### DT-30 — Segredos, transporte e cabeçalhos de segurança
+
+- **Contexto:** nenhum segredo ou dado real no repositório (RNF-05; `CLAUDE.md` §8.3) e acesso pela rede (RNF-03).
+- **Alternativas consideradas:**
+  - *Variáveis de ambiente em produção e `dotnet user-secrets` em desenvolvimento:* nada sensível em arquivos versionados.
+  - *Arquivos de configuração com segredos fora do Git:* fácil de versionar por engano.
+- **Decisão:**
+  - **Segredos** (`ConnectionStrings__Default`, `Jwt__SigningKey` com no mínimo 32 bytes aleatórios, `Manager__*`) vêm de variáveis de ambiente em produção e de `dotnet user-secrets` em desenvolvimento. `appsettings*.json` não contêm segredos. O `compose.yaml` lê a senha local do PostgreSQL de um `.env` ignorado pelo Git; o repositório traz apenas um `.env.example`.
+  - **Transporte:** HTTPS (TLS terminado pela hospedagem, DT-09), `UseHttpsRedirection` e HSTS em produção.
+  - **Cabeçalhos:** `Content-Security-Policy` restritiva (`default-src 'self'`; sem scripts inline), `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` e `frame-ancestors 'none'`. Sem CORS, porque a origem é única (DT-01).
+- **Justificativa:** a CSP é a segunda barreira contra XSS, complementando o escape automático de templates do Angular; com ela, mesmo um token em memória fica difícil de exfiltrar.
+- **Atende:** RNF-03, RNF-04, RNF-05.
+
+### 7.3 Dados pessoais e dados da validação
+
+- Das pessoas, o sistema guarda apenas nome, time, capacidade e ausências (tipo e período), sem motivo detalhado (RNF-05).
+- Logs não registram corpos de requisição, tokens nem senhas.
+- Os dados históricos da validação (PRD 7.2) são **anonimizados antes** de entrar no sistema e **nunca** são versionados; para demonstração, o repositório tem apenas dados fictícios de exemplo.
+- Backups do banco seguem o serviço de PostgreSQL gerenciado da hospedagem escolhida (DT-09, pendente).
