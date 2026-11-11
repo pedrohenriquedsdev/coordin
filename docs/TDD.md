@@ -1,6 +1,6 @@
 # TDD — Coordin
 
-- **Status:** em elaboração — seções 1 a 3 aprovadas
+- **Status:** em elaboração — seções 1 a 4 aprovadas
 - **Última atualização:** 2026-11-11
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -218,3 +218,115 @@ Versões estáveis verificadas em 2026-11-11 nos registros oficiais (NuGet, npm)
 - **Recomendação:** container Docker em PaaS com PostgreSQL gerenciado.
 - **Decisão:** pendente; o autor vai validar a opção com o professor orientador. **Prazo para decidir: 2026-11-14**, para que a implantação caiba no M4.
 - **Atende:** RNF-03, RNF-06.
+
+---
+
+## 4. Modelo de dados
+
+### 4.1 Diagrama
+
+```mermaid
+erDiagram
+    Team ||--o{ Person : "tem"
+    Person ||--o{ Absence : "registra"
+    Demand ||--|{ DemandTeam : "envolve"
+    Team ||--o{ DemandTeam : "atua em"
+    Demand ||--o{ DemandAssignment : "aloca"
+    Person ||--o{ DemandAssignment : "trabalha em"
+    Demand ||--o{ DemandDependency : "depende de"
+    Demand ||--o| Forecast : "tem previsão"
+    Demand ||--o{ ForecastHistory : "histórico (Could)"
+    DemandTeam ||--o{ EstimateHistory : "histórico (Could)"
+    Holiday
+    PlanningSettings
+```
+
+### 4.2 Entidades
+
+Tipos: identificadores `Guid` versão 7 (`uuid`); datas de planejamento `DateOnly` (`date`); instantes `DateTimeOffset` gravados em UTC (`timestamptz`) e exibidos no fuso `America/Sao_Paulo`; horas `decimal` com duas casas.
+
+| Entidade | Atributos principais | Regras de integridade | Requisitos |
+|---|---|---|---|
+| `Team` | `Id`, `Name` | `Name` obrigatório e único (sem diferenciar maiúsculas) | RF-01 |
+| `Person` | `Id`, `Name`, `TeamId`, `DailyCapacityHours` | Um único time (FK obrigatória); `DailyCapacityHours` entre 0 e 24 | RF-02 |
+| `Absence` | `Id`, `PersonId`, `Type` (`Vacation`, `Other`), `StartDate`, `EndDate` | `EndDate >= StartDate`; sem motivo detalhado (RNF-05) | RF-03 |
+| `Holiday` | `Id`, `Date`, `Description` (opcional) | `Date` única | RF-03 |
+| `Demand` | `Id`, `Title`, `PriorityRank`, `ExecutionRank`, `StartDate` (opcional), `InformedEndDate` (opcional), `CompletedOn` (opcional), `ActualEffortHours` (opcional, Could) | `PriorityRank` e `ExecutionRank` únicos e contínuos a partir de 1; `CompletedOn >= StartDate`; `ActualEffortHours > 0` quando informado | RF-04, RF-07, RF-12, RF-22 |
+| `DemandTeam` | `DemandId`, `TeamId`, `EstimatedEffortHours` (opcional) | Chave (`DemandId`, `TeamId`); `EstimatedEffortHours > 0` quando informado | RF-05, RF-06 |
+| `DemandAssignment` | `DemandId`, `PersonId` | Chave (`DemandId`, `PersonId`); o time da pessoa precisa estar entre os times da demanda | RF-05 |
+| `DemandDependency` | `DemandId`, `PrerequisiteDemandId` | Chave composta; sem autodependência; ciclos rejeitados pela API usando o motor (seção 6) | RF-18 |
+| `Forecast` | `DemandId`, `IsPredictable`, `UnpredictableReason`, `ForecastStartDate`, `EndDateWithoutMargin`, `ForecastEndDate`, `BaselineEndDate`, `CalculatedAt` | Uma por demanda; `ForecastEndDate >= EndDateWithoutMargin`; `BaselineEndDate` gravada uma única vez | RF-08 a RF-12 |
+| `ForecastHistory` | `Id`, `DemandId`, `PreviousEndDate`, `NewEndDate`, `Cause`, `ChangedAt` | Somente inclusão | RF-21 (Could) |
+| `EstimateHistory` | `Id`, `DemandId`, `TeamId`, `PreviousHours`, `NewHours`, `Reason` (opcional), `ChangedAt` | Somente inclusão | RF-20 (Could) |
+| `PlanningSettings` | `ExecutionOrderMode` (`FollowPriority`, `Custom`) e os parâmetros da margem de segurança (definidos na seção 6) | Registro único | RF-09, RF-15 |
+
+A conta de acesso do gestor é definida na seção 7. Cenários (RF-13, RF-14) e a simulação de nova demanda (RF-16) **não são persistidos** (DT-03): apenas o resultado aprovado altera `ExecutionRank` ou cria a demanda.
+
+### 4.3 Decisões
+
+#### DT-10 — Capacidade em horas por dia útil, com calendário do setor
+
+- **Contexto:** modelo de capacidade delegado pelo PRD (9.3, item 1; `CLAUDE.md` §7.3), incluindo ausências, outras alocações e calendário.
+- **Alternativas consideradas:**
+  - *Horas por dia útil, um número por pessoa:* simples de cadastrar e de calcular; outras alocações da pessoa já ficam descontadas no número informado; não representa jornadas irregulares.
+  - *Horas por dia da semana:* cobre jornadas irregulares, com mais cadastro e cálculo.
+- **Decisão:** cada pessoa tem `DailyCapacityHours`. A capacidade de uma pessoa em uma data é `DailyCapacityHours` se a data for de segunda a sexta, não for feriado (`Holiday`) e não estiver em uma ausência da pessoa (`Absence`); caso contrário, zero. A capacidade de um time em uma data é a soma das capacidades das pessoas dele.
+- **Justificativa:** atende ao RF-02 e ao RF-03 com o menor modelo possível. Feriados foram incluídos no PRD (RF-03, ajuste aprovado em 2026-11-11) para não tratar feriado como dia de trabalho.
+- **Atende:** RF-02, RF-03, RF-08, RF-17.
+
+#### DT-11 — Esforço estimado por time da demanda
+
+- **Contexto:** paralelismo entre times (PRD 9.3, item 2) e a regra inviolável 4 (adicionar um time não divide o prazo automaticamente).
+- **Alternativas consideradas:**
+  - *Esforço por demanda × time (`DemandTeam.EstimatedEffortHours`):* cada time estima a sua parte; cada parte é executada com a capacidade do próprio time e a demanda termina quando a última parte termina. O paralelismo é explícito nos dados.
+  - *Esforço total dividido pelo motor:* um número por demanda, repartido pela capacidade; exige um fator de eficiência para não virar divisão exata.
+- **Decisão:** esforço por demanda × time. O esforço total da demanda é a soma das partes. A demanda só é previsível quando todos os times alocados têm estimativa.
+- **Justificativa:** fiel a "os times informam o esforço" e garante a regra 4 por construção, sem um fator arbitrário. O PRD foi ajustado em RF-06 e RF-10 (aprovado em 2026-11-11).
+- **Atende:** RF-05, RF-06, RF-08, RF-10; regra inviolável 4.
+
+#### DT-12 — Alocação de pessoas inteiras, em fila por ordem de execução
+
+- **Contexto:** RF-05 exige alocar pessoas às demandas e compartilhar a capacidade respeitando a ordem de execução.
+- **Alternativas consideradas:**
+  - *Pessoa inteira em fila:* cada pessoa trabalha nas demandas a que está alocada uma de cada vez, na ordem de execução; uma demanda posterior só recebe horas da pessoa quando as anteriores não precisarem mais dela.
+  - *Percentual da pessoa por demanda:* mais flexível, com mais dados e risco de ultrapassar 100%.
+  - *Só o time, sem pessoas:* mais simples, mas contraria o RF-05.
+- **Decisão:** `DemandAssignment` liga pessoa e demanda, sem percentual. A parte de um time na demanda é executada pelas pessoas desse time alocadas a ela. Uma parte sem pessoas alocadas torna a demanda não previsível ("sem capacidade", RF-10).
+- **Justificativa:** respeita o RF-05 e o RF-08 (demanda posterior não toma capacidade de anterior) com um modelo simples; o algoritmo da fila é detalhado na seção 6.
+- **Atende:** RF-05, RF-08, RF-10.
+
+#### DT-13 — Ordem de prioridade e ordem de execução separadas
+
+- **Contexto:** RF-04 e RF-15 exigem preservar a prioridade registrada e permitir uma ordem de execução aprovada diferente (regras invioláveis 2 e 3).
+- **Alternativas consideradas:**
+  - *Dois rankings na demanda (`PriorityRank`, `ExecutionRank`) e um modo global:* com `FollowPriority`, o motor usa a prioridade; com `Custom`, usa a ordem aprovada. Voltar à prioridade (RF-15) é trocar o modo.
+  - *Um único ranking:* aprovar cenário apagaria a prioridade combinada com o produto.
+- **Decisão:** dois rankings mais `PlanningSettings.ExecutionOrderMode`. Aprovar um cenário grava o `ExecutionRank` de todas as demandas e muda o modo para `Custom`. No modo `Custom`, uma nova demanda entra no fim da ordem de execução, e o cronograma sinaliza a divergência em relação à prioridade (RF-15).
+- **Justificativa:** a prioridade nunca é sobrescrita por uma decisão de sequência, e a divergência fica visível.
+- **Atende:** RF-04, RF-11, RF-15; regras invioláveis 2 e 3.
+
+#### DT-14 — Linha de base e históricos somente de inclusão
+
+- **Contexto:** registro de mudanças e previsto × realizado (PRD 9.3, item 6).
+- **Alternativas consideradas:**
+  - *Linha de base como coluna gravada uma vez e históricos em tabelas somente de inclusão:* simples de consultar e impossível de "corrigir" por engano.
+  - *Versionar o planejamento inteiro a cada alteração:* reconstrói qualquer momento, mas é desproporcional ao escopo.
+- **Decisão:** `Forecast.BaselineEndDate` é gravada no primeiro cálculo em que a demanda se torna previsível e nunca é alterada. `ForecastHistory` e `EstimateHistory` (Could) só recebem inclusões; a API não expõe edição nem exclusão delas.
+- **Justificativa:** atende ao RF-12 nos Must sem depender dos Could; os históricos podem ser implementados depois sem mudar o restante do modelo.
+- **Atende:** RF-12, RF-20, RF-21, RF-23.
+
+#### DT-15 — Identificadores e tipos de dados
+
+- **Contexto:** consistência entre banco, API e motor; datas sem fuso para o planejamento e instantes com fuso para auditoria (RNF-07).
+- **Alternativas consideradas:**
+  - *`Guid` v7, `DateOnly` e `DateTimeOffset` em UTC:* identificadores gerados na aplicação, ordenáveis no tempo e sem colisão; datas de planejamento sem ambiguidade de fuso.
+  - *Inteiros autoincrementais e `DateTime`:* identificadores mais curtos, mas expostos na URL de forma sequencial, e `DateTime` mistura data e fuso.
+- **Decisão:** `Guid.CreateVersion7()` para identificadores; `DateOnly` para datas de planejamento; `DateTimeOffset` em UTC para instantes; `decimal` com duas casas para horas.
+- **Justificativa:** o motor trabalha com dias (`DateOnly`), o que elimina erros de fuso no cálculo; o fuso `America/Sao_Paulo` só é aplicado na exibição.
+- **Atende:** RNF-02, RNF-07.
+
+### 4.4 Exclusões
+
+- Um time com pessoas não pode ser excluído; uma pessoa alocada a demanda não concluída também não.
+- Excluir uma demanda remove suas partes por time, alocações, dependências e previsão, e recompacta os rankings; demandas concluídas não são excluídas, para preservar a métrica principal.
+- Excluir uma pessoa remove suas ausências.
