@@ -1,6 +1,6 @@
 # TDD — Coordin
 
-- **Status:** em elaboração — seções 1 a 5 aprovadas
+- **Status:** em elaboração — seções 1 a 6 aprovadas
 - **Última atualização:** 2026-11-11
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -481,3 +481,134 @@ Na criação, a demanda entra no fim da ordem de prioridade (e da de execução,
 - **Decisão:** CSV com separador `;`, codificação UTF-8 com BOM, datas `dd/MM/yyyy`, horas com vírgula decimal e cabeçalhos em português; nome `coordin-cronograma-AAAA-MM-DD.csv`. Colunas: as do cronograma (RF-11), incluindo prioridade e ordem de execução.
 - **Justificativa:** o Excel em português usa `;` como separador e só reconhece acentos em UTF-8 com BOM; sem esses dois detalhes, o arquivo abre "quebrado".
 - **Atende:** RF-19, RNF-07.
+
+---
+
+## 6. Algoritmos de cálculo
+
+Todos os algoritmos desta seção vivem no `Coordin.Engine` (DT-02) e são funções puras: recebem o snapshot do planejamento e devolvem resultados, sem relógio, aleatoriedade ou acesso externo.
+
+### 6.1 Pipeline do cálculo
+
+```
+Snapshot ──► 1. validar (ciclos de dependência)
+         ──► 2. classificar previsibilidade (RF-10)
+         ──► 3. simular a execução dia a dia (DT-21), aplicando a margem a cada conclusão (DT-22)
+         ──► 4. montar o resultado: previsões por demanda, consumo diário por pessoa
+         ──► (sob demanda) relatório por time (DT-24) · cenários (DT-25, DT-26)
+```
+
+Entradas do snapshot: times, pessoas (`DailyCapacityHours`), ausências, feriados, demandas (ranks, datas, conclusão), partes por time com esforço, alocações, dependências, modo de ordem de execução e percentual da margem. Ordenações internas sempre por ranking e, em empate, por `Id`, para o resultado nunca depender da ordem de leitura.
+
+### 6.2 Capacidade diária (DT-10)
+
+`capacity(person, date)` = `DailyCapacityHours` se a data for de segunda a sexta, não for feriado e não estiver em ausência da pessoa; senão, `0`. Um **dia útil** é qualquer data de segunda a sexta que não seja feriado.
+
+### 6.3 Previsibilidade (RF-10)
+
+Uma demanda **não concluída** é não previsível, com o primeiro motivo que se aplicar:
+
+1. `MissingStartDate`: sem data de início;
+2. `MissingEstimate`: algum time alocado sem estimativa;
+3. `NoCapacity`: alguma parte por time sem pessoa alocada, ou cujas pessoas alocadas tenham capacidade zero;
+4. `PrerequisiteUnpredictable`: depende, direta ou indiretamente, de uma demanda não previsível.
+
+Demandas não previsíveis e demandas concluídas ficam fora da simulação e não consomem capacidade.
+
+### 6.4 Decisões
+
+#### DT-21 — Simulação dia a dia com fila por pessoa
+
+- **Contexto:** calcular a data prevista (RF-08) considerando capacidade, ausências, feriados, vários times (RF-05), fila por ordem de execução (DT-12) e dependências (RF-18).
+- **Alternativas consideradas:**
+  - *Simulação dia a dia:* percorre os dias úteis e distribui as horas de cada pessoa; trata ausência no meio do período, vários times e filas de forma natural e fácil de testar.
+  - *Fórmula fechada (esforço ÷ capacidade):* rápida, mas não representa filas, ausências pontuais nem dependências.
+  - *Programação matemática (solver):* ótima em teoria, mas pesada, difícil de explicar e desproporcional ao prazo.
+- **Decisão:** a partir da menor data de início entre as demandas previsíveis, para cada dia útil e para cada pessoa:
+  1. a pessoa tem `capacity(person, date)` horas no dia;
+  2. as horas vão para a **primeira parte elegível** da fila da pessoa, na ordem de execução. Uma parte é elegível se a data de início da demanda já chegou, os pré-requisitos já terminaram (DT-23) e ainda há esforço restante;
+  3. se a parte termina com horas sobrando no dia, a sobra vai para a próxima parte elegível da fila;
+  4. a parte de um time termina no dia em que o esforço restante chega a zero; a **demanda termina no dia em que termina a última parte** (`EndDateWithoutMargin`); `ForecastStartDate` é o primeiro dia em que a demanda recebe horas.
+  
+  A simulação para quando todas as partes terminam, ou ao atingir um horizonte de 5 anos; o que não terminar até lá vira `NoCapacity`.
+- **Justificativa:** cada time trabalha na própria parte com a própria capacidade, então adicionar um time nunca divide o prazo por construção (regra 4). Uma demanda posterior só recebe horas quando as anteriores da fila da pessoa não podem usá-las (RF-08). A previsão é **baseada no plano**: ela simula a partir das datas de início, como se o plano tivesse sido executado como previsto. Sem apontamento de horas (PRD 8.2), o sistema não sabe quanto já foi feito de uma demanda em andamento; a conclusão real (RF-12) e o replanejamento corrigem a previsão.
+- **Atende:** RF-03, RF-05, RF-08, RF-10, RF-18; regra inviolável 4.
+
+#### DT-22 — Margem percentual sobre a duração, em dias úteis
+
+- **Contexto:** tipo e etapa da margem (PRD 9.3, item 4; `CLAUDE.md` §7.3) e a regra inviolável 1.
+- **Alternativas consideradas:**
+  - *Percentual sobre a duração em dias úteis:* fiel à proposta ("margem ao prazo calculado"); não consome capacidade; proporcional ao tamanho da demanda.
+  - *Percentual sobre o esforço:* torna o cronograma inteiro mais conservador, porque consome capacidade e atrasa as demandas seguintes.
+  - *Dias fixos:* igual para demandas de 2 dias e de 2 meses.
+- **Decisão:** `duration` = número de dias úteis de `ForecastStartDate` a `EndDateWithoutMargin`, inclusive; `marginDays = ceil(duration × percent / 100)`; `ForecastEndDate` = `EndDateWithoutMargin` avançada `marginDays` dias úteis. O percentual fica em `PlanningSettings`, é editável pelo gestor (`PUT /api/settings`), aceita apenas valores **maiores ou iguais a zero** e começa em **20%**. A diferença entre `ForecastEndDate` e `EndDateWithoutMargin` é exibida como a parte da margem (RF-09).
+- **Justificativa:** com percentual não negativo e arredondamento para cima, `ForecastEndDate >= EndDateWithoutMargin` sempre vale (regra 1), o que é verificado por teste (RNF-08).
+- **Atende:** RF-09; regra inviolável 1.
+
+#### DT-23 — Dependências como grafo dirigido, com ciclos rejeitados
+
+- **Contexto:** representação de dependências e detecção de ciclos (PRD 9.3, item 3; RF-18).
+- **Alternativas consideradas:**
+  - *Grafo dirigido (`DemandDependency` como arestas) com busca em profundidade:* simples, detecta ciclos diretos e indiretos em tempo linear.
+  - *Dependências embutidas na ordem de execução:* não detecta ciclos e confunde dependência com prioridade.
+- **Decisão:** ao gravar uma demanda (`POST`/`PUT`), a API chama o motor para verificar o grafo com busca em profundidade (marcação em três estados); se houver ciclo, responde `409` com `code: dependency-cycle`. Na simulação, uma demanda dependente só se torna elegível no dia útil seguinte ao `ForecastEndDate` **com margem** do pré-requisito. A não previsibilidade se propaga aos dependentes (6.3). Como a elegibilidade respeita as dependências em qualquer ordem de execução, nenhum cenário as viola (RF-18).
+- **Justificativa:** "não começa antes da conclusão prevista" usa a data comunicada, que inclui a margem, mantendo a regra de forma conservadora.
+- **Atende:** RF-18.
+
+#### DT-24 — Relatório por time em períodos parametrizáveis (semana)
+
+- **Contexto:** tamanho do período (PRD 9.3, item 7) e definições de ociosidade e sobrecarga (RF-17). O autor indicou que o período pode mudar.
+- **Alternativas consideradas:**
+  - *Período como parâmetro do cálculo, começando por semana:* troca de período sem reescrever o algoritmo.
+  - *Semana fixa no código:* mais simples hoje, mais trabalho para mudar depois.
+- **Decisão:** o relatório recebe o período como parâmetro (hoje, `Week`: segunda a domingo). Para cada time e período, a partir do consumo diário da simulação:
+  - `capacityHours`: soma das capacidades das pessoas do time;
+  - `allocatedHours`: horas efetivamente consumidas por partes de demandas;
+  - `occupancy` = `allocatedHours / capacityHours`;
+  - **ociosidade** = `capacityHours − allocatedHours`, quando positiva;
+  - **sobrecarga**: o período em que alguma parte do time estava elegível e terminou o período com esforço restante, ou seja, havia trabalho esperando sem capacidade para atendê-lo; o relatório lista essas demandas.
+  
+  O relatório também informa a quantidade de demandas não previsíveis do time.
+- **Justificativa:** ociosidade e sobrecarga saem do mesmo consumo diário que gera a previsão, sem um segundo modelo. Pessoas do time sem alocação aparecem como ociosas, o que é justamente a "oportunidade de realocação" da proposta.
+- **Atende:** RF-17.
+
+#### DT-25 — Critério de otimização: conclusão ponderada pela prioridade
+
+- **Contexto:** critério de otimização dos cenários (PRD 9.3, item 5; `CLAUDE.md` §7.3; RF-13).
+- **Alternativas consideradas:**
+  - *Soma ponderada das conclusões:* antecipa o que é mais prioritário sem ignorar o prazo total.
+  - *Prazo total do setor:* pode atrasar prioritárias para encaixar a capacidade.
+  - *Utilização dos times:* nem sempre antecipa entregas.
+- **Decisão:** para as demandas previsíveis, `score = Σ wᵢ × dᵢ`, em que `dᵢ` é o número de dias úteis entre a menor data de início do planejamento e o `ForecastEndDate` da demanda, e `wᵢ = n − PriorityRankᵢ + 1` (a mais prioritária tem o maior peso). Menor é melhor. Empates são desfeitos, nesta ordem, pelo prazo total do setor (última `ForecastEndDate`), pelo menor número de demandas deslocadas em relação à ordem atual e pela ordem lexicográfica dos ids.
+- **Justificativa:** o peso usa a **prioridade registrada** (regra 3), então um cenário só é recomendado se compensar no conjunto, considerando o que o produto definiu como mais importante.
+- **Atende:** RF-13; regras invioláveis 2 e 3.
+
+#### DT-26 — Busca local determinística com orçamento de avaliações
+
+- **Contexto:** o espaço de sequências é fatorial (200! ordens possíveis) e o RNF-01 limita os cenários a 10 s; o resultado precisa ser determinístico (RNF-02).
+- **Alternativas consideradas:**
+  - *Busca local (subida de encosta) com vizinhança fixa:* simples, explicável e determinística.
+  - *Algoritmo genético com semente fixa:* explora mais, mas é bem mais complexo de implementar, testar e explicar no prazo.
+  - *Só trocas de vizinhos adjacentes:* simples demais; acha poucas melhorias.
+- **Decisão:** a partir da ordem de execução atual:
+  1. **vizinhança:** mover cada demanda de 1 a 3 posições para cima ou para baixo, gerada sempre na mesma ordem;
+  2. **primeira melhoria:** ao encontrar um vizinho com `score` menor, ele vira a ordem corrente e a varredura recomeça;
+  3. **parada:** quando nenhum vizinho melhora ou ao atingir **3.000 avaliações**. O limite é por número de avaliações, nunca por tempo de relógio, para o resultado não variar com a máquina.
+  
+  Recomenda até **3 cenários**: a melhor ordem encontrada e os dois melhores movimentos únicos a partir da ordem atual, sem repetir sequências. Se nada melhorar o `score`, devolve a lista vazia (RF-13).
+- **Justificativa:** uma simulação percorre cerca de 150 pessoas × 260 dias úteis por ano, com custo da ordem de milissegundos; 3.000 avaliações cabem nos 10 s do RNF-01. O limite exato é confirmado por um teste de desempenho com o volume do RNF-01 (seção 8). Os movimentos únicos são fáceis de o gestor entender ("antecipar B em duas posições").
+- **Atende:** RF-13, RNF-01, RNF-02.
+
+#### DT-27 — Desvio em dias corridos
+
+- **Contexto:** RF-12 e RF-23 expressam o desvio "em dias", sem dizer se úteis ou corridos.
+- **Alternativas consideradas:**
+  - *Dias corridos:* igual à diferença entre duas datas no calendário; é como o gestor e o produto falam de atraso.
+  - *Dias úteis:* mais fiel ao esforço, menos intuitivo na comunicação.
+- **Decisão:** desvio = `CompletedOn − ForecastEndDate`, em dias corridos (positivo é atraso), calculado contra a linha de base (`BaselineEndDate`) e contra a previsão vigente na conclusão.
+- **Justificativa:** a métrica principal é de comunicação de prazo; dias corridos são lidos sem explicação.
+- **Atende:** RF-12, RF-23.
+
+### 6.5 Simulação de nova demanda (RF-16)
+
+O motor calcula duas vezes, com o snapshot atual e com o snapshot acrescido da nova demanda, e compara as previsões demanda a demanda. A diferença em dias corridos de cada `ForecastEndDate` é o impacto exibido.
