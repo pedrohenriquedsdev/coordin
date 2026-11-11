@@ -1,6 +1,6 @@
 # TDD — Coordin
 
-- **Status:** aprovado (2026-11-11); pendente apenas a hospedagem (DT-09), a decidir até 2026-11-14
+- **Status:** aprovado (2026-11-11); pendente apenas a hospedagem (DT-09), a decidir até 2026-11-14. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23
 - **Última atualização:** 2026-11-11
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -163,6 +163,7 @@ Versões estáveis verificadas em 2026-11-11 nos registros oficiais (NuGet, npm)
 | Front | Angular (componentes standalone, signals) | 22.2.x (CLI 22.2.6) |
 | Linguagem do front | TypeScript | **6.0.x** (o Angular 22 exige `>=6.0 <6.1`; não usar o TypeScript 7) |
 | Estilos | Tailwind CSS | 4.3.x |
+| Gráficos | Chart.js (DT-36), usado diretamente, sem wrapper | 4.6.x |
 | Runtime do front (build) | Node.js | 24 LTS (instalado: 24.21; o Angular 22 exige `^24.15`) |
 | Testes .NET | xUnit v3 | 3.2.x |
 | Testes front | Vitest (suportado pelo builder do Angular 22) | 5.x |
@@ -212,6 +213,21 @@ Versões estáveis verificadas em 2026-11-11 nos registros oficiais (NuGet, npm)
 - **Decisão:** Angular 22 com componentes standalone e signals, TypeScript 6.0.x e Tailwind CSS 4 para o layout responsivo. Sem biblioteca de componentes visuais: os componentes são próprios, estilizados com Tailwind.
 - **Justificativa:** escolha do autor; o Angular traz pronto o que o PRD exige (formulários com validação, roteamento, cliente HTTP), e o Tailwind agiliza o layout do computador e do celular sem uma biblioteca de componentes pesada.
 - **Atende:** RNF-03, RNF-07.
+
+#### DT-36 — Gráficos com Chart.js em um componente próprio
+
+- **Contexto:** os cenários precisam mostrar por que são melhores, e o relatório por time e os indicadores precisam ser apresentados em gráfico, sempre com uma tabela dos mesmos valores (RF-13, RF-14, RF-17, RF-23). Os dados já são calculados pelo motor em milissegundos (DT-02, DT-03), então os gráficos são desenhados na tela a partir das respostas da API, sem processamento assíncrono nem geração de arquivo.
+- **Alternativas consideradas** (versões verificadas no npm em 2026-11-11):
+  - *Chart.js 4.6.x usado diretamente, em um componente standalone próprio:* leve, tipos inclusos, licença MIT; barras agrupadas, empilhadas e flutuantes cobrem os três gráficos; exige um componente pequeno de integração com o `<canvas>`.
+  - *Chart.js com ng2-charts 11.0.0:* diretiva pronta para o Angular 22, mas traz o `@angular/cdk` como dependência adicional e mais uma camada para atualizar.
+  - *ECharts 6.1.0 com ngx-echarts 22.0.0:* mais recursos e interações, com pacote bem maior, pior para o celular (RNF-03).
+  - *SVG próprio estilizado com Tailwind:* nenhuma dependência, mas eixos, escalas e responsividade feitos à mão, caro para o prazo.
+- **Decisão:** `chart.js` 4.6.x, com os componentes registrados individualmente (sem `chart.js/auto`), envolvido por um componente standalone `ChartComponent` que recebe a configuração por `input()`, cria o gráfico no `<canvas>` obtido por `viewChild()`, atualiza-o em um `effect()` e o destrói ao sair da tela. Cada tela transforma a resposta da API em séries do gráfico por funções puras, testadas com Vitest. Todo gráfico tem ao lado, ou alternável com ele, uma tabela com os mesmos valores. Gráficos previstos:
+  - **cenário (RF-13, RF-14):** data prevista de cada demanda antes e depois (barras flutuantes) e o `score` atual × do cenário, com as demandas que mais contribuem para a diferença;
+  - **relatório por time (RF-17):** capacidade × horas alocadas por semana, com ociosidade e sobrecarga destacadas;
+  - **indicadores (RF-23):** desvio médio e percentual no prazo por time, com a referência do setor.
+- **Justificativa:** o Chart.js não é uma biblioteca de componentes visuais, então o DT-08 continua valendo: as telas seguem com componentes próprios e Tailwind, e só o desenho do gráfico é delegado. O componente próprio evita dependência extra e mantém a regra de negócio fora do front: os números (inclusive as parcelas do `score`) vêm do motor; o front só ordena e desenha. A tabela torna os valores verificáveis em teste e legíveis no celular.
+- **Atende:** RF-13, RF-14, RF-17, RF-23; RNF-03.
 
 #### DT-09 — Hospedagem: **PENDENTE**
 
@@ -422,14 +438,19 @@ Na criação, a demanda entra no fim da ordem de prioridade (e da de execução,
   "executionOrder": ["…", "…"],
   "items": [
     { "demandId": "…", "title": "…", "priorityRank": 1, "newExecutionRank": 2,
-      "forecastStartDate": "…", "forecastEndDate": "…", "deltaDays": 3 }
+      "currentForecastEndDate": "…",
+      "forecastStartDate": "…", "forecastEndDate": "…", "deltaDays": 3,
+      "weight": 12, "scoreContributionDelta": 36 }
   ],
   "sectorEndDate": "2027-02-10",
-  "sectorDeltaDays": -6
+  "sectorDeltaDays": -6,
+  "score": { "current": 15840, "scenario": 15210, "delta": -630 }
 }
 ```
 
 `recommendations` devolve uma lista (possivelmente vazia, RF-13) desses objetos; `apply` recebe `executionOrder`, valida de novo (dependências) e grava; `simulate` recebe `executionOrder` e não grava nada.
+
+A justificativa do cenário (RF-13, DT-36) vem do motor: `score` é o critério do DT-25 no cronograma atual e no cenário; `weight` é o `wᵢ` da demanda e `scoreContributionDelta` é a diferença da sua parcela `wᵢ × dᵢ` entre o cenário e o atual (negativa quando a demanda contribui para a melhoria). A soma das `scoreContributionDelta` é igual a `score.delta`. Demandas não previsíveis não entram no `score` e têm `weight` e `scoreContributionDelta` nulos.
 
 ### 5.4 Decisões
 
@@ -721,6 +742,7 @@ Os testes usam **construtores de dados** (por exemplo, `PlanningSnapshotBuilder`
 | Determinismo | Mesmo snapshot, inclusive com listas embaralhadas, gera resultado idêntico | RNF-02 |
 | Horizonte | Demanda que não termina em 5 anos vira `NoCapacity` | DT-21 |
 | Cenários | Nunca violam dependências; lista vazia quando não há melhoria; nenhum é aplicado pelo motor; `score` usa a prioridade registrada | RF-13, RF-18; regras 2 e 3 |
+| Justificativa do cenário | A soma das parcelas `scoreContributionDelta` é igual a `score.delta`; demandas não previsíveis ficam fora do `score` | RF-13, DT-25, DT-36 |
 | Relatório por time | Capacidade, horas alocadas, ociosidade e sobrecarga corretas em um cenário montado à mão | RF-17, DT-24 |
 | Desvio | Diferença em dias corridos, positiva para atraso | RF-12, DT-27 |
 
@@ -740,7 +762,7 @@ Cada classe de teste usa um banco PostgreSQL próprio no container, com as migra
 
 ### 8.4 Front e E2E
 
-- **Vitest:** serviço de autenticação (token só em memória, renovação ao expirar), interceptor HTTP, validadores de formulário e transformações do cronograma para exibição. O cliente gerado pelo `ng-openapi-gen` não é testado diretamente.
+- **Vitest:** serviço de autenticação (token só em memória, renovação ao expirar), interceptor HTTP, validadores de formulário, transformações do cronograma para exibição e transformações das respostas da API em séries e tabelas dos gráficos (DT-36). O desenho no `<canvas>` não é testado. O cliente gerado pelo `ng-openapi-gen` não é testado diretamente.
 - **Playwright (smoke, depois dos Must):** (1) login e logout; (2) cadastrar time, pessoa e demanda com estimativa e ver a data prevista no cronograma; (3) consultar o cronograma em viewport de 360 px sem rolagem horizontal (RNF-03).
 
 ### 8.5 Desempenho (RNF-01)
@@ -822,10 +844,10 @@ Cada change é uma fatia vertical (motor, API, tela e testes, conforme o caso), 
 | 4 | `forecast-engine` | `feat/forecast-engine` | Motor: capacidade diária, previsibilidade, simulação, margem; casos da seção 8.2 e invariantes | RF-05, RF-08, RF-09, RF-10; DT-21, DT-22, DT-34; RNF-02, RNF-08; regras 1, 4 e 5 | Must | 11-17 |
 | 5 | `demand-planning` | `feat/demand-planning` | Demandas como agregado, ordem de prioridade, estimativas por time, alocações, datas, recálculo na escrita, linha de base, configuração da margem, cronograma com alerta e conclusão real com desvio | RF-04 a RF-07, RF-11, RF-12; DT-03, DT-11 a DT-14, DT-17, DT-27; regras 2, 3 e 5 | Must | 11-19 |
 | 6 | `deployment` | `chore/deployment` | Implantação na hospedagem escolhida (DT-09), PostgreSQL gerenciado, variáveis de ambiente e roteiro de verificação | DT-09; RNF-03, RNF-06 | Must | 11-20 (M4) |
-| 7 | `dependencies-and-team-report` | `feat/dependencies-and-team-report` | Dependências com detecção de ciclo no motor, API e tela; relatório semanal por time com ociosidade e sobrecarga | RF-17, RF-18; DT-23, DT-24 | Should | 11-22 |
-| 8 | `sequencing-scenarios` | `feat/sequencing-scenarios` | Score, busca local, recomendação, simulação e aprovação de cenários, volta à prioridade, simulação de nova demanda e teste de desempenho | RF-13 a RF-16; DT-25, DT-26; RNF-01 | Should | 11-23 |
+| 7 | `dependencies-and-team-report` | `feat/dependencies-and-team-report` | Dependências com detecção de ciclo no motor, API e tela; relatório semanal por time com ociosidade e sobrecarga, com o `ChartComponent` e o gráfico de capacidade × alocado | RF-17, RF-18; DT-23, DT-24, DT-36 | Should | 11-22 |
+| 8 | `sequencing-scenarios` | `feat/sequencing-scenarios` | Score com parcelas por demanda, busca local, recomendação, simulação e aprovação de cenários com justificativa em gráfico, volta à prioridade, simulação de nova demanda e teste de desempenho | RF-13 a RF-16; DT-25, DT-26, DT-36; RNF-01 | Should | 11-23 |
 | 9 | `schedule-export` | `feat/schedule-export` | Exportação do cronograma em CSV pt-BR | RF-19; DT-20 | Should | 11-24 (M5) |
-| 10 | `delivery-insights` | `feat/delivery-insights` | Histórico de estimativas e de previsões, esforço real e indicadores de precisão | RF-20 a RF-23; DT-14 | Could | 11-25 (M6) |
+| 10 | `delivery-insights` | `feat/delivery-insights` | Histórico de estimativas e de previsões, esforço real e indicadores de precisão com gráfico por time | RF-20 a RF-23; DT-14, DT-36 | Could | 11-25 (M6) |
 | 11 | `e2e-smoke` | `test/e2e-smoke` | Três cenários de smoke com Playwright, inclusive viewport de celular | DT-32; RNF-03 | Could | 11-25, se couber |
 
 Depois do congelamento (2026-11-25), só correções: 11-26 validação com dados históricos (M7) e 11-27 documentação e apresentação (M8).
@@ -875,6 +897,7 @@ Complementam os riscos de produto do PRD (9.2).
 | RT-07 | **Falha na implementação do JWT ou do refresh token** | Sessão vulnerável | Testes de integração da seção 8.3 (rotação, reuso, bloqueio, `401`); token de acesso curto; CSP (DT-30) |
 | RT-08 | **Ritmo:** 11 changes em 12 dias, incluindo fins de semana | Should e Could não entregues | Pontos de corte (PRD 10.1, TDD 9.3); uma change por vez |
 | RT-09 | **Cronograma no celular** com muitas colunas | Retrabalho de interface | Celular só para consulta (RNF-03); layout compacto decidido na change 5 |
+| RT-10 | **Gráficos aumentam o esforço** das changes 7, 8 e 10 | Atraso das Should | `ChartComponent` único criado na change 7 e reutilizado; nos pontos de corte (9.3), a tabela atende sozinha e o gráfico pode ficar para depois |
 
 ### 10.2 Pendências
 
