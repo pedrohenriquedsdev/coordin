@@ -1,6 +1,6 @@
 # TDD — Coordin
 
-- **Status:** em elaboração — seções 1 a 9 aprovadas
+- **Status:** aprovado (2026-11-11); pendente apenas a hospedagem (DT-09), a decidir até 2026-11-14
 - **Última atualização:** 2026-11-11
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -855,3 +855,49 @@ Depois do congelamento (2026-11-25), só correções: 11-26 validação com dado
 - Uma change só começa depois que a anterior estiver integrada à `main`, exceto quando não houver dependência entre elas e o autor aprovar trabalhar em paralelo.
 - Nos pontos de corte do PRD (10.1): em 2026-11-20, se a change 6 não estiver concluída, as changes 10 e 11 saem do escopo e as Should são reavaliadas; em 2026-11-24, se a change 9 não estiver concluída, as changes 10 e 11 saem do escopo.
 - A **atualização para o .NET 11** (DT-05) só entra depois da change 9, se houver tempo e o Npgsql 11 estável estiver publicado, como uma change `chore/dotnet-11-upgrade`.
+
+---
+
+## 10. Riscos técnicos e pendências
+
+### 10.1 Riscos técnicos
+
+Complementam os riscos de produto do PRD (9.2).
+
+| ID | Risco | Impacto | Mitigação |
+|---|---|---|---|
+| RT-01 | **Hospedagem indefinida** (DT-09) | Change 6 e marco M4 atrasam; sem acesso pelo celular (RNF-03) | Decidir até 2026-11-14; o Dockerfile da change 1 serve a qualquer PaaS. Plano de contingência: demonstrar com Docker Compose localmente e registrar o RNF-03 como não atendido |
+| RT-02 | **Cenários acima de 10 s** (RNF-01) | Recomendação lenta para a banca | Teste de desempenho (8.5) na change 8; orçamento de avaliações e vizinhança (DT-26) são parâmetros que podem ser reduzidos |
+| RT-03 | **Erro na simulação** em combinações raras (fila, ausências, dependências) | Previsões erradas sem perceber | Casos da seção 8.2 e invariantes com dados gerados (DT-34) |
+| RT-04 | **Previsão baseada no plano** (DT-21) diverge da realidade em demandas atrasadas | Previsão otimista até o gestor replanejar | Limitação documentada; conclusão real (RF-12) e replanejamento corrigem; tratada na validação (PRD 7.2) |
+| RT-05 | **Versões recentes do front:** o Angular 22 exige TypeScript 6.0 e o TypeScript mais novo é o 7 | Build quebrado por atualização automática | Versões travadas no `package-lock.json`; atualização só por change própria |
+| RT-06 | **Docker indisponível** para os Testcontainers | Testes de integração não rodam | Docker Desktop local; runners Linux do GitHub Actions já têm Docker |
+| RT-07 | **Falha na implementação do JWT ou do refresh token** | Sessão vulnerável | Testes de integração da seção 8.3 (rotação, reuso, bloqueio, `401`); token de acesso curto; CSP (DT-30) |
+| RT-08 | **Ritmo:** 11 changes em 12 dias, incluindo fins de semana | Should e Could não entregues | Pontos de corte (PRD 10.1, TDD 9.3); uma change por vez |
+| RT-09 | **Cronograma no celular** com muitas colunas | Retrabalho de interface | Celular só para consulta (RNF-03); layout compacto decidido na change 5 |
+
+### 10.2 Pendências
+
+| # | Pendência | Responsável | Prazo |
+|---|---|---|---|
+| 1 | Hospedagem (DT-09): validar com o orientador a recomendação de container Docker em PaaS com PostgreSQL gerenciado | Autor | 2026-11-14 |
+| 2 | Dados históricos da validação: confirmar se existem e se há registro das datas comunicadas (PRD P-03, P-04; M2) | Autor | 2026-11-13 |
+| 3 | Versões das GitHub Actions do CI (DT-33) | Change 1 | 2026-11-13 |
+| 4 | Período do relatório por time: semana por enquanto, pode mudar (DT-24, já parametrizado) | Autor | Quando decidir |
+| 5 | Atualização para o .NET 11 (DT-05) | Change opcional após a 9 | Se houver tempo |
+
+### 10.3 Fechamento dos pontos em aberto
+
+Todos os pontos em aberto do `CLAUDE.md` §7.3 e as decisões delegadas pelo PRD (9.3) estão fechados:
+
+| Ponto em aberto | Fechado por |
+|---|---|
+| Modelo de capacidade (horas, férias, ausências, outras alocações) e calendário | DT-10 |
+| Paralelismo entre times na mesma demanda | DT-11, DT-21 |
+| Representação de dependências | DT-23 |
+| Tipo e etapa da margem de segurança | DT-22 |
+| Critério e método de otimização | DT-25, DT-26 |
+| Registro de mudanças de estimativa e previsto × realizado | DT-14, DT-27 |
+| Tamanho do período do relatório por time | DT-24 |
+| Formato da exportação | DT-20 |
+| Stack, autenticação e hospedagem | DT-05 a DT-08, DT-28 a DT-30; hospedagem pendente (DT-09) |
