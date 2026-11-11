@@ -244,11 +244,14 @@ Pode fazer sem perguntar: ler arquivos, buscar no repositório, rodar build/test
 - [x] `.github/pull_request_template.md` (PR #2)
 - [x] Marco M1: `chore/project-setup` (#1), `chore/pr-template` (#2) e `docs/prd` (#3) integradas à `main` em 2026-11-11, com merge commit
 - [x] PRD (`docs/PRD.md`), na branch `docs/prd`: seções 1 a 10 aprovadas em 2026-11-10 (RF-01 a RF-23, RNF-01 a RNF-08, marcos M0 a M8)
-- [ ] TDD (`docs/TDD.md`), até 2026-11-13 (M3)
+- [ ] TDD (`docs/TDD.md`), até 2026-11-13 (M3), na branch `docs/tdd`:
+  - [x] 1 Contexto e objetivos técnicos (aprovada em 2026-11-11)
+  - [x] 2 Arquitetura · 3 Stack, DT-01 a DT-09 (aprovadas em 2026-11-11; DT-09 hospedagem **pendente**, decidir até 2026-11-14 com o orientador)
+  - [ ] 4 Modelo de dados · 5 Contratos de API · 6 Algoritmos · 7 Segurança · 8 Testes · 9 Roadmap · 10 Riscos
 - [ ] Changes do OpenSpec, implementação e PRs, conforme o roadmap do TDD
 
 **Desvios registrados (2026-11-10 e 2026-11-11):** a `docs/prd` foi criada a partir da `chore/project-setup` porque a `main` ainda não tinha este arquivo; o PR #1 foi aberto antes do template de PR. Ambos registrados nas descrições dos PRs. PRs são integrados sempre com merge commit (`gh pr merge <n> --merge`), nunca squash ou rebase.
 
-**Próximo passo:** marco M3 (até 2026-11-13): escrever o TDD na branch `docs/tdd` com `/generate-tdd`, começando pela seção 1. Em paralelo, M2 (até 2026-11-13): o usuário verifica os dados históricos da validação (P-03, P-04).
+**Próximo passo:** marco M3 (até 2026-11-13): seção 4 (Modelo de dados) do TDD com `/generate-tdd 4`. **Pendente com prazo:** hospedagem (DT-09) até 2026-11-14, após conversa com o orientador; recomendação registrada: container Docker em PaaS com PostgreSQL gerenciado. Em paralelo, M2 (até 2026-11-13): o usuário verifica os dados históricos da validação (P-03, P-04).
 
 Mantenha esta seção atualizada ao concluir cada etapa.
