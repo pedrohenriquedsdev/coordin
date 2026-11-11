@@ -1,6 +1,6 @@
 # PRD — Coordin
 
-- **Status:** em elaboração — seções 1 a 9 aprovadas
+- **Status:** aprovado (2026-11-10)
 - **Última atualização:** 2026-11-10
 - **Fonte original:** [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -518,3 +518,29 @@ O PRD define o comportamento; as decisões abaixo definem **como** atendê-lo e 
 | 7 | **Tamanho do período** do relatório por time (semana, mês). | RF-17 |
 | 8 | **Formato do arquivo** exportado (por exemplo, CSV ou XLSX). | RF-19 |
 | 9 | **Stack, autenticação e hospedagem**, incluindo a confirmação da preferência por C#/.NET. | RNF-01, RNF-03, RNF-04, RNF-06 |
+
+---
+
+## 10. Marcos até 2026-11-28
+
+Em 2026-11-28 tudo precisa estar pronto: software funcionando, documentação (PRD, TDD, specs) e apresentação. Não há entregas intermediárias fixas; os marcos abaixo são o planejamento interno. Dedicação prevista: até cerca de 10 horas por dia, aproximadamente 180 horas no total, sem folga para imprevistos.
+
+| # | Marco | Data limite | Pronto quando |
+|---|---|---|---|
+| M0 | PRD aprovado | 2026-11-10 | Seções 1 a 10 aprovadas |
+| M1 | Repositório integrado | 2026-11-11 | Template de PR criado; `chore/project-setup` e `docs/prd` integradas à `main` por PR |
+| M2 | Dados da validação verificados | 2026-11-13 | Confirmado se existem demandas históricas e registros das datas comunicadas (P-03, P-04); amostra da validação definida (R-04) |
+| M3 | TDD aprovado | 2026-11-13 | Decisões da seção 9.3 fechadas como `DT-*`; roadmap de changes definido; hospedagem decidida (R-02) |
+| M4 | Must entregues | 2026-11-20 | RF-01 a RF-12 implementados, testados (RNF-08) e acessíveis pela rede (RNF-03) |
+| M5 | Should entregues | 2026-11-24 | RF-13 a RF-19 implementados e testados |
+| M6 | Could e congelamento | 2026-11-25 | Could que couberem no prazo implementados; a partir daqui, só correções |
+| M7 | Validação executada | 2026-11-26 | Histórico cadastrado, desvios medidos (seção 7) e questionário respondido pelo gestor |
+| M8 | Entrega pronta | 2026-11-27 | Documentação revisada, apresentação pronta e ensaiada |
+| — | Entrega do TCC | 2026-11-28 | — |
+
+### 10.1 Pontos de decisão de corte
+
+- **Em 2026-11-20 (M4):** se os Must não estiverem completos, os Could saem do escopo e os Should são reavaliados um a um.
+- **Em 2026-11-24 (M5):** se os Should não estiverem completos, os Could saem do escopo e os Should restantes são reavaliados.
+- **A validação (M7) e a entrega (M8) não são cortadas:** se necessário, a implementação de Should e Could cede tempo a elas.
+- Todo corte é proposto com justificativa e decidido pelo autor do TCC, nunca aplicado silenciosamente.
