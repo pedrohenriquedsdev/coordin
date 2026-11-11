@@ -1,6 +1,6 @@
 # PRD — Coordin
 
-- **Status:** aprovado (2026-11-10); ajustes aprovados em 2026-11-11 em RF-02, RF-03, RF-06, RF-10 e 8.1, decorrentes do TDD
+- **Status:** aprovado (2026-11-10); ajustes aprovados em 2026-11-11 em RF-02, RF-03, RF-06, RF-10 e 8.1, decorrentes do TDD, e em RF-13, RF-17 e RF-23 (justificativa dos cenários e apresentação em gráficos)
 - **Última atualização:** 2026-11-11
 - **Fonte original:** [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -261,6 +261,8 @@ O sistema analisa ordens de execução alternativas e recomenda as que melhoram 
 - Cada cenário mostra a sequência proposta e, para cada demanda, as novas datas de início e prevista, com a diferença em dias em relação ao cronograma atual.
 - Cada cenário mostra também o efeito no conjunto do setor (por exemplo, a data de conclusão da última demanda).
 - A prioridade registrada de cada demanda aparece ao lado da nova posição, deixando visível o que muda em relação a ela.
+- Cada cenário mostra por que é melhor: o valor do critério de comparação (decidido no TDD) no cronograma atual e no cenário, e as demandas que mais contribuem para a diferença.
+- A comparação entre o cronograma atual e o cenário também é apresentada em gráfico (por exemplo, a data prevista de cada demanda antes e depois), com os mesmos valores disponíveis em tabela.
 - Quando nenhuma alternativa melhora o resultado, o sistema informa isso.
 - Nenhum cenário é aplicado automaticamente.
 
@@ -295,6 +297,7 @@ Para cada time, o sistema mostra por período a capacidade disponível (desconta
 - **Sobrecarga:** período em que o trabalho na fila do time excede sua capacidade, empurrando entregas para depois; o relatório indica as demandas afetadas.
 - O relatório permite identificar times com capacidade livre para receber novas demandas ou apoiar outros times.
 - Demandas não previsíveis do time não entram nas horas alocadas, mas o relatório informa quantas existem.
+- A capacidade disponível e as horas alocadas de cada time por período também são apresentadas em gráfico, com ociosidade e sobrecarga destacadas, e os mesmos valores ficam disponíveis em tabela.
 - O tamanho do período (semana, mês) é decidido no TDD.
 
 #### RF-18 — Dependências entre demandas
@@ -352,6 +355,7 @@ O sistema apresenta indicadores de precisão calculados sobre as demandas conclu
 - **Desvio médio de prazo**, em dias, em relação à primeira previsão e em relação à previsão vigente na conclusão.
 - **Percentual de demandas concluídas até a data prevista**, considerando a primeira previsão.
 - **Diferença média entre esforço estimado e real**, em percentual, apenas para as demandas com esforço real registrado (RF-22).
+- Os indicadores também são apresentados em gráfico, permitindo comparar os times entre si e com o setor.
 - O gestor filtra os indicadores por período de conclusão.
 - Uma demanda com vários times entra nos indicadores de cada time envolvido.
 - Times com diferença recorrente entre estimado e realizado ficam evidenciados na comparação entre times.
