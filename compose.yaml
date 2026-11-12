@@ -1,0 +1,43 @@
+name: coordin
+
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: coordin
+      POSTGRES_DB: coordin
+      # A senha vem do arquivo .env (ignorado pelo Git); veja o .env.example.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env (copie o .env.example)}
+    ports:
+      # Só a própria máquina acessa o banco.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # A imagem 18 guarda os dados em /var/lib/postgresql/18/docker.
+      - coordin-pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coordin -d coordin"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # A imagem completa (API + Angular), só para conferir localmente como ela roda em produção.
+  # Não sobe com o `docker compose up` comum; use: docker compose --profile app up -d --build
+  app:
+    profiles: ["app"]
+    image: coordin:local
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Staging = Production sem forçar HTTPS: aqui não há proxy com TLS na frente (em produção, a
+      # hospedagem termina o HTTPS). Fora isso, o comportamento (CSP, sem Swagger etc.) é o de produção.
+      ASPNETCORE_ENVIRONMENT: Staging
+      # A senha vem do .env; dentro da rede do Compose o banco se chama "db".
+      ConnectionStrings__Default: Host=db;Port=5432;Database=coordin;Username=coordin;Password=${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
+    ports:
+      - "127.0.0.1:8080:8080"
+
+volumes:
+  coordin-pgdata:

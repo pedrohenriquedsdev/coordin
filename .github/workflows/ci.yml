@@ -1,0 +1,92 @@
+name: CI
+
+# Roda em todo pull request e em todo push para a main (DT-33). Os comandos são os do TDD 8.6.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Uma nova execução da mesma branch ou PR cancela a anterior.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# O CI só lê o repositório; nenhum job precisa de permissão de escrita.
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+# Versões das actions verificadas nas releases oficiais em 2026-11-12:
+# actions/checkout v7.0.1 · actions/setup-dotnet v6.1.0 · actions/setup-node v7.1.0 · actions/upload-artifact v7.0.2
+jobs:
+  dotnet:
+    name: .NET (build, formatação e testes)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          # A versão do SDK vem do global.json, a mesma usada localmente.
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: Directory.Packages.props
+
+      - name: Build
+        run: dotnet build Coordin.slnx
+
+      - name: Formatação
+        run: dotnet format Coordin.slnx --verify-no-changes
+
+      # Os testes de integração sobem um PostgreSQL de verdade (Testcontainers, DT-31);
+      # o runner ubuntu-latest já traz o Docker.
+      - name: Testes com cobertura
+        run: dotnet test Coordin.slnx --collect:"XPlat Code Coverage"
+
+      - name: Publicar cobertura
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: "**/TestResults/**/coverage.cobertura.xml"
+          if-no-files-found: warn
+          retention-days: 14
+
+  web:
+    name: Front (lint, testes e build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: src/coordin-web
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: src/coordin-web/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Formatação
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Testes
+        run: npm test -- --watch=false
+
+      - name: Build
+        run: npm run build
