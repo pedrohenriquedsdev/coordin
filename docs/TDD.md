@@ -1,7 +1,7 @@
 # TDD — Coordin
 
-- **Status:** aprovado (2026-11-11); pendente apenas a hospedagem (DT-09), a decidir até 2026-11-14. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23. Ajuste em 2026-11-12, decorrente do PRD: RF-17 como Must no roadmap, validação por simulação no produto (RF-24, DT-37) e roadmap com 13 changes
-- **Última atualização:** 2026-11-11
+- **Status:** aprovado (2026-11-11); hospedagem (DT-09) decidida em 2026-11-12, com o provedor escolhido na change 7. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23. Ajuste em 2026-11-12, decorrente do PRD: RF-17 como Must no roadmap, validação por simulação no produto (RF-24, DT-37) e roadmap com 13 changes
+- **Última atualização:** 2026-11-12
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
 ---
@@ -229,15 +229,15 @@ Versões estáveis verificadas em 2026-11-11 nos registros oficiais (NuGet, npm)
 - **Justificativa:** o Chart.js não é uma biblioteca de componentes visuais, então o DT-08 continua valendo: as telas seguem com componentes próprios e Tailwind, e só o desenho do gráfico é delegado. O componente próprio evita dependência extra e mantém a regra de negócio fora do front: os números (inclusive as parcelas do `score`) vêm do motor; o front só ordena e desenha. A tabela torna os valores verificáveis em teste e legíveis no celular.
 - **Atende:** RF-13, RF-14, RF-17, RF-23; RNF-03.
 
-#### DT-09 — Hospedagem: **PENDENTE**
+#### DT-09 — Hospedagem: container Docker em PaaS com PostgreSQL gerenciado
 
 - **Contexto:** o acesso pelo computador e pelo celular exige o sistema acessível pela rede (RNF-03, PRD R-02). O marco M4 (2026-11-21) exige os Must acessíveis pela rede.
 - **Alternativas consideradas:**
   - *Container Docker em PaaS* (por exemplo, Render, Railway ou Fly.io) com PostgreSQL gerenciado: implanta a imagem única do DT-01, independe da versão do .NET.
   - *Azure App Service:* ecossistema Microsoft, possível crédito de estudante.
   - *Servidor virtual próprio:* mais controle, mais configuração e manutenção.
-- **Recomendação:** container Docker em PaaS com PostgreSQL gerenciado.
-- **Decisão:** pendente; o autor vai validar a opção com o professor orientador. **Prazo para decidir: 2026-11-14**, para que a implantação caiba no M4.
+- **Decisão:** container Docker em PaaS com PostgreSQL gerenciado, validado com o professor orientador em 2026-11-12. O provedor (Render, Railway ou Fly.io) é escolhido na change 7 (`deployment`), depois de verificar planos, limites e suporte a Docker e PostgreSQL na documentação oficial de cada um.
+- **Justificativa:** a mesma imagem Docker usada localmente (DT-01) é implantada sem adaptação; HTTPS, banco e backups ficam a cargo do provedor; nenhuma change antes da 7 depende do provedor, porque o Dockerfile da change 1 serve a qualquer PaaS.
 - **Atende:** RNF-03, RNF-06.
 
 ---
@@ -768,7 +768,7 @@ Logout ──► POST /api/auth/logout → revoga o refresh token e apaga o cook
 - Logs não registram corpos de requisição, tokens nem senhas.
 - A validação usa apenas o **conjunto fictício** da simulação (PRD 7.3), versionado como recurso embutido da API (DT-37); nenhum dado real do setor entra no sistema nem no repositório.
 - A área de validação só existe com `Validation__Enabled=true` (DT-37); carregar o conjunto exige `confirmReplaceAll: true` e substitui todos os dados do planejamento, sem tocar na conta do gestor.
-- Backups do banco seguem o serviço de PostgreSQL gerenciado da hospedagem escolhida (DT-09, pendente).
+- Backups do banco seguem o serviço de PostgreSQL gerenciado do provedor escolhido na change 7 (DT-09).
 
 ---
 
@@ -936,7 +936,7 @@ Depois do congelamento (2026-11-25), só correções: 11-26 validação por simu
   - os **cadastros de capacidade** vêm antes do motor e do planejamento, que precisam de dados;
   - o **motor** é isolado em uma change própria por ser o núcleo do TCC e o ponto com mais testes;
   - o **relatório por time** é Must por atender à dor central (PRD 2) e vem antes da implantação, criando o `ChartComponent` reutilizado depois;
-  - a **implantação** fecha os Must no M4, depois de a hospedagem ser decidida (até 2026-11-14);
+  - a **implantação** fecha os Must no M4, em container Docker numa PaaS com PostgreSQL gerenciado (DT-09), com o provedor escolhido na própria change;
   - **dependências** vêm antes dos cenários, que precisam respeitá-las;
   - a **validação por simulação** vem depois dos Should, porque usa o relatório e os cenários, e antes dos Could, porque não é cortada (PRD 5.4);
   - os **Could** ficam por último, como manda a ordem de proteção do escopo (PRD 8.1).
@@ -958,7 +958,7 @@ Complementam os riscos de produto do PRD (9.2).
 
 | ID | Risco | Impacto | Mitigação |
 |---|---|---|---|
-| RT-01 | **Hospedagem indefinida** (DT-09) | Change 7 e marco M4 atrasam; sem acesso pelo celular (RNF-03) | Decidir até 2026-11-14; o Dockerfile da change 1 serve a qualquer PaaS. Plano de contingência: demonstrar com Docker Compose localmente e registrar o RNF-03 como não atendido |
+| RT-01 | **Provedor da PaaS** (DT-09) sem plano adequado ou com limite gratuito insuficiente | Change 7 e marco M4 atrasam; sem acesso pelo celular (RNF-03) | Três provedores candidatos (Render, Railway, Fly.io) verificados na change 7; o Dockerfile da change 1 serve a qualquer um. Plano de contingência: demonstrar com Docker Compose localmente e registrar o RNF-03 como não atendido |
 | RT-02 | **Cenários acima de 10 s** (RNF-01) | Recomendação lenta para a banca | Teste de desempenho (8.5) na change 9; orçamento de avaliações e vizinhança (DT-26) são parâmetros que podem ser reduzidos |
 | RT-03 | **Erro na simulação** em combinações raras (fila, ausências, dependências) | Previsões erradas sem perceber | Casos da seção 8.2 e invariantes com dados gerados (DT-34) |
 | RT-04 | **Previsão baseada no plano** (DT-21) diverge da realidade em demandas atrasadas | Previsão otimista até o gestor replanejar | Limitação documentada; conclusão real (RF-12) e replanejamento corrigem; declarada como limitação da validação por simulação (PRD 7.3) |
@@ -974,7 +974,7 @@ Complementam os riscos de produto do PRD (9.2).
 
 | # | Pendência | Responsável | Prazo |
 |---|---|---|---|
-| 1 | Hospedagem (DT-09): validar com o orientador a recomendação de container Docker em PaaS com PostgreSQL gerenciado | Autor | 2026-11-14 |
+| 1 | Provedor da PaaS (DT-09): escolher entre Render, Railway e Fly.io após verificar planos e limites na documentação oficial | Change 7 | 2026-11-21 |
 | 2 | Conjunto fictício da simulação, faixa de variação do esforço e disponibilidade do gestor (PRD P-03 a P-05; M2; DT-37) | Autor, com o gestor | 2026-11-13 |
 | 3 | Versões das GitHub Actions do CI (DT-33) | Change 1 | 2026-11-13 |
 | 4 | Período do relatório por time: semana por enquanto, pode mudar (DT-24, já parametrizado) | Autor | Quando decidir |
@@ -995,4 +995,4 @@ Todos os pontos em aberto do `CLAUDE.md` §7.3 e as decisões delegadas pelo PRD
 | Tamanho do período do relatório por time | DT-24 |
 | Formato da exportação | DT-20 |
 | Validação por simulação (PRD 7.3, RF-24) | DT-37 |
-| Stack, autenticação e hospedagem | DT-05 a DT-08, DT-28 a DT-30; hospedagem pendente (DT-09) |
+| Stack, autenticação e hospedagem | DT-05 a DT-09, DT-28 a DT-30 |
