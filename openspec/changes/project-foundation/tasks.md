@@ -25,9 +25,9 @@ Regras para todas as tasks:
 
 ## 4. Segurança HTTP
 
-- [ ] 4.1 Implementar o middleware de cabeçalhos de segurança com a CSP do D7 (relaxada só em `/swagger` em `Development`), na posição do D5; verificar com os testes "Cabeçalhos na API", "Cabeçalhos na SPA" e "Cabeçalhos também em erros" (spec `http-security`)
-- [ ] 4.2 Configurar `UseForwardedHeaders`, `UseHsts` e `UseHttpsRedirection` só em produção (D5); verificar com os testes "HSTS em produção", "Requisição encaminhada pelo proxy como HTTPS" e "Sem HSTS em desenvolvimento"
-- [ ] 4.3 Verificar a ausência de CORS com o teste "Requisição de outra origem" (sem `Access-Control-Allow-Origin`)
+- [x] 4.1 Implementar o middleware de cabeçalhos de segurança com a CSP do D7 (relaxada só em `/swagger` em `Development`), na posição do D5; verificar com os testes "Cabeçalhos na API" e "Cabeçalhos também em erros" (spec `http-security`); o teste "Cabeçalhos na SPA" fica na task 8.1, quando a API passar a servir o `index.html`
+- [x] 4.2 Configurar `UseForwardedHeaders`, `UseHsts` e `UseHttpsRedirection` só em produção (D5); verificar com os testes "HSTS em produção", "Requisição encaminhada pelo proxy como HTTPS" e "Sem HSTS em desenvolvimento"
+- [x] 4.3 Verificar a ausência de CORS com o teste "Requisição de outra origem" (sem `Access-Control-Allow-Origin`)
 
 ## 5. Persistência, migration inicial e saúde
 
@@ -52,7 +52,7 @@ Regras para todas as tasks:
 
 ## 8. SPA servida pela API
 
-- [ ] 8.1 Adicionar `UseStaticFiles` e `MapFallbackToFile("index.html")` depois do fallback de `/api` (D5); verificar com os testes "Página inicial", "Arquivos estáticos", "Recarregar uma rota da SPA" e "Rota de API não cai na SPA" (spec `web-shell`)
+- [ ] 8.1 Adicionar `UseStaticFiles` e `MapFallbackToFile("index.html")` depois do fallback de `/api` (D5); verificar com os testes "Página inicial", "Arquivos estáticos", "Recarregar uma rota da SPA" e "Rota de API não cai na SPA" (spec `web-shell`) e "Cabeçalhos na SPA" (spec `http-security`)
 
 ## 9. Cliente gerado
 
