@@ -67,7 +67,7 @@ Regras para todas as tasks:
 ## 11. CI
 
 - [x] 11.1 Verificar as versões atuais das actions `checkout`, `setup-dotnet`, `setup-node` e `upload-artifact` nas releases oficiais e registrar no PR (pendência 3 do TDD 10.2)
-- [ ] 11.2 Criar `.github/workflows/ci.yml` com os jobs `dotnet` e `web` (D15); verificar que o workflow passa no PR da change
+- [x] 11.2 Criar `.github/workflows/ci.yml` com os jobs `dotnet` e `web` (D15); verificar que o workflow passa no PR da change
 
 ## 12. Verificação final
 
