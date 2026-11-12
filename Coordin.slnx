@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Coordin.Api/Coordin.Api.csproj" />
     <Project Path="src/Coordin.Engine/Coordin.Engine.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Coordin.Api.Tests/Coordin.Api.Tests.csproj" />
     <Project Path="tests/Coordin.Engine.Tests/Coordin.Engine.Tests.csproj" />
   </Folder>
 </Solution>
