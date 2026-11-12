@@ -1,7 +1,7 @@
 # PRD — Coordin
 
-- **Status:** aprovado (2026-11-10); ajustes aprovados em 2026-11-11 em RF-02, RF-03, RF-06, RF-10 e 8.1, decorrentes do TDD, e em RF-13, RF-17 e RF-23 (justificativa dos cenários e apresentação em gráficos)
-- **Última atualização:** 2026-11-11
+- **Status:** aprovado (2026-11-10); ajustes aprovados em 2026-11-11 em RF-02, RF-03, RF-06, RF-10 e 8.1, decorrentes do TDD, e em RF-13, RF-17 e RF-23 (justificativa dos cenários e apresentação em gráficos). Ajustes aprovados em 2026-11-12: dor central reenquadrada (seções 1 a 3), RF-17 promovido a Must com M4 em 2026-11-21, métricas de eficiência (7.2) e validação por simulação (7.3, 9, 10)
+- **Última atualização:** 2026-11-12
 - **Fonte original:** [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
 ---
@@ -447,17 +447,22 @@ Medem diretamente a dor central (seção 2): o quanto o planejamento aproveita a
 
 - **Meta:** sem meta numérica. O sucesso é o planejamento com o Coordin ser melhor que o do processo atual em pelo menos uma métrica de eficiência **sem piorar o prazo das demandas mais prioritárias**, preservando a prioridade combinada (regra inviolável 3).
 
-### 7.3 Validação no TCC com demandas históricas
+### 7.3 Validação no TCC por simulação
 
-O prazo do TCC não permite acompanhar demandas reais do início à conclusão com o sistema. A métrica principal é demonstrada com demandas já concluídas no setor:
+O prazo do TCC não permite acompanhar demandas reais do início à conclusão com o sistema. A validação compara, em uma simulação, o planejamento como acontece hoje com o planejamento feito com o Coordin:
 
-1. Selecionar demandas concluídas, com seus dados **anonimizados** (sem nomes reais de pessoas, times ou clientes).
-2. Cadastrar os times, as pessoas, a capacidade e as ausências do período, além das estimativas e datas de início que existiam quando cada demanda começou.
-3. Calcular a previsão do Coordin para cada demanda e comparar com a data real de conclusão: este é o **desvio do Coordin**.
-4. Comparar com a **linha de base**: o desvio entre a data real e a data que foi comunicada na época pelo processo manual, para as demandas em que esse registro existir.
-5. Considerar a validação bem-sucedida se o desvio médio do Coordin for menor que o da linha de base.
+1. **Dados:** um conjunto **fictício** de times, pessoas, capacidades, ausências, feriados e demandas, com tamanhos inspirados no setor (7 ou mais times), sem nenhum dado real. O conjunto é definido antes da execução e pode ser versionado como dado de exemplo (RNF-05).
+2. **Linha de base:** antes de usar o sistema, o gestor de desenvolvimento do setor informa, como faria hoje, a data de entrega que comunicaria ao gestor de produto para cada demanda.
+3. **Planejamento do processo atual:** o Coordin calcula o cronograma na ordem de prioridade e com a alocação inicial, sem que o gestor use o relatório por time nem os cenários.
+4. **Planejamento com o Coordin:** o gestor usa o relatório por time (RF-17) e os cenários (RF-13 a RF-15) para realocar pessoas e aprovar ou rejeitar sequências; o sistema recalcula o cronograma.
+5. **Eficiência:** as métricas da seção 7.2 são calculadas nos dois planejamentos e comparadas.
+6. **Realizado simulado:** o esforço real de cada demanda é o esforço estimado multiplicado por uma variação definida antes da execução, gerada de forma reprodutível. As datas reais resultam de executar o planejamento do processo atual com esse esforço.
+7. **Desvio:** o desvio médio das datas informadas pelo gestor (passo 2) é comparado com o desvio médio das previsões do Coordin para o mesmo planejamento, ambos em relação às datas reais simuladas. A métrica principal (7.1) é bem-sucedida se o desvio do Coordin for menor.
+8. **Avaliação do gestor:** o gestor responde ao questionário (7.4).
 
-A existência de registros das datas comunicadas na época ainda não foi confirmada (premissa na seção 9). **Plano B:** sem esses registros, a validação apresenta o desvio do Coordin nas demandas históricas sem comparação com a linha de base, e o resultado é avaliado junto com o gestor de desenvolvimento.
+**Limitação declarada no TCC:** as datas reais simuladas são produzidas pelo mesmo modelo de capacidade do Coordin, variando apenas o esforço. Por isso, o desvio mede como a previsão reage à imprecisão das estimativas, e não a aderência do modelo à realidade do setor. Na comparação de eficiência, os dois planejamentos usam o mesmo cálculo, então a diferença vem apenas das decisões do gestor.
+
+**Plano B:** se o gestor do setor não estiver disponível (P-05), o autor executa os passos 2 e 4, a avaliação do gestor deixa de ser medida e a limitação é registrada no TCC.
 
 ### 7.4 Métricas secundárias
 
@@ -511,9 +516,9 @@ O Coordin **não** vai:
 |---|---|---|
 | P-01 | O sistema é usado em um setor de desenvolvimento real, com 7 ou mais times, cujas estimativas são feitas em horas. | Revisar volume (RNF-01) e unidade de esforço. |
 | P-02 | O gestor de desenvolvimento tem as informações de capacidade (pessoas, horas disponíveis e ausências) para cadastrar. | As previsões ficam não previsíveis ou imprecisas; reduzir a validação ao que houver de dado. |
-| P-03 | Existem demandas concluídas com estimativa, data de início e data real de conclusão para a validação (7.3). | A métrica principal não pode ser demonstrada com dados reais; usar dados de demonstração e deixar a limitação explícita no TCC. |
-| P-04 | Existem registros das datas comunicadas ao produto na época dessas demandas (linha de base). **A confirmar.** | Aplicar o plano B do 7.3: desvio do Coordin sem comparação com a linha de base. |
-| P-05 | O gestor de desenvolvimento está disponível para usar o sistema na validação e responder ao questionário (7.4). | A avaliação do gestor deixa de ser medida. |
+| P-03 | O conjunto fictício da simulação representa de forma plausível o setor: quantidade de times e pessoas, capacidades e tamanho das demandas (7.3). | Revisar o conjunto com o gestor antes da validação. |
+| P-04 | O gestor do setor consegue informar, sem o sistema, as datas que comunicaria para as demandas do conjunto (linha de base, 7.3). | Apresentar o desvio do Coordin sem comparação com a linha de base. |
+| P-05 | O gestor de desenvolvimento está disponível para informar a linha de base, planejar com o sistema na validação e responder ao questionário (7.3, 7.4). | Aplicar o plano B do 7.3: o autor faz o papel do gestor e a avaliação do gestor deixa de ser medida. |
 
 ### 9.2 Riscos
 
@@ -521,11 +526,11 @@ O Coordin **não** vai:
 |---|---|---|---|
 | R-01 | **Prazo:** 23 requisitos funcionais, TDD e implementação até 2026-11-28. | Should e Could não entregues. | Proteger Must → Should → Could (seção 8); revisar o andamento ao fim de cada etapa e propor cortes cedo. |
 | R-02 | **Hospedagem:** o uso no computador e no celular (RNF-03) exige que o sistema esteja acessível pela rede. | Sem hospedagem, o celular não acessa os dados; custo e configuração extras. | Decidir hospedagem e implantação no TDD, cedo no roadmap. |
-| R-03 | **Dados históricos insuficientes** para a validação (P-03, P-04). | Métrica principal sem demonstração com dados reais ou sem linha de base. | Verificar os dados disponíveis antes da implementação; plano B do 7.2. |
-| R-04 | **Cadastro manual do histórico:** sem importação (seção 8), as demandas da validação são digitadas uma a uma. | Horas de cadastro perto do prazo. | Limitar a validação a uma amostra de demandas definida antes; reservar tempo nos marcos (seção 10). |
+| R-03 | **Validade da simulação:** dados fictícios e realizado gerado pelo mesmo modelo do Coordin (P-03). | A banca questionar o quanto os resultados representam o setor real. | Limitação declarada (7.3); conjunto revisado com o gestor; eficiência comparada com o mesmo cálculo nos dois planejamentos. |
+| R-04 | **Cadastro do conjunto da simulação:** sem importação (seção 8), os dados precisam ser carregados no sistema. | Horas de cadastro perto do prazo. | Limitar o tamanho do conjunto, definido no M2; reservar tempo nos marcos (seção 10). |
 | R-05 | **Agregação da métrica principal depende do RF-23 (Could).** | Sem média e % no prazo calculados pelo sistema. | Calcular a partir da exportação (RF-19) ou manualmente na validação. |
 | R-06 | **Complexidade do cálculo:** ausências, vários times por demanda, dependências e busca de cenários com até 200 demandas. | Erros de previsão ou cenários acima do tempo do RNF-01. | Motor de cálculo isolado e testado (RNF-08); método de busca de cenários definido no TDD respeitando o RNF-01. |
-| R-07 | **Exposição de dados reais** do setor na validação ou no repositório. | Problema de confidencialidade e de dados pessoais. | Anonimizar os dados da validação; nada real versionado (RNF-05). |
+| R-07 | **Exposição de dados reais** do setor na validação ou no repositório. | Problema de confidencialidade e de dados pessoais. | A simulação usa apenas dados fictícios; nada real versionado (RNF-05). |
 | R-08 | **Telas no celular:** o cronograma tem muitas informações para telas de 360 px. | Retrabalho de interface. | Celular só para consulta (RNF-03); definir no TDD a apresentação compacta. |
 
 ### 9.3 Decisões delegadas ao TDD
@@ -554,12 +559,12 @@ Em 2026-11-28 tudo precisa estar pronto: software funcionando, documentação (P
 |---|---|---|---|
 | M0 | PRD aprovado | 2026-11-10 | Seções 1 a 10 aprovadas |
 | M1 | Repositório integrado | 2026-11-11 | Template de PR criado; `chore/project-setup` e `docs/prd` integradas à `main` por PR |
-| M2 | Dados da validação verificados | 2026-11-13 | Confirmado se existem demandas históricas e registros das datas comunicadas (P-03, P-04); amostra da validação definida (R-04) |
+| M2 | Conjunto da simulação definido | 2026-11-13 | Conjunto fictício de times, pessoas e demandas definido (P-03, R-04) e disponibilidade do gestor confirmada (P-05) |
 | M3 | TDD aprovado | 2026-11-13 | Decisões da seção 9.3 fechadas como `DT-*`; roadmap de changes definido; hospedagem decidida (R-02) |
 | M4 | Must entregues | 2026-11-21 | RF-01 a RF-12 e RF-17 implementados, testados (RNF-08) e acessíveis pela rede (RNF-03) |
 | M5 | Should entregues | 2026-11-24 | RF-13 a RF-16, RF-18 e RF-19 implementados e testados |
 | M6 | Could e congelamento | 2026-11-25 | Could que couberem no prazo implementados; a partir daqui, só correções |
-| M7 | Validação executada | 2026-11-26 | Histórico cadastrado, desvios medidos (seção 7) e questionário respondido pelo gestor |
+| M7 | Validação executada | 2026-11-26 | Simulação executada (7.3): métricas de eficiência e desvios medidos e questionário respondido pelo gestor |
 | M8 | Entrega pronta | 2026-11-27 | Documentação revisada, apresentação pronta e ensaiada |
 | — | Entrega do TCC | 2026-11-28 | — |
 
