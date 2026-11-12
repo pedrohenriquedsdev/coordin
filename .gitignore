@@ -1,0 +1,27 @@
+Claude outputs/
+
+# Segredos e ambiente local
+.env
+*.user
+secrets.json
+
+# .NET
+bin/
+obj/
+TestResults/
+coverage/
+*.log
+
+# Front (Angular)
+node_modules/
+dist/
+.angular/
+src/Coordin.Api/wwwroot/
+
+# IDEs e sistema
+.vs/
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
+.DS_Store
