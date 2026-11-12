@@ -31,11 +31,11 @@ Regras para todas as tasks:
 
 ## 5. Persistência, migration inicial e saúde
 
-- [ ] 5.1 Criar `compose.yaml` (`postgres:18`, porta `5432`, volume nomeado, senha do `.env`) e `.env.example` com valores de exemplo; configurar `ConnectionStrings:Default` por `dotnet user-secrets` (D10); verificar com `docker compose up -d` e `docker compose ps` mostrando o banco saudável
-- [ ] 5.2 Criar `CoordinDbContext`, gerar a migration vazia `InitialCreate` com o `dotnet-ef` e aplicá-la na inicialização (D8); verificar com os testes "Banco vazio" e "Banco já atualizado" (spec `service-health`)
-- [ ] 5.3 Mapear `GET /api/health` anônimo com o check do `DbContext` e a resposta só com `status` (D9); verificar com os testes "Aplicação e banco saudáveis", "Banco indisponível" (container parado ou string de conexão inválida) e "Falha sem detalhes internos"
-- [ ] 5.4 Registrar o `GET /api/health` na tabela do TDD 5.2 (acréscimo aprovado pelo autor em 2026-11-12); verificar que o TDD cita o endpoint e a spec `service-health`
-- [ ] 5.5 Verificar a spec "Nenhum segredo versionado" com um teste que lê os `appsettings*.json` versionados e não encontra `Password=` nem `ConnectionStrings` com valor, e confirmar que `git check-ignore .env` retorna o arquivo
+- [x] 5.1 Criar `compose.yaml` (`postgres:18`, porta `5432`, volume nomeado, senha do `.env`) e `.env.example` com valores de exemplo; configurar `ConnectionStrings:Default` por `dotnet user-secrets` (D10); verificar com `docker compose up -d` e `docker compose ps` mostrando o banco saudável
+- [x] 5.2 Criar `CoordinDbContext`, gerar a migration vazia `InitialCreate` com o `dotnet-ef` e aplicá-la na inicialização (D8); verificar com os testes "Banco vazio" e "Banco já atualizado" (spec `service-health`)
+- [x] 5.3 Mapear `GET /api/health` anônimo com o check do `DbContext` e a resposta só com `status` (D9); verificar com os testes "Aplicação e banco saudáveis", "Banco indisponível" (container parado ou string de conexão inválida) e "Falha sem detalhes internos"
+- [x] 5.4 Registrar o `GET /api/health` na tabela do TDD 5.2 (acréscimo aprovado pelo autor em 2026-11-12); verificar que o TDD cita o endpoint e a spec `service-health`
+- [x] 5.5 Verificar a spec "Nenhum segredo versionado" com um teste que lê os `appsettings*.json` versionados e não encontra `Password=` nem `ConnectionStrings` com valor, e confirmar que `git check-ignore .env` retorna o arquivo
 
 ## 6. Documentação da API (OpenAPI e Swagger UI)
 
