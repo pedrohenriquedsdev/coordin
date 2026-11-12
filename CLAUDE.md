@@ -66,7 +66,6 @@ coordin/
 ├── Dockerfile                    # imagem única: API + build do Angular
 ├── .dockerignore · .gitignore    # o que o Docker e o Git ignoram
 ├── .editorconfig                 # convenções de código e formatação
-├── .env.example                  # modelo do .env local (o .env real é ignorado pelo Git, nunca versionado)
 ├── README.md                     # como rodar, testar e containerizar localmente
 └── LICENSE
 ```

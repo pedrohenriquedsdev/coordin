@@ -48,10 +48,10 @@ A aplicação SHALL servir a API e a SPA na mesma origem e não SHALL habilitar 
 - **THEN** a resposta não contém `Access-Control-Allow-Origin`
 
 ### Requirement: Nenhum segredo versionado
-A configuração versionada SHALL NOT conter segredos: a string de conexão e as senhas vêm de variáveis de ambiente ou de segredos locais fora do repositório, e o repositório traz apenas um modelo com valores fictícios (DT-30; RNF-05).
+A configuração versionada SHALL NOT conter segredos: a string de conexão e as senhas vêm de variáveis de ambiente ou de segredos locais fora do repositório, e o repositório não traz arquivos de modelo com senhas (DT-30; RNF-05).
 
 #### Scenario: Arquivos de configuração sem segredos
-- **WHEN** se inspecionam os arquivos de configuração versionados da API e o `.env.example`
+- **WHEN** se inspecionam os arquivos de configuração versionados da API
 - **THEN** nenhum deles contém senha, chave ou string de conexão com credencial real
 
 #### Scenario: Arquivo de ambiente ignorado

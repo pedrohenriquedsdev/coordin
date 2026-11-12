@@ -187,7 +187,7 @@ cd coordin
 
 # 2. Create your local .env and set POSTGRES_PASSWORD (letters and numbers only).
 #    The .env file is ignored by Git. Never commit passwords or other secrets.
-cp .env.example .env
+echo "POSTGRES_PASSWORD=YOUR_PASSWORD" > .env
 
 # 3. Start PostgreSQL
 docker compose up -d

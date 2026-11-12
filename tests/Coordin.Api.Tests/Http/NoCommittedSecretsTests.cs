@@ -23,14 +23,10 @@ public class NoCommittedSecretsTests
     }
 
     [Fact]
-    public void EnvExample_HasOnlyTheLocalPlaceholderPassword()
+    public void NoEnvTemplateFile_IsVersioned()
     {
-        var path = Path.Combine(RepositoryRoot.Find(), ".env.example");
+        var root = RepositoryRoot.Find();
 
-        var settings = File.ReadAllLines(path)
-            .Where(line => !string.IsNullOrWhiteSpace(line) && !line.TrimStart().StartsWith('#'))
-            .ToList();
-
-        Assert.Equal(["POSTGRES_PASSWORD=troque-esta-senha-local"], settings);
+        Assert.False(File.Exists(Path.Combine(root, ".env.example")));
     }
 }
