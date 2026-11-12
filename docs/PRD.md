@@ -432,9 +432,22 @@ Valem para todo o sistema. Nenhum requisito, cenário ou decisão técnica pode 
 - **Definição:** para cada demanda concluída, desvio = data real de conclusão − data prevista, em dias. Valor positivo indica atraso; negativo, entrega antecipada.
 - **Leituras:** em relação à primeira previsão (linha de base da demanda) e à previsão vigente na conclusão (RF-12). A primeira mostra a qualidade da previsão original; a segunda, o efeito dos replanejamentos.
 - **Agregação:** desvio médio e percentual de demandas concluídas até a data prevista, no setor e por time (RF-23).
-- **Meta:** não há meta numérica, porque o setor não tem medição atual do atraso. O sucesso é o desvio do Coordin ser **menor que a linha de base** do processo atual (7.2).
+- **Meta:** não há meta numérica, porque o setor não tem medição atual do atraso. O sucesso é o desvio do Coordin ser **menor que a linha de base** do processo atual (7.3).
 
-### 7.2 Validação no TCC com demandas históricas
+### 7.2 Métricas de eficiência do setor
+
+Medem diretamente a dor central (seção 2): o quanto o planejamento aproveita a capacidade dos times e equilibra o trabalho entre eles. São calculadas sobre o mesmo conjunto de demandas, times e período, no planejamento do processo atual e no planejamento feito com o Coordin, e comparadas na validação (7.3).
+
+| Métrica | Definição | Melhor quando | Requisitos |
+|---|---|---|---|
+| Horas ociosas | Soma das horas de capacidade sem trabalho alocado, de todos os times, no período (ociosidade do RF-17) | Menor | RF-17 |
+| Equilíbrio de ocupação | Diferença, em pontos percentuais, entre a maior e a menor ocupação média dos times no período | Menor | RF-17 |
+| Períodos de sobrecarga | Quantidade de períodos (time × período) com sobrecarga, conforme o RF-17 | Menor | RF-17 |
+| Prazo total do setor | Data de conclusão prevista da última demanda do conjunto | Mais cedo | RF-08, RF-13 |
+
+- **Meta:** sem meta numérica. O sucesso é o planejamento com o Coordin ser melhor que o do processo atual em pelo menos uma métrica de eficiência **sem piorar o prazo das demandas mais prioritárias**, preservando a prioridade combinada (regra inviolável 3).
+
+### 7.3 Validação no TCC com demandas históricas
 
 O prazo do TCC não permite acompanhar demandas reais do início à conclusão com o sistema. A métrica principal é demonstrada com demandas já concluídas no setor:
 
@@ -446,12 +459,11 @@ O prazo do TCC não permite acompanhar demandas reais do início à conclusão c
 
 A existência de registros das datas comunicadas na época ainda não foi confirmada (premissa na seção 9). **Plano B:** sem esses registros, a validação apresenta o desvio do Coordin nas demandas históricas sem comparação com a linha de base, e o resultado é avaliado junto com o gestor de desenvolvimento.
 
-### 7.3 Métricas secundárias
+### 7.4 Métricas secundárias
 
 | Métrica | Como medir | Resultado esperado relacionado | Requisitos |
 |---|---|---|---|
 | Demandas previsíveis | Percentual de demandas cadastradas que têm data prevista | Visão centralizada das demandas e da capacidade | RF-10, RF-11 |
-| Ociosidade e sobrecarga detectadas | Horas ociosas e períodos de sobrecarga identificados por time | Identificação antecipada de ociosidade, sobrecarga e realocação | RF-17 |
 | Cenários avaliados | Quantidade de cenários recomendados ou simulados, e quantos foram aprovados ou rejeitados | Comparação de cenários para apoiar o sequenciamento | RF-13 a RF-15 |
 | Avaliação do gestor | Questionário curto respondido pelo gestor de desenvolvimento após usar o sistema na validação (clareza das previsões, utilidade dos cenários e relatórios, apoio à comunicação com o gestor de produto) | Previsibilidade e comunicação mais clara entre os gestores | — |
 
@@ -499,9 +511,9 @@ O Coordin **não** vai:
 |---|---|---|
 | P-01 | O sistema é usado em um setor de desenvolvimento real, com 7 ou mais times, cujas estimativas são feitas em horas. | Revisar volume (RNF-01) e unidade de esforço. |
 | P-02 | O gestor de desenvolvimento tem as informações de capacidade (pessoas, horas disponíveis e ausências) para cadastrar. | As previsões ficam não previsíveis ou imprecisas; reduzir a validação ao que houver de dado. |
-| P-03 | Existem demandas concluídas com estimativa, data de início e data real de conclusão para a validação (7.2). | A métrica principal não pode ser demonstrada com dados reais; usar dados de demonstração e deixar a limitação explícita no TCC. |
-| P-04 | Existem registros das datas comunicadas ao produto na época dessas demandas (linha de base). **A confirmar.** | Aplicar o plano B do 7.2: desvio do Coordin sem comparação com a linha de base. |
-| P-05 | O gestor de desenvolvimento está disponível para usar o sistema na validação e responder ao questionário (7.3). | A avaliação do gestor deixa de ser medida. |
+| P-03 | Existem demandas concluídas com estimativa, data de início e data real de conclusão para a validação (7.3). | A métrica principal não pode ser demonstrada com dados reais; usar dados de demonstração e deixar a limitação explícita no TCC. |
+| P-04 | Existem registros das datas comunicadas ao produto na época dessas demandas (linha de base). **A confirmar.** | Aplicar o plano B do 7.3: desvio do Coordin sem comparação com a linha de base. |
+| P-05 | O gestor de desenvolvimento está disponível para usar o sistema na validação e responder ao questionário (7.4). | A avaliação do gestor deixa de ser medida. |
 
 ### 9.2 Riscos
 
