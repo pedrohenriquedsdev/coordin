@@ -1,6 +1,6 @@
 # TDD — Coordin
 
-- **Status:** aprovado (2026-11-11); hospedagem (DT-09) decidida em 2026-11-12, com o provedor escolhido na change 7. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23. Ajuste em 2026-11-12, decorrente do PRD: RF-17 como Must no roadmap, validação por simulação no produto (RF-24, DT-37) e roadmap com 13 changes
+- **Status:** aprovado (2026-11-11); hospedagem (DT-09) decidida em 2026-11-12, com o provedor escolhido na change 7. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23. Ajuste em 2026-11-12, decorrente do PRD: RF-17 como Must no roadmap, validação por simulação no produto (RF-24, DT-37) e roadmap com 13 changes. Ajuste em 2026-11-12, na change 1: endpoint de saúde `GET /api/health` (seção 5.2)
 - **Última atualização:** 2026-11-12
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -363,7 +363,7 @@ A conta de acesso do gestor usa as tabelas padrão do ASP.NET Core Identity (`As
 ### 5.1 Convenções
 
 - Base `/api`, JSON com propriedades em `camelCase`; datas `yyyy-MM-dd`; instantes ISO 8601 em UTC; horas como número decimal.
-- Todos os endpoints, exceto `login` e `refresh`, exigem o gestor autenticado por `Authorization: Bearer` (seção 7).
+- Todos os endpoints, exceto `login`, `refresh` e `health`, exigem o gestor autenticado por `Authorization: Bearer` (seção 7).
 - Sucesso: `200` (leitura ou atualização com corpo), `201` com `Location` (criação), `204` (sem corpo).
 - Erros em Problem Details (DT-06, DT-18).
 - Toda escrita que afeta o cálculo recalcula e persiste as previsões na mesma transação (DT-03); o front recarrega o cronograma depois de uma escrita bem-sucedida.
@@ -372,6 +372,7 @@ A conta de acesso do gestor usa as tabelas padrão do ASP.NET Core Identity (`As
 
 | Recurso | Operações | Requisitos |
 |---|---|---|
+| Saúde | `GET /api/health` (anônimo): `200` `{"status":"Healthy"}` ou `503` `{"status":"Unhealthy"}`, conforme o banco aceite conexões; sem detalhes internos (change 1, spec `service-health`) | RNF-06; DT-09 |
 | Autenticação | `POST /api/auth/login` · `POST /api/auth/refresh` · `POST /api/auth/logout` · `GET /api/auth/me` (DT-28) | RNF-04 |
 | Times | `GET`, `POST /api/teams` · `PUT`, `DELETE /api/teams/{id}` | RF-01 |
 | Pessoas | `GET`, `POST /api/people` · `PUT`, `DELETE /api/people/{id}` | RF-02 |
