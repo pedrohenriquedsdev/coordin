@@ -1,6 +1,6 @@
 # TDD — Coordin
 
-- **Status:** aprovado (2026-11-11); pendente apenas a hospedagem (DT-09), a decidir até 2026-11-14. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23
+- **Status:** aprovado (2026-11-11); pendente apenas a hospedagem (DT-09), a decidir até 2026-11-14. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23. Ajuste em 2026-11-12, decorrente do PRD: RF-17 como Must no roadmap, validação por simulação no produto (RF-24, DT-37) e roadmap com 13 changes
 - **Última atualização:** 2026-11-11
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -12,7 +12,7 @@
 
 O Coordin é um sistema de planejamento e apoio à decisão para o gestor de desenvolvimento, seu **único usuário**. Ele transforma demandas priorizadas, esforço estimado em horas e capacidade dos times em previsões de entrega, compara sequências alternativas de execução e aponta ociosidade e sobrecarga. O gestor sempre decide; o sistema calcula, mostra o impacto e recomenda.
 
-O PRD define 23 requisitos funcionais (Must RF-01 a RF-12, Should RF-13 a RF-19, Could RF-20 a RF-23), 8 não funcionais (RNF-01 a RNF-08) e 5 regras invioláveis (PRD 6.1). Este documento define **como** atendê-los.
+O PRD define 24 requisitos funcionais (Must RF-01 a RF-12 e RF-17; Should RF-13 a RF-16, RF-18 e RF-19; Could RF-20 a RF-23; apoio à validação RF-24), 8 não funcionais (RNF-01 a RNF-08) e 5 regras invioláveis (PRD 6.1). Este documento define **como** atendê-los.
 
 ### 1.2 Objetivos técnicos
 
@@ -29,7 +29,7 @@ O PRD define 23 requisitos funcionais (Must RF-01 a RF-12, Should RF-13 a RF-19,
 
 ### 1.3 Restrições
 
-- **Prazo:** entrega em 2026-11-28. Marcos do PRD: TDD aprovado até 2026-11-13 (M3), Must até 2026-11-20 (M4), Should até 2026-11-24 (M5), congelamento em 2026-11-25 (M6). Toda decisão técnica favorece o que pode ser entregue e testado nesse prazo.
+- **Prazo:** entrega em 2026-11-28. Marcos do PRD: TDD aprovado até 2026-11-13 (M3), Must até 2026-11-21 (M4), Should até 2026-11-24 (M5), congelamento em 2026-11-25 (M6), validação por simulação em 2026-11-26 (M7). Toda decisão técnica favorece o que pode ser entregue e testado nesse prazo.
 - **Usuário único:** um gestor e um planejamento; sem perfis, permissões por papel ou multi-inquilino (PRD 8.2).
 - **Sem integrações nem notificações:** dados entram pelo próprio sistema; a única saída é a exportação em planilha (RF-19).
 - **Stack:** a preferência é C#/.NET (`CLAUDE.md` §8.1), a confirmar na seção 3; versões e compatibilidade verificadas em documentação oficial.
@@ -231,7 +231,7 @@ Versões estáveis verificadas em 2026-11-11 nos registros oficiais (NuGet, npm)
 
 #### DT-09 — Hospedagem: **PENDENTE**
 
-- **Contexto:** o acesso pelo computador e pelo celular exige o sistema acessível pela rede (RNF-03, PRD R-02). O marco M4 (2026-11-20) exige os Must acessíveis pela rede.
+- **Contexto:** o acesso pelo computador e pelo celular exige o sistema acessível pela rede (RNF-03, PRD R-02). O marco M4 (2026-11-21) exige os Must acessíveis pela rede.
 - **Alternativas consideradas:**
   - *Container Docker em PaaS* (por exemplo, Render, Railway ou Fly.io) com PostgreSQL gerenciado: implanta a imagem única do DT-01, independe da versão do .NET.
   - *Azure App Service:* ecossistema Microsoft, possível crédito de estudante.
@@ -258,8 +258,10 @@ erDiagram
     Demand ||--o| Forecast : "tem previsão"
     Demand ||--o{ ForecastHistory : "histórico (Could)"
     DemandTeam ||--o{ EstimateHistory : "histórico (Could)"
+    Demand ||--o| ValidationBaseline : "linha de base (RF-24)"
     Holiday
     PlanningSettings
+    ValidationCurrentPlan
 ```
 
 ### 4.2 Entidades
@@ -280,6 +282,8 @@ Tipos: identificadores `Guid` versão 7 (`uuid`); datas de planejamento `DateOnl
 | `ForecastHistory` | `Id`, `DemandId`, `PreviousEndDate`, `NewEndDate`, `Cause`, `ChangedAt` | Somente inclusão | RF-21 (Could) |
 | `EstimateHistory` | `Id`, `DemandId`, `TeamId`, `PreviousHours`, `NewHours`, `Reason` (opcional), `ChangedAt` | Somente inclusão | RF-20 (Could) |
 | `PlanningSettings` | `ExecutionOrderMode` (`FollowPriority`, `Custom`) e os parâmetros da margem de segurança (definidos na seção 6) | Registro único | RF-09, RF-15 |
+| `ValidationBaseline` | `DemandId`, `BaselineDate` | Uma por demanda; apagada com a demanda e ao carregar o conjunto | RF-24 |
+| `ValidationCurrentPlan` | `Id`, `SnapshotJson` (`jsonb`), `CapturedAt` | Registro único; gravado uma vez e só apagado ao carregar o conjunto de novo | RF-24 |
 
 A conta de acesso do gestor usa as tabelas padrão do ASP.NET Core Identity (`AspNetUsers` e relacionadas) e a entidade `RefreshToken` (`Id`, `UserId`, `TokenHash`, `ExpiresAt`, `RevokedAt`, `ReplacedById`), detalhadas na seção 7 (DT-28). Cenários (RF-13, RF-14) e a simulação de nova demanda (RF-16) **não são persistidos** (DT-03): apenas o resultado aprovado altera `ExecutionRank` ou cria a demanda.
 
@@ -384,6 +388,7 @@ A conta de acesso do gestor usa as tabelas padrão do ASP.NET Core Identity (`As
 | Indicadores de precisão | `GET /api/reports/accuracy?from=&to=` | RF-23 (Could) |
 | Históricos | `GET /api/demands/{id}/estimate-history` · `GET /api/demands/{id}/forecast-history` | RF-20, RF-21 (Could) |
 | Configurações | `GET`, `PUT /api/settings` (parâmetros da margem, conforme a seção 6) | RF-09 |
+| Validação por simulação (só com `Validation__Enabled=true`, DT-37) | `GET /api/validation/status` · `POST /api/validation/dataset` (`{ "confirmReplaceAll": true }`) · `GET`, `PUT /api/validation/baseline` · `POST /api/validation/current-plan` · `POST /api/validation/evaluate` | RF-24 |
 
 ### 5.3 Contratos principais
 
@@ -452,6 +457,31 @@ Na criação, a demanda entra no fim da ordem de prioridade (e da de execução,
 
 A justificativa do cenário (RF-13, DT-36) vem do motor: `score` é o critério do DT-25 no cronograma atual e no cenário; `weight` é o `wᵢ` da demanda e `scoreContributionDelta` é a diferença da sua parcela `wᵢ × dᵢ` entre o cenário e o atual (negativa quando a demanda contribui para a melhoria). A soma das `scoreContributionDelta` é igual a `score.delta`. Demandas não previsíveis não entram no `score` e têm `weight` e `scoreContributionDelta` nulos.
 
+**Validação por simulação (`POST /api/validation/evaluate`, RF-24).** Entrada e saída:
+
+```json
+{ "minEffortFactor": 0.8, "maxEffortFactor": 1.5, "seed": 20261126 }
+```
+
+```json
+{
+  "efficiency": {
+    "currentProcess": { "idleHours": 412.5, "occupancySpreadPoints": 38.0, "overloadedPeriods": 9, "sectorEndDate": "2027-03-12" },
+    "withCoordin":    { "idleHours": 296.0, "occupancySpreadPoints": 21.5, "overloadedPeriods": 4, "sectorEndDate": "2027-02-26" }
+  },
+  "deviation": {
+    "items": [
+      { "demandId": "…", "title": "…", "baselineDate": "…", "coordinForecastEndDate": "…",
+        "simulatedActualEndDate": "…", "baselineDeviationDays": 12, "coordinDeviationDays": 3 }
+    ],
+    "averageBaselineDeviationDays": 9.4,
+    "averageCoordinDeviationDays": 2.8
+  }
+}
+```
+
+Erros: `409 validation-current-plan-missing` (plano atual não guardado), `409 validation-baseline-incomplete` (demanda sem linha de base), `400` para fatores inválidos (`minEffortFactor > 0` e `minEffortFactor <= maxEffortFactor`). Com `Validation__Enabled` desligado, os endpoints não são mapeados e respondem `404`. Os valores do exemplo são ilustrativos.
+
 ### 5.4 Decisões
 
 #### DT-16 — REST orientado a recursos, sem versionamento nem paginação
@@ -518,7 +548,7 @@ Snapshot ──► 1. validar (ciclos de dependência)
          ──► 2. classificar previsibilidade (RF-10)
          ──► 3. simular a execução dia a dia (DT-21), aplicando a margem a cada conclusão (DT-22)
          ──► 4. montar o resultado: previsões por demanda, consumo diário por pessoa
-         ──► (sob demanda) relatório por time (DT-24) · cenários (DT-25, DT-26)
+         ──► (sob demanda) relatório por time (DT-24) · cenários (DT-25, DT-26) · avaliação da validação (6.6, DT-37)
 ```
 
 Entradas do snapshot: times, pessoas (`DailyCapacityHours`), ausências, feriados, demandas (ranks, datas, conclusão), partes por time com esforço, alocações, dependências, modo de ordem de execução e percentual da margem. Ordenações internas sempre por ranking e, em empate, por `Id`, para o resultado nunca depender da ordem de leitura.
@@ -632,9 +662,42 @@ Demandas não previsíveis e demandas concluídas ficam fora da simulação e n�
 - **Justificativa:** a métrica principal é de comunicação de prazo; dias corridos são lidos sem explicação.
 - **Atende:** RF-12, RF-23.
 
+#### DT-37 — Validação por simulação como área do produto, habilitada por configuração
+
+- **Contexto:** a validação do TCC é uma simulação (PRD 7.3) que exige carregar um conjunto fictício, registrar a linha de base do gestor, guardar o planejamento do processo atual, simular o realizado e comparar métricas e desvios (RF-24). O cálculo precisa ser reprodutível (RNF-02), e o carregamento substitui os dados do único banco do sistema.
+- **Alternativas consideradas:**
+  - *Área do produto (endpoints e tela), habilitada por configuração:* o gestor executa tudo no próprio Coordin e vê o resultado em gráficos (DT-36); exige telas a mais e proteção contra apagar dados por engano.
+  - *Ferramenta de console fora do produto:* menos telas e nenhum risco no banco de produção, mas o gestor não opera a validação sozinho e o resultado sai em arquivo.
+  - *Planilha a partir das exportações:* frágil, e o realizado simulado ainda dependeria do motor.
+- **Decisão:**
+  - **Cálculo** no motor (`ValidationEvaluator`, seção 6.6), reutilizando a simulação (DT-21), a margem (DT-22), o relatório por time (DT-24) e o desvio (DT-27), com gerador pseudoaleatório próprio e semente informada.
+  - **Conjunto fictício** em JSON, versionado como recurso embutido da `Coordin.Api` e carregado por `POST /api/validation/dataset` com `confirmReplaceAll: true`, em uma transação que apaga e recria os dados do planejamento (times, pessoas, ausências, feriados, demandas, previsões, linha de base e plano guardado) e recalcula as previsões (DT-03). A conta do gestor e os refresh tokens não são tocados.
+  - **Plano do processo atual** guardado como o snapshot serializado (`ValidationCurrentPlan`), uma única vez; só um novo carregamento o apaga.
+  - **Parâmetros** do realizado simulado (`minEffortFactor`, `maxEffortFactor`, `seed`) informados a cada avaliação; a faixa é combinada com o gestor no M2. O resultado não é persistido: é recalculado a cada pedido, como os cenários (DT-03).
+  - **Habilitação:** os endpoints só são mapeados com `Validation__Enabled=true` (variável de ambiente; desligada por padrão), e o Angular só mostra o menu quando `GET /api/validation/status` responde.
+  - **Tela:** um assistente em quatro etapas (carregar, linha de base, guardar plano atual, comparar), com o resultado em gráfico e tabela pelo `ChartComponent` (DT-36).
+- **Justificativa:** a escolha do autor por operar a validação dentro do produto dá ao gestor o mesmo material visual do uso real; a regra de cálculo continua no motor (DT-02) e testável; a flag desligada por padrão e a confirmação explícita evitam apagar o planejamento por engano.
+- **Atende:** RF-24; RNF-02, RNF-05; PRD 7.2, 7.3.
+
 ### 6.5 Simulação de nova demanda (RF-16)
 
 O motor calcula duas vezes, com o snapshot atual e com o snapshot acrescido da nova demanda, e compara as previsões demanda a demanda. A diferença em dias corridos de cada `ForecastEndDate` é o impacto exibido.
+
+### 6.6 Avaliação da validação por simulação (RF-24, DT-37)
+
+`ValidationEvaluator` recebe o snapshot do processo atual (guardado), o snapshot vigente (com as decisões do gestor), as datas de linha de base e os parâmetros `minEffortFactor`, `maxEffortFactor` e `seed`:
+
+1. **Período comparado:** da menor data de início à maior `ForecastEndDate` entre os dois planejamentos, em semanas (DT-24).
+2. **Eficiência (PRD 7.2):** para cada planejamento, a partir do relatório por time (DT-24) no período comparado:
+   - `idleHours` = soma da ociosidade de todos os times e semanas;
+   - `occupancySpreadPoints` = (maior − menor ocupação média dos times) × 100;
+   - `overloadedPeriods` = quantidade de pares time × semana com sobrecarga;
+   - `sectorEndDate` = maior `ForecastEndDate`.
+3. **Fator de esforço por demanda:** `factor = min + (max − min) × u`, com `u` em [0, 1) gerado por um gerador pseudoaleatório próprio (SplitMix64) a partir de `seed` combinado com um hash estável do `Id` da demanda. Não usa `System.Random`, cuja sequência para uma semente não é garantida entre versões do .NET; e não depende da ordem das demandas.
+4. **Realizado simulado:** o snapshot do processo atual é simulado de novo (DT-21) com o esforço de cada parte multiplicado pelo fator da demanda e **margem zero**; a `EndDateWithoutMargin` resultante é a data real simulada.
+5. **Desvio (DT-27, dias corridos):** por demanda previsível no processo atual, `baselineDeviationDays = real − linha de base` e `coordinDeviationDays = real − ForecastEndDate` do processo atual (com margem); médias dos valores, com sinal.
+
+O mesmo snapshot com os mesmos parâmetros produz sempre o mesmo resultado (RNF-02).
 
 ---
 
@@ -703,7 +766,8 @@ Logout ──► POST /api/auth/logout → revoga o refresh token e apaga o cook
 
 - Das pessoas, o sistema guarda apenas nome, time, capacidade e ausências (tipo e período), sem motivo detalhado (RNF-05).
 - Logs não registram corpos de requisição, tokens nem senhas.
-- Os dados históricos da validação (PRD 7.2) são **anonimizados antes** de entrar no sistema e **nunca** são versionados; para demonstração, o repositório tem apenas dados fictícios de exemplo.
+- A validação usa apenas o **conjunto fictício** da simulação (PRD 7.3), versionado como recurso embutido da API (DT-37); nenhum dado real do setor entra no sistema nem no repositório.
+- A área de validação só existe com `Validation__Enabled=true` (DT-37); carregar o conjunto exige `confirmReplaceAll: true` e substitui todos os dados do planejamento, sem tocar na conta do gestor.
 - Backups do banco seguem o serviço de PostgreSQL gerenciado da hospedagem escolhida (DT-09, pendente).
 
 ---
@@ -745,6 +809,7 @@ Os testes usam **construtores de dados** (por exemplo, `PlanningSnapshotBuilder`
 | Justificativa do cenário | A soma das parcelas `scoreContributionDelta` é igual a `score.delta`; demandas não previsíveis ficam fora do `score` | RF-13, DT-25, DT-36 |
 | Relatório por time | Capacidade, horas alocadas, ociosidade e sobrecarga corretas em um cenário montado à mão | RF-17, DT-24 |
 | Desvio | Diferença em dias corridos, positiva para atraso | RF-12, DT-27 |
+| Avaliação da validação | Fatores dentro da faixa e iguais para a mesma semente, independentemente da ordem das demandas; fator 1 reproduz `EndDateWithoutMargin`; métricas de eficiência corretas em um cenário montado à mão; mesmo resultado em execuções repetidas | RF-24, DT-37; RNF-02 |
 
 #### 8.2.1 Invariantes com dados gerados
 
@@ -757,6 +822,7 @@ Além dos exemplos, um gerador de snapshots com **semente fixa** cria algumas ce
 - **Recálculo na escrita (DT-03):** após cada tipo de escrita, as previsões gravadas correspondem a um novo cálculo; `BaselineEndDate` não muda em replanejamentos.
 - **Cenários:** `simulate` e `recommendations` não gravam nada; `apply` grava a ordem de execução e muda o modo para `Custom`.
 - **Exportação:** CSV com separador `;`, BOM UTF-8 e datas `dd/MM/yyyy`.
+- **Validação (DT-37):** com a flag desligada, todos os endpoints respondem `404`; sem `confirmReplaceAll` o carregamento é rejeitado; o carregamento substitui os dados do planejamento e preserva a conta do gestor; o plano atual é guardado uma única vez; `evaluate` sem plano guardado ou com linha de base incompleta responde `409`.
 
 Cada classe de teste usa um banco PostgreSQL próprio no container, com as migrations aplicadas, para os testes não interferirem entre si.
 
@@ -843,40 +909,44 @@ Cada change é uma fatia vertical (motor, API, tela e testes, conforme o caso), 
 | 3 | `capacity-registry` | `feat/capacity-registry` | Times, pessoas com capacidade diária, ausências e feriados (API e telas) | RF-01, RF-02, RF-03; DT-10 | Must | 11-15 |
 | 4 | `forecast-engine` | `feat/forecast-engine` | Motor: capacidade diária, previsibilidade, simulação, margem; casos da seção 8.2 e invariantes | RF-05, RF-08, RF-09, RF-10; DT-21, DT-22, DT-34; RNF-02, RNF-08; regras 1, 4 e 5 | Must | 11-17 |
 | 5 | `demand-planning` | `feat/demand-planning` | Demandas como agregado, ordem de prioridade, estimativas por time, alocações, datas, recálculo na escrita, linha de base, configuração da margem, cronograma com alerta e conclusão real com desvio | RF-04 a RF-07, RF-11, RF-12; DT-03, DT-11 a DT-14, DT-17, DT-27; regras 2, 3 e 5 | Must | 11-19 |
-| 6 | `deployment` | `chore/deployment` | Implantação na hospedagem escolhida (DT-09), PostgreSQL gerenciado, variáveis de ambiente e roteiro de verificação | DT-09; RNF-03, RNF-06 | Must | 11-20 (M4) |
-| 7 | `dependencies-and-team-report` | `feat/dependencies-and-team-report` | Dependências com detecção de ciclo no motor, API e tela; relatório semanal por time com ociosidade e sobrecarga, com o `ChartComponent` e o gráfico de capacidade × alocado | RF-17, RF-18; DT-23, DT-24, DT-36 | Should | 11-22 |
-| 8 | `sequencing-scenarios` | `feat/sequencing-scenarios` | Score com parcelas por demanda, busca local, recomendação, simulação e aprovação de cenários com justificativa em gráfico, volta à prioridade, simulação de nova demanda e teste de desempenho | RF-13 a RF-16; DT-25, DT-26, DT-36; RNF-01 | Should | 11-23 |
-| 9 | `schedule-export` | `feat/schedule-export` | Exportação do cronograma em CSV pt-BR | RF-19; DT-20 | Should | 11-24 (M5) |
-| 10 | `delivery-insights` | `feat/delivery-insights` | Histórico de estimativas e de previsões, esforço real e indicadores de precisão com gráfico por time | RF-20 a RF-23; DT-14, DT-36 | Could | 11-25 (M6) |
-| 11 | `e2e-smoke` | `test/e2e-smoke` | Três cenários de smoke com Playwright, inclusive viewport de celular | DT-32; RNF-03 | Could | 11-25, se couber |
+| 6 | `team-report` | `feat/team-report` | Relatório semanal por time com ociosidade e sobrecarga (motor, API e tela), com o `ChartComponent` e o gráfico de capacidade × alocado | RF-17; DT-24, DT-36 | Must | 11-20 |
+| 7 | `deployment` | `chore/deployment` | Implantação na hospedagem escolhida (DT-09), PostgreSQL gerenciado, variáveis de ambiente e roteiro de verificação | DT-09; RNF-03, RNF-06 | Must | 11-21 (M4) |
+| 8 | `demand-dependencies` | `feat/demand-dependencies` | Dependências com detecção de ciclo no motor, API e tela | RF-18; DT-23 | Should | 11-22 |
+| 9 | `sequencing-scenarios` | `feat/sequencing-scenarios` | Score com parcelas por demanda, busca local, recomendação, simulação e aprovação de cenários com justificativa em gráfico, volta à prioridade, simulação de nova demanda e teste de desempenho | RF-13 a RF-16; DT-25, DT-26, DT-36; RNF-01 | Should | 11-23 |
+| 10 | `schedule-export` | `feat/schedule-export` | Exportação do cronograma em CSV pt-BR | RF-19; DT-20 | Should | 11-24 (M5) |
+| 11 | `simulation-validation` | `feat/simulation-validation` | Avaliação da validação no motor, conjunto fictício embutido, endpoints habilitados por configuração e assistente de validação com gráficos | RF-24; DT-37 | Apoio à validação (não cortada) | 11-25 |
+| 12 | `delivery-insights` | `feat/delivery-insights` | Histórico de estimativas e de previsões, esforço real e indicadores de precisão com gráfico por time | RF-20 a RF-23; DT-14, DT-36 | Could | 11-25 (M6), se couber |
+| 13 | `e2e-smoke` | `test/e2e-smoke` | Três cenários de smoke com Playwright, inclusive viewport de celular | DT-32; RNF-03 | Could | 11-25, se couber |
 
-Depois do congelamento (2026-11-25), só correções: 11-26 validação com dados históricos (M7) e 11-27 documentação e apresentação (M8).
+Depois do congelamento (2026-11-25), só correções: 11-26 validação por simulação (M7, PRD 7.3) e 11-27 documentação e apresentação (M8).
 
 ### 9.2 Decisões
 
-#### DT-35 — Cerca de dez changes em fatias verticais, nesta ordem
+#### DT-35 — Changes em fatias verticais, nesta ordem
 
-- **Contexto:** 23 requisitos em 12 dias (PRD R-01), com um ciclo de proposta, revisão, implementação e PR por change (`CLAUDE.md` §4.3, §10).
+- **Contexto:** 24 requisitos em 13 dias (PRD R-01), com um ciclo de proposta, revisão, implementação e PR por change (`CLAUDE.md` §4.3, §10).
 - **Alternativas consideradas:**
   - *Cerca de dez changes verticais:* cada uma entrega algo utilizável de ponta a ponta; cerca de uma por dia.
   - *Uma change por requisito (cerca de quinze):* PRs menores, com o custo fixo do ciclo multiplicado.
   - *Por camada (motor, depois API, depois telas):* menos ciclos, mas nada utilizável até o fim e integração concentrada no último momento.
-- **Decisão:** as onze changes da tabela 9.1, na ordem indicada.
+- **Decisão:** as treze changes da tabela 9.1, na ordem indicada (eram onze; em 2026-11-12 o relatório por time ganhou change própria, separada das dependências, e entrou a change da validação).
 - **Justificativa da ordem:**
   - a **fundação** vem primeiro, com o CI, para todas as changes seguintes já serem verificadas automaticamente;
   - a **autenticação** vem cedo porque todos os endpoints dependem dela;
   - os **cadastros de capacidade** vêm antes do motor e do planejamento, que precisam de dados;
   - o **motor** é isolado em uma change própria por ser o núcleo do TCC e o ponto com mais testes;
+  - o **relatório por time** é Must por atender à dor central (PRD 2) e vem antes da implantação, criando o `ChartComponent` reutilizado depois;
   - a **implantação** fecha os Must no M4, depois de a hospedagem ser decidida (até 2026-11-14);
   - **dependências** vêm antes dos cenários, que precisam respeitá-las;
+  - a **validação por simulação** vem depois dos Should, porque usa o relatório e os cenários, e antes dos Could, porque não é cortada (PRD 5.4);
   - os **Could** ficam por último, como manda a ordem de proteção do escopo (PRD 8.1).
 - **Atende:** PRD 8.1 e 10; `CLAUDE.md` §4.3 e §12.
 
 ### 9.3 Regras de andamento
 
 - Uma change só começa depois que a anterior estiver integrada à `main`, exceto quando não houver dependência entre elas e o autor aprovar trabalhar em paralelo.
-- Nos pontos de corte do PRD (10.1): em 2026-11-20, se a change 6 não estiver concluída, as changes 10 e 11 saem do escopo e as Should são reavaliadas; em 2026-11-24, se a change 9 não estiver concluída, as changes 10 e 11 saem do escopo.
-- A **atualização para o .NET 11** (DT-05) só entra depois da change 9, se houver tempo e o Npgsql 11 estável estiver publicado, como uma change `chore/dotnet-11-upgrade`.
+- Nos pontos de corte do PRD (10.1): em 2026-11-21, se a change 7 não estiver concluída, as changes 12 e 13 saem do escopo e as Should são reavaliadas; em 2026-11-24, se a change 10 não estiver concluída, as changes 12 e 13 saem do escopo. A change 11 (validação) nunca é cortada; se preciso, as Should cedem tempo a ela.
+- A **atualização para o .NET 11** (DT-05) só entra depois da change 11, se houver tempo e o Npgsql 11 estável estiver publicado, como uma change `chore/dotnet-11-upgrade`.
 
 ---
 
@@ -888,26 +958,27 @@ Complementam os riscos de produto do PRD (9.2).
 
 | ID | Risco | Impacto | Mitigação |
 |---|---|---|---|
-| RT-01 | **Hospedagem indefinida** (DT-09) | Change 6 e marco M4 atrasam; sem acesso pelo celular (RNF-03) | Decidir até 2026-11-14; o Dockerfile da change 1 serve a qualquer PaaS. Plano de contingência: demonstrar com Docker Compose localmente e registrar o RNF-03 como não atendido |
-| RT-02 | **Cenários acima de 10 s** (RNF-01) | Recomendação lenta para a banca | Teste de desempenho (8.5) na change 8; orçamento de avaliações e vizinhança (DT-26) são parâmetros que podem ser reduzidos |
+| RT-01 | **Hospedagem indefinida** (DT-09) | Change 7 e marco M4 atrasam; sem acesso pelo celular (RNF-03) | Decidir até 2026-11-14; o Dockerfile da change 1 serve a qualquer PaaS. Plano de contingência: demonstrar com Docker Compose localmente e registrar o RNF-03 como não atendido |
+| RT-02 | **Cenários acima de 10 s** (RNF-01) | Recomendação lenta para a banca | Teste de desempenho (8.5) na change 9; orçamento de avaliações e vizinhança (DT-26) são parâmetros que podem ser reduzidos |
 | RT-03 | **Erro na simulação** em combinações raras (fila, ausências, dependências) | Previsões erradas sem perceber | Casos da seção 8.2 e invariantes com dados gerados (DT-34) |
-| RT-04 | **Previsão baseada no plano** (DT-21) diverge da realidade em demandas atrasadas | Previsão otimista até o gestor replanejar | Limitação documentada; conclusão real (RF-12) e replanejamento corrigem; tratada na validação (PRD 7.2) |
+| RT-04 | **Previsão baseada no plano** (DT-21) diverge da realidade em demandas atrasadas | Previsão otimista até o gestor replanejar | Limitação documentada; conclusão real (RF-12) e replanejamento corrigem; declarada como limitação da validação por simulação (PRD 7.3) |
 | RT-05 | **Versões recentes do front:** o Angular 22 exige TypeScript 6.0 e o TypeScript mais novo é o 7 | Build quebrado por atualização automática | Versões travadas no `package-lock.json`; atualização só por change própria |
 | RT-06 | **Docker indisponível** para os Testcontainers | Testes de integração não rodam | Docker Desktop local; runners Linux do GitHub Actions já têm Docker |
 | RT-07 | **Falha na implementação do JWT ou do refresh token** | Sessão vulnerável | Testes de integração da seção 8.3 (rotação, reuso, bloqueio, `401`); token de acesso curto; CSP (DT-30) |
-| RT-08 | **Ritmo:** 11 changes em 12 dias, incluindo fins de semana | Should e Could não entregues | Pontos de corte (PRD 10.1, TDD 9.3); uma change por vez |
+| RT-08 | **Ritmo:** 13 changes em 13 dias, incluindo fins de semana | Should e Could não entregues | Pontos de corte (PRD 10.1, TDD 9.3); uma change por vez; Could tratados como "se couber" |
 | RT-09 | **Cronograma no celular** com muitas colunas | Retrabalho de interface | Celular só para consulta (RNF-03); layout compacto decidido na change 5 |
-| RT-10 | **Gráficos aumentam o esforço** das changes 7, 8 e 10 | Atraso das Should | `ChartComponent` único criado na change 7 e reutilizado; nos pontos de corte (9.3), a tabela atende sozinha e o gráfico pode ficar para depois |
+| RT-10 | **Gráficos aumentam o esforço** das changes 6, 9, 11 e 12 | Atraso do M4 e das Should | `ChartComponent` único criado na change 6 e reutilizado; nos pontos de corte (9.3), a tabela atende sozinha e o gráfico pode ficar para depois |
+| RT-11 | **Carregamento do conjunto da validação apaga o planejamento** no banco de produção | Perda dos dados do gestor | Área desligada por padrão (`Validation__Enabled`), confirmação explícita, conta do gestor preservada e testes de integração (8.3); ligar a flag só durante a validação |
 
 ### 10.2 Pendências
 
 | # | Pendência | Responsável | Prazo |
 |---|---|---|---|
 | 1 | Hospedagem (DT-09): validar com o orientador a recomendação de container Docker em PaaS com PostgreSQL gerenciado | Autor | 2026-11-14 |
-| 2 | Dados históricos da validação: confirmar se existem e se há registro das datas comunicadas (PRD P-03, P-04; M2) | Autor | 2026-11-13 |
+| 2 | Conjunto fictício da simulação, faixa de variação do esforço e disponibilidade do gestor (PRD P-03 a P-05; M2; DT-37) | Autor, com o gestor | 2026-11-13 |
 | 3 | Versões das GitHub Actions do CI (DT-33) | Change 1 | 2026-11-13 |
 | 4 | Período do relatório por time: semana por enquanto, pode mudar (DT-24, já parametrizado) | Autor | Quando decidir |
-| 5 | Atualização para o .NET 11 (DT-05) | Change opcional após a 9 | Se houver tempo |
+| 5 | Atualização para o .NET 11 (DT-05) | Change opcional após a 11 | Se houver tempo |
 
 ### 10.3 Fechamento dos pontos em aberto
 
@@ -923,4 +994,5 @@ Todos os pontos em aberto do `CLAUDE.md` §7.3 e as decisões delegadas pelo PRD
 | Registro de mudanças de estimativa e previsto × realizado | DT-14, DT-27 |
 | Tamanho do período do relatório por time | DT-24 |
 | Formato da exportação | DT-20 |
+| Validação por simulação (PRD 7.3, RF-24) | DT-37 |
 | Stack, autenticação e hospedagem | DT-05 a DT-08, DT-28 a DT-30; hospedagem pendente (DT-09) |

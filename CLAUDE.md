@@ -141,11 +141,12 @@ Qualquer mudança nessas regras exige minha aprovação explícita.
 - **Estimativas:** em horas, informadas pelos times e registradas pelo gestor.
 - **Dependências** entre demandas acontecem às vezes: suportadas, mas não são o caso principal.
 - **Escopo:** tudo o que está na proposta, priorizado com MoSCoW:
-  - **Must:** cadastros (times, pessoas, capacidade, demandas), cálculo de previsão com margem, cronograma.
-  - **Should:** cenários de sequenciamento com aprovação do gestor, relatório por time (ocupação, ociosidade, sobrecarga).
+  - **Must:** cadastros (times, pessoas, capacidade, demandas), cálculo de previsão com margem, cronograma, relatório por time (ocupação, ociosidade, sobrecarga; promovido em 2026-11-12).
+  - **Should:** cenários de sequenciamento com aprovação do gestor.
   - **Could:** previsto × realizado detalhado.
   - Ajustes podem ser propostos, com justificativa.
-- **Métrica principal de sucesso:** desvio entre a data prevista e a data realizada.
+- **Dor central (2026-11-12):** o trabalho manual do gestor de desenvolvimento para encontrar ociosidade, equilibrar a carga entre os times e descobrir sequências mais eficazes; previsões confiáveis e a comunicação com o gestor de produto são consequência.
+- **Métrica principal de sucesso:** desvio entre a data prevista e a data realizada, acompanhada das métricas de eficiência do setor (horas ociosas, equilíbrio de ocupação, períodos de sobrecarga e prazo total; PRD 7.2).
 
 ### 7.3 Pontos em aberto (decidir no TDD)
 Modelo de capacidade (horas por pessoa e por time, férias, ausências, outras alocações) · paralelismo entre times na mesma demanda · representação de dependências · tipo da margem (percentual, fixa ou configurável) e etapa em que é aplicada · critério de otimização (prazo total, prioritárias, utilização ou combinação) · registro de mudanças de estimativa e comparação previsto × realizado.
@@ -245,12 +246,13 @@ Pode fazer sem perguntar: ler arquivos, buscar no repositório, rodar build/test
 - [x] Marco M1: `chore/project-setup` (#1), `chore/pr-template` (#2) e `docs/prd` (#3) integradas à `main` em 2026-11-11, com merge commit
 - [x] PRD (`docs/PRD.md`), na branch `docs/prd`: seções 1 a 10 aprovadas em 2026-11-10 (RF-01 a RF-23, RNF-01 a RNF-08, marcos M0 a M8)
 - [x] TDD (`docs/TDD.md`), na branch `docs/tdd`: seções 1 a 10 aprovadas em 2026-11-11 (M3 antecipado), DT-01 a DT-35; todos os pontos do §7.3 fechados. PRD ajustado em RF-02, RF-03 (feriados), RF-06 (esforço por time), RF-10 e 8.1. Integrado à `main` pelo PR #4 em 2026-11-11
-- [x] Ajuste de gráficos e justificativa dos cenários, na branch `docs/decision-charts` (2026-11-11): PRD RF-13, RF-17 e RF-23 (todo gráfico acompanhado de tabela); TDD DT-36 (Chart.js 4.6.x com `ChartComponent` próprio), contrato de cenário com `score` e parcelas por demanda, RT-10. Mensageria avaliada e descartada: os gráficos são desenhados na tela a partir de dados já calculados
+- [x] Ajuste de gráficos e justificativa dos cenários, na branch `docs/decision-charts` (2026-11-11): PRD RF-13, RF-17 e RF-23 (todo gráfico acompanhado de tabela); TDD DT-36 (Chart.js 4.6.x com `ChartComponent` próprio), contrato de cenário com `score` e parcelas por demanda, RT-10. Mensageria avaliada e descartada: os gráficos são desenhados na tela a partir de dados já calculados. Integrado à `main` pelo PR #5 em 2026-11-11
+- [x] Reenquadramento da dor central e validação por simulação, na branch `docs/prd-core-pain-reframe` (2026-11-12): PRD seções 1 a 3 (dor central), RF-17 promovido a Must com M4 em 2026-11-21, métricas de eficiência (7.2), validação por simulação (7.3, premissas, riscos, M2, M7) e RF-24 (5.4, apoio à validação, não cortado); TDD DT-37 (validação no produto com `Validation__Enabled` e confirmação), algoritmo 6.6, roadmap com 13 changes e RT-11
 - [x] `openspec/config.yaml` aponta para `docs/PRD.md` e `docs/TDD.md` (context + rules por artefato)
-- [ ] Changes do OpenSpec, implementação e PRs, conforme o roadmap do TDD (9.1): 1 `project-foundation` · 2 `authentication` · 3 `capacity-registry` · 4 `forecast-engine` · 5 `demand-planning` · 6 `deployment` · 7 `dependencies-and-team-report` · 8 `sequencing-scenarios` · 9 `schedule-export` · 10 `delivery-insights` · 11 `e2e-smoke`
+- [ ] Changes do OpenSpec, implementação e PRs, conforme o roadmap do TDD (9.1): 1 `project-foundation` · 2 `authentication` · 3 `capacity-registry` · 4 `forecast-engine` · 5 `demand-planning` · 6 `team-report` · 7 `deployment` (M4) · 8 `demand-dependencies` · 9 `sequencing-scenarios` · 10 `schedule-export` (M5) · 11 `simulation-validation` · 12 `delivery-insights` · 13 `e2e-smoke`
 
 **Desvios registrados (2026-11-10 e 2026-11-11):** a `docs/prd` foi criada a partir da `chore/project-setup` porque a `main` ainda não tinha este arquivo; o PR #1 foi aberto antes do template de PR. Ambos registrados nas descrições dos PRs. PRs são integrados sempre com merge commit (`gh pr merge <n> --merge`), nunca squash ou rebase.
 
-**Próximo passo:** abrir e integrar o PR da `docs/decision-charts`; depois, criar a branch `chore/project-foundation` a partir da `main` e propor a change 1 com `/opsx:propose`. **Pendente com prazo:** hospedagem (DT-09) até 2026-11-14, após conversa com o orientador; recomendação registrada: container Docker em PaaS com PostgreSQL gerenciado. Em paralelo, M2 (até 2026-11-13): o usuário verifica os dados históricos da validação (P-03, P-04).
+**Próximo passo:** abrir e integrar o PR da `docs/prd-core-pain-reframe`; depois, criar a branch `chore/project-foundation` a partir da `main` e propor a change 1 com `/opsx:propose`. **Pendente com prazo:** hospedagem (DT-09) até 2026-11-14, após conversa com o orientador; recomendação registrada: container Docker em PaaS com PostgreSQL gerenciado. M2 (até 2026-11-13): definir o conjunto fictício da simulação e a faixa de variação do esforço e confirmar a participação do gestor (P-03 a P-05).
 
 Mantenha esta seção atualizada ao concluir cada etapa.

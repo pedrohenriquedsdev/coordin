@@ -1,7 +1,7 @@
 # PRD — Coordin
 
-- **Status:** aprovado (2026-11-10); ajustes aprovados em 2026-11-11 em RF-02, RF-03, RF-06, RF-10 e 8.1, decorrentes do TDD, e em RF-13, RF-17 e RF-23 (justificativa dos cenários e apresentação em gráficos)
-- **Última atualização:** 2026-11-11
+- **Status:** aprovado (2026-11-10); ajustes aprovados em 2026-11-11 em RF-02, RF-03, RF-06, RF-10 e 8.1, decorrentes do TDD, e em RF-13, RF-17 e RF-23 (justificativa dos cenários e apresentação em gráficos). Ajustes aprovados em 2026-11-12: dor central reenquadrada (seções 1 a 3), RF-17 promovido a Must com M4 em 2026-11-21, métricas de eficiência (7.2), validação por simulação (7.3, 9, 10) e RF-24 (5.4)
+- **Última atualização:** 2026-11-12
 - **Fonte original:** [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
 ---
@@ -10,7 +10,7 @@
 
 O **Coordin** é um sistema de planejamento e apoio à decisão para a gestão de desenvolvimento. Ele transforma uma lista de demandas priorizadas, o esforço estimado de cada uma e a capacidade dos times em um cronograma de entregas mais previsível. Além de calcular datas, compara sequências alternativas de execução, aponta possíveis ociosidades e sobrecargas e recomenda alternativas de organização.
 
-> **Objetivo central:** dar ao gestor de desenvolvimento visibilidade suficiente para responder ao gestor de produto quando cada demanda poderá ser entregue, considerando a capacidade real dos times.
+> **Objetivo central:** reduzir o trabalho do gestor de desenvolvimento para encontrar ociosidade, sobrecarga e sequências de execução mais eficazes, dando a ele visibilidade sobre a capacidade real dos times. Com essa visibilidade, as previsões de entrega comunicadas ao gestor de produto passam a ser fundamentadas em dados, cálculos e alternativas descritas.
 
 **Princípio central:** o gestor sempre decide. O sistema calcula, mostra o impacto de cada alternativa e recomenda, mas nunca substitui a decisão do gestor nem a prioridade combinada entre produto e desenvolvimento.
 
@@ -24,12 +24,13 @@ O **Coordin** é um sistema de planejamento e apoio à decisão para a gestão d
 
 **Resultados esperados:**
 
-- Maior previsibilidade das datas de entrega.
+- Identificação antecipada de ociosidade, sobrecarga e oportunidades de realocação.
+- Carga de trabalho mais equilibrada entre os times.
+- Comparação de cenários para apoiar decisões de sequenciamento.
 - Visão centralizada das demandas e da capacidade dos times.
 - Melhor sincronização entre times que participam de uma mesma demanda.
-- Identificação antecipada de ociosidade, sobrecarga e oportunidades de realocação.
-- Comparação de cenários para apoiar decisões de sequenciamento.
-- Mais clareza na comunicação entre os gestores de desenvolvimento e de produto.
+- Maior previsibilidade das datas de entrega.
+- Mais clareza na comunicação entre os gestores de desenvolvimento e de produto, como consequência dos itens anteriores.
 
 ---
 
@@ -39,15 +40,17 @@ O planejamento de entregas fica difícil quando há várias demandas concorrente
 
 **Situação atual:** hoje esse planejamento é feito de maneira manual, com ferramentas soltas, planilhas ou até mesmo apenas na cabeça do gestor. Não existe uma ferramenta voltada ao desenvolvimento para tratar esse problema.
 
-Nesse cenário, o gestor de desenvolvimento precisa responder ao gestor de produto quando cada demanda será entregue, mas enfrenta as seguintes dificuldades:
+**Dor central:** nesse cenário, encontrar ociosidades, equilibrar a carga entre os times e descobrir sequências de execução mais eficazes exige do gestor de desenvolvimento um trabalho manual grande. As dificuldades são:
 
-1. **Falta de visão consolidada** sobre demandas, responsáveis, esforço e datas previstas.
-2. **Distribuição desigual de trabalho**, com possibilidade de ociosidade em alguns times e sobrecarga em outros.
-3. **Impacto de novas demandas pouco claro:** é difícil entender como uma nova demanda afeta o cronograma já planejado.
-4. **Comparação de alternativas difícil:** é difícil comparar sequências de execução e identificar uma organização mais eficiente.
+1. **Ociosidade e sobrecarga difíceis de enxergar:** o trabalho fica distribuído de forma desigual, com times parados enquanto outros acumulam fila, e as oportunidades de realocação passam despercebidas.
+2. **Comparação de alternativas difícil:** é difícil comparar sequências de execução e identificar uma organização mais eficaz em relação a datas e times.
+3. **Impacto de novas demandas pouco claro:** é difícil entender como uma nova demanda afeta o cronograma já planejado e a carga de cada time.
+4. **Falta de visão consolidada** sobre demandas, responsáveis, esforço e datas previstas.
 5. **Previsões dependentes das estimativas dos times:** a data de entrega depende do esforço levantado pelos próprios times, e não apenas da prioridade da demanda. Essa estimativa pode não existir quando a demanda chega: inicialmente a demanda traz apenas sua prioridade, e as demais informações são complementadas ao longo do planejamento.
 
-**Em síntese:** o desafio não é somente acompanhar tarefas, e sim coordenar a capacidade de vários times para prever e melhorar as entregas do setor.
+**Consequência:** sem essa análise, o gestor de desenvolvimento responde ao gestor de produto quando cada demanda será entregue com base em intuição, e a produtividade do setor fica abaixo do que a capacidade disponível dos times permitiria.
+
+**Em síntese:** o desafio não é somente acompanhar tarefas, e sim dar ao gestor visibilidade sobre a capacidade dos times para equilibrar o trabalho e encontrar alternativas mais eficazes. Previsões confiáveis e uma comunicação clara com o produto decorrem disso.
 
 ---
 
@@ -75,13 +78,14 @@ Responsável pelo planejamento de entregas de todo o setor, com 7 ou mais times.
 
 **Objetivos:**
 
-- Responder ao gestor de produto quando cada demanda poderá ser entregue, com base na capacidade real dos times.
-- Ter uma visão consolidada de demandas, responsáveis, esforço e datas previstas.
 - Perceber cedo ociosidade e sobrecarga nos times e encontrar times com capacidade para receber novas demandas ou apoiar outras equipes.
-- Entender o impacto de uma nova demanda no cronograma já planejado.
+- Equilibrar a carga de trabalho entre os times.
 - Comparar sequências de execução antes de decidir.
+- Entender o impacto de uma nova demanda no cronograma já planejado.
+- Ter uma visão consolidada de demandas, responsáveis, esforço e datas previstas.
+- Responder ao gestor de produto quando cada demanda poderá ser entregue, com base na capacidade real dos times.
 
-**Dores atuais:** planeja de forma manual, com ferramentas soltas, planilhas ou de cabeça, sem uma visão consolidada (ver seção 2).
+**Dores atuais:** encontrar ociosidade, equilibrar a carga e comparar alternativas de forma manual, com ferramentas soltas, planilhas ou de cabeça, sem uma visão consolidada (ver seção 2).
 
 ### 3.2 Gestor de produto (não usuário)
 
@@ -250,6 +254,19 @@ O gestor registra a data real de conclusão de uma demanda.
 - O sistema guarda a **primeira previsão** calculada para a demanda (linha de base); replanejamentos posteriores não a alteram.
 - Para cada demanda concluída, o sistema mostra a data real e dois desvios, em dias: em relação à primeira previsão e em relação à previsão vigente no momento da conclusão.
 
+#### RF-17 — Relatório por time
+
+O RF-17 passou de Should para Must em 2026-11-12, por atender diretamente à dor central (seção 2); o ID foi mantido para preservar as referências.
+
+Para cada time, o sistema mostra por período a capacidade disponível (descontadas as ausências), as horas alocadas e a ocupação.
+
+- **Ociosidade:** período em que o time tem capacidade sem trabalho alocado; o relatório indica quantas horas estão livres.
+- **Sobrecarga:** período em que o trabalho na fila do time excede sua capacidade, empurrando entregas para depois; o relatório indica as demandas afetadas.
+- O relatório permite identificar times com capacidade livre para receber novas demandas ou apoiar outros times.
+- Demandas não previsíveis do time não entram nas horas alocadas, mas o relatório informa quantas existem.
+- A capacidade disponível e as horas alocadas de cada time por período também são apresentadas em gráfico, com ociosidade e sobrecarga destacadas, e os mesmos valores ficam disponíveis em tabela.
+- O tamanho do período (semana, mês) é decidido no TDD.
+
 ### 5.2 Should
 
 O relatório de planejamento geral previsto na proposta (comparar sequências e seu impacto no cronograma do setor) é atendido pelos cenários (RF-13 a RF-15). O critério que define um cenário "melhor" (prazo total, entregas prioritárias, utilização ou combinação) é decidido no TDD.
@@ -288,17 +305,6 @@ Antes de incluir uma nova demanda no planejamento, o gestor simula seu efeito no
 
 - O sistema mostra quais demandas têm a data prevista alterada e em quantos dias.
 - O gestor confirma a inclusão, que passa a valer no cronograma, ou descarta a simulação, sem nenhum efeito.
-
-#### RF-17 — Relatório por time
-
-Para cada time, o sistema mostra por período a capacidade disponível (descontadas as ausências), as horas alocadas e a ocupação.
-
-- **Ociosidade:** período em que o time tem capacidade sem trabalho alocado; o relatório indica quantas horas estão livres.
-- **Sobrecarga:** período em que o trabalho na fila do time excede sua capacidade, empurrando entregas para depois; o relatório indica as demandas afetadas.
-- O relatório permite identificar times com capacidade livre para receber novas demandas ou apoiar outros times.
-- Demandas não previsíveis do time não entram nas horas alocadas, mas o relatório informa quantas existem.
-- A capacidade disponível e as horas alocadas de cada time por período também são apresentadas em gráfico, com ociosidade e sobrecarga destacadas, e os mesmos valores ficam disponíveis em tabela.
-- O tamanho do período (semana, mês) é decidido no TDD.
 
 #### RF-18 — Dependências entre demandas
 
@@ -359,6 +365,23 @@ O sistema apresenta indicadores de precisão calculados sobre as demandas conclu
 - O gestor filtra os indicadores por período de conclusão.
 - Uma demanda com vários times entra nos indicadores de cada time envolvido.
 - Times com diferença recorrente entre estimado e realizado ficam evidenciados na comparação entre times.
+
+### 5.4 Apoio à validação do TCC
+
+Requisito fora da priorização MoSCoW, criado em 2026-11-12 para executar a validação por simulação (7.3) dentro do próprio sistema. É protegido como o marco M7: não é cortado.
+
+#### RF-24 — Validação por simulação
+
+O gestor executa no Coordin a comparação entre o planejamento do processo atual e o planejamento feito com o sistema, sobre um conjunto fictício de dados.
+
+- A área de validação só fica disponível quando habilitada na configuração do ambiente; desabilitada, ela não aparece e não pode ser acessada.
+- O gestor carrega o conjunto fictício da simulação (7.3, passo 1). Como o carregamento substitui todos os dados do planejamento, ele exige confirmação explícita e informa o que será substituído.
+- O gestor registra, para cada demanda do conjunto, a data que comunicaria ao gestor de produto sem o sistema (linha de base, passo 2).
+- O gestor guarda o planejamento do processo atual (passo 3) antes de usar o relatório por time e os cenários; esse planejamento guardado não muda depois.
+- O gestor informa os parâmetros do realizado simulado (faixa de variação do esforço e semente) e solicita a comparação (passos 5 a 7).
+- O resultado mostra, para o planejamento do processo atual e para o planejamento com o Coordin, as métricas de eficiência (7.2), e, para cada demanda e na média, o desvio das datas da linha de base e o desvio das previsões do Coordin em relação às datas reais simuladas.
+- Com os mesmos dados e parâmetros, a comparação produz sempre o mesmo resultado (RNF-02).
+- O resultado é apresentado em gráficos e em tabela com os mesmos valores.
 
 ---
 
@@ -426,26 +449,43 @@ Valem para todo o sistema. Nenhum requisito, cenário ou decisão técnica pode 
 - **Definição:** para cada demanda concluída, desvio = data real de conclusão − data prevista, em dias. Valor positivo indica atraso; negativo, entrega antecipada.
 - **Leituras:** em relação à primeira previsão (linha de base da demanda) e à previsão vigente na conclusão (RF-12). A primeira mostra a qualidade da previsão original; a segunda, o efeito dos replanejamentos.
 - **Agregação:** desvio médio e percentual de demandas concluídas até a data prevista, no setor e por time (RF-23).
-- **Meta:** não há meta numérica, porque o setor não tem medição atual do atraso. O sucesso é o desvio do Coordin ser **menor que a linha de base** do processo atual (7.2).
+- **Meta:** não há meta numérica, porque o setor não tem medição atual do atraso. O sucesso é o desvio do Coordin ser **menor que a linha de base** do processo atual (7.3).
 
-### 7.2 Validação no TCC com demandas históricas
+### 7.2 Métricas de eficiência do setor
 
-O prazo do TCC não permite acompanhar demandas reais do início à conclusão com o sistema. A métrica principal é demonstrada com demandas já concluídas no setor:
+Medem diretamente a dor central (seção 2): o quanto o planejamento aproveita a capacidade dos times e equilibra o trabalho entre eles. São calculadas sobre o mesmo conjunto de demandas, times e período, no planejamento do processo atual e no planejamento feito com o Coordin, e comparadas na validação (7.3).
 
-1. Selecionar demandas concluídas, com seus dados **anonimizados** (sem nomes reais de pessoas, times ou clientes).
-2. Cadastrar os times, as pessoas, a capacidade e as ausências do período, além das estimativas e datas de início que existiam quando cada demanda começou.
-3. Calcular a previsão do Coordin para cada demanda e comparar com a data real de conclusão: este é o **desvio do Coordin**.
-4. Comparar com a **linha de base**: o desvio entre a data real e a data que foi comunicada na época pelo processo manual, para as demandas em que esse registro existir.
-5. Considerar a validação bem-sucedida se o desvio médio do Coordin for menor que o da linha de base.
+| Métrica | Definição | Melhor quando | Requisitos |
+|---|---|---|---|
+| Horas ociosas | Soma das horas de capacidade sem trabalho alocado, de todos os times, no período (ociosidade do RF-17) | Menor | RF-17 |
+| Equilíbrio de ocupação | Diferença, em pontos percentuais, entre a maior e a menor ocupação média dos times no período | Menor | RF-17 |
+| Períodos de sobrecarga | Quantidade de períodos (time × período) com sobrecarga, conforme o RF-17 | Menor | RF-17 |
+| Prazo total do setor | Data de conclusão prevista da última demanda do conjunto | Mais cedo | RF-08, RF-13 |
 
-A existência de registros das datas comunicadas na época ainda não foi confirmada (premissa na seção 9). **Plano B:** sem esses registros, a validação apresenta o desvio do Coordin nas demandas históricas sem comparação com a linha de base, e o resultado é avaliado junto com o gestor de desenvolvimento.
+- **Meta:** sem meta numérica. O sucesso é o planejamento com o Coordin ser melhor que o do processo atual em pelo menos uma métrica de eficiência **sem piorar o prazo das demandas mais prioritárias**, preservando a prioridade combinada (regra inviolável 3).
 
-### 7.3 Métricas secundárias
+### 7.3 Validação no TCC por simulação
+
+O prazo do TCC não permite acompanhar demandas reais do início à conclusão com o sistema. A validação compara, em uma simulação, o planejamento como acontece hoje com o planejamento feito com o Coordin:
+
+1. **Dados:** um conjunto **fictício** de times, pessoas, capacidades, ausências, feriados e demandas, com tamanhos inspirados no setor (7 ou mais times), sem nenhum dado real. O conjunto é definido antes da execução e pode ser versionado como dado de exemplo (RNF-05).
+2. **Linha de base:** antes de usar o sistema, o gestor de desenvolvimento do setor informa, como faria hoje, a data de entrega que comunicaria ao gestor de produto para cada demanda.
+3. **Planejamento do processo atual:** o Coordin calcula o cronograma na ordem de prioridade e com a alocação inicial, sem que o gestor use o relatório por time nem os cenários.
+4. **Planejamento com o Coordin:** o gestor usa o relatório por time (RF-17) e os cenários (RF-13 a RF-15) para realocar pessoas e aprovar ou rejeitar sequências; o sistema recalcula o cronograma.
+5. **Eficiência:** as métricas da seção 7.2 são calculadas nos dois planejamentos e comparadas.
+6. **Realizado simulado:** o esforço real de cada demanda é o esforço estimado multiplicado por uma variação definida antes da execução, gerada de forma reprodutível. As datas reais resultam de executar o planejamento do processo atual com esse esforço.
+7. **Desvio:** o desvio médio das datas informadas pelo gestor (passo 2) é comparado com o desvio médio das previsões do Coordin para o mesmo planejamento, ambos em relação às datas reais simuladas. A métrica principal (7.1) é bem-sucedida se o desvio do Coordin for menor.
+8. **Avaliação do gestor:** o gestor responde ao questionário (7.4).
+
+**Limitação declarada no TCC:** as datas reais simuladas são produzidas pelo mesmo modelo de capacidade do Coordin, variando apenas o esforço. Por isso, o desvio mede como a previsão reage à imprecisão das estimativas, e não a aderência do modelo à realidade do setor. Na comparação de eficiência, os dois planejamentos usam o mesmo cálculo, então a diferença vem apenas das decisões do gestor.
+
+**Plano B:** se o gestor do setor não estiver disponível (P-05), o autor executa os passos 2 e 4, a avaliação do gestor deixa de ser medida e a limitação é registrada no TCC.
+
+### 7.4 Métricas secundárias
 
 | Métrica | Como medir | Resultado esperado relacionado | Requisitos |
 |---|---|---|---|
 | Demandas previsíveis | Percentual de demandas cadastradas que têm data prevista | Visão centralizada das demandas e da capacidade | RF-10, RF-11 |
-| Ociosidade e sobrecarga detectadas | Horas ociosas e períodos de sobrecarga identificados por time | Identificação antecipada de ociosidade, sobrecarga e realocação | RF-17 |
 | Cenários avaliados | Quantidade de cenários recomendados ou simulados, e quantos foram aprovados ou rejeitados | Comparação de cenários para apoiar o sequenciamento | RF-13 a RF-15 |
 | Avaliação do gestor | Questionário curto respondido pelo gestor de desenvolvimento após usar o sistema na validação (clareza das previsões, utilidade dos cenários e relatórios, apoio à comunicação com o gestor de produto) | Previsibilidade e comunicação mais clara entre os gestores | — |
 
@@ -459,12 +499,13 @@ Métricas que dependem de requisitos Should ou Could só são medidas se esses r
 
 | Prioridade | Requisitos | O que cobre |
 |---|---|---|
-| Must | RF-01 a RF-12 | Cadastros de times, pessoas, capacidade, ausências, feriados e demandas; alocação; estimativas; cálculo da previsão com margem de segurança; demandas não previsíveis; cronograma; conclusão real e desvio |
-| Should | RF-13 a RF-19 | Cenários de sequenciamento (recomendados e simulados) com aprovação do gestor; simulação de nova demanda; relatório por time; dependências entre demandas; exportação em planilha |
+| Must | RF-01 a RF-12 e RF-17 | Cadastros de times, pessoas, capacidade, ausências, feriados e demandas; alocação; estimativas; cálculo da previsão com margem de segurança; demandas não previsíveis; cronograma; conclusão real e desvio; relatório por time com ociosidade e sobrecarga |
+| Should | RF-13 a RF-16, RF-18 e RF-19 | Cenários de sequenciamento (recomendados e simulados) com aprovação do gestor; simulação de nova demanda; dependências entre demandas; exportação em planilha |
 | Could | RF-20 a RF-23 | Histórico de estimativas e da data prevista; esforço real; indicadores de precisão |
+| Apoio à validação | RF-24 | Validação por simulação dentro do sistema (7.3), protegida como o M7 |
 | Não funcionais | RNF-01 a RNF-08 | Valem para tudo o que for entregue |
 
-O escopo é protegido na ordem **Must → Should → Could**. Se o prazo exigir cortes, eles começam pelos Could, são propostos com justificativa e dependem de aprovação; nenhum Must é cortado sem decisão explícita.
+O escopo é protegido na ordem **Must → Should → Could**; o RF-24 não entra nessa ordem e não é cortado, porque sustenta a validação (M7). Se o prazo exigir cortes, eles começam pelos Could, são propostos com justificativa e dependem de aprovação; nenhum Must é cortado sem decisão explícita.
 
 ### 8.2 Não objetivos
 
@@ -493,21 +534,21 @@ O Coordin **não** vai:
 |---|---|---|
 | P-01 | O sistema é usado em um setor de desenvolvimento real, com 7 ou mais times, cujas estimativas são feitas em horas. | Revisar volume (RNF-01) e unidade de esforço. |
 | P-02 | O gestor de desenvolvimento tem as informações de capacidade (pessoas, horas disponíveis e ausências) para cadastrar. | As previsões ficam não previsíveis ou imprecisas; reduzir a validação ao que houver de dado. |
-| P-03 | Existem demandas concluídas com estimativa, data de início e data real de conclusão para a validação (7.2). | A métrica principal não pode ser demonstrada com dados reais; usar dados de demonstração e deixar a limitação explícita no TCC. |
-| P-04 | Existem registros das datas comunicadas ao produto na época dessas demandas (linha de base). **A confirmar.** | Aplicar o plano B do 7.2: desvio do Coordin sem comparação com a linha de base. |
-| P-05 | O gestor de desenvolvimento está disponível para usar o sistema na validação e responder ao questionário (7.3). | A avaliação do gestor deixa de ser medida. |
+| P-03 | O conjunto fictício da simulação representa de forma plausível o setor: quantidade de times e pessoas, capacidades e tamanho das demandas (7.3). | Revisar o conjunto com o gestor antes da validação. |
+| P-04 | O gestor do setor consegue informar, sem o sistema, as datas que comunicaria para as demandas do conjunto (linha de base, 7.3). | Apresentar o desvio do Coordin sem comparação com a linha de base. |
+| P-05 | O gestor de desenvolvimento está disponível para informar a linha de base, planejar com o sistema na validação e responder ao questionário (7.3, 7.4). | Aplicar o plano B do 7.3: o autor faz o papel do gestor e a avaliação do gestor deixa de ser medida. |
 
 ### 9.2 Riscos
 
 | ID | Risco | Impacto | Mitigação |
 |---|---|---|---|
-| R-01 | **Prazo:** 23 requisitos funcionais, TDD e implementação até 2026-11-28. | Should e Could não entregues. | Proteger Must → Should → Could (seção 8); revisar o andamento ao fim de cada etapa e propor cortes cedo. |
+| R-01 | **Prazo:** 24 requisitos funcionais, TDD e implementação até 2026-11-28. | Should e Could não entregues. | Proteger Must → Should → Could (seção 8); revisar o andamento ao fim de cada etapa e propor cortes cedo. |
 | R-02 | **Hospedagem:** o uso no computador e no celular (RNF-03) exige que o sistema esteja acessível pela rede. | Sem hospedagem, o celular não acessa os dados; custo e configuração extras. | Decidir hospedagem e implantação no TDD, cedo no roadmap. |
-| R-03 | **Dados históricos insuficientes** para a validação (P-03, P-04). | Métrica principal sem demonstração com dados reais ou sem linha de base. | Verificar os dados disponíveis antes da implementação; plano B do 7.2. |
-| R-04 | **Cadastro manual do histórico:** sem importação (seção 8), as demandas da validação são digitadas uma a uma. | Horas de cadastro perto do prazo. | Limitar a validação a uma amostra de demandas definida antes; reservar tempo nos marcos (seção 10). |
-| R-05 | **Agregação da métrica principal depende do RF-23 (Could).** | Sem média e % no prazo calculados pelo sistema. | Calcular a partir da exportação (RF-19) ou manualmente na validação. |
+| R-03 | **Validade da simulação:** dados fictícios e realizado gerado pelo mesmo modelo do Coordin (P-03). | A banca questionar o quanto os resultados representam o setor real. | Limitação declarada (7.3); conjunto revisado com o gestor; eficiência comparada com o mesmo cálculo nos dois planejamentos. |
+| R-04 | **Conjunto da simulação:** o conjunto fictício precisa ser montado e carregado no sistema (RF-24). | Horas de preparação perto do prazo. | Limitar o tamanho do conjunto, definido no M2; carregamento pelo RF-24, sem digitação manual. |
+| R-05 | **Agregação da métrica principal no uso real depende do RF-23 (Could).** | Fora da validação, sem média e % no prazo calculados pelo sistema. | Na validação, o RF-24 calcula os desvios; no uso real, calcular a partir da exportação (RF-19) até o RF-23 existir. |
 | R-06 | **Complexidade do cálculo:** ausências, vários times por demanda, dependências e busca de cenários com até 200 demandas. | Erros de previsão ou cenários acima do tempo do RNF-01. | Motor de cálculo isolado e testado (RNF-08); método de busca de cenários definido no TDD respeitando o RNF-01. |
-| R-07 | **Exposição de dados reais** do setor na validação ou no repositório. | Problema de confidencialidade e de dados pessoais. | Anonimizar os dados da validação; nada real versionado (RNF-05). |
+| R-07 | **Exposição de dados reais** do setor na validação ou no repositório. | Problema de confidencialidade e de dados pessoais. | A simulação usa apenas dados fictícios; nada real versionado (RNF-05). |
 | R-08 | **Telas no celular:** o cronograma tem muitas informações para telas de 360 px. | Retrabalho de interface. | Celular só para consulta (RNF-03); definir no TDD a apresentação compacta. |
 
 ### 9.3 Decisões delegadas ao TDD
@@ -536,18 +577,18 @@ Em 2026-11-28 tudo precisa estar pronto: software funcionando, documentação (P
 |---|---|---|---|
 | M0 | PRD aprovado | 2026-11-10 | Seções 1 a 10 aprovadas |
 | M1 | Repositório integrado | 2026-11-11 | Template de PR criado; `chore/project-setup` e `docs/prd` integradas à `main` por PR |
-| M2 | Dados da validação verificados | 2026-11-13 | Confirmado se existem demandas históricas e registros das datas comunicadas (P-03, P-04); amostra da validação definida (R-04) |
+| M2 | Conjunto da simulação definido | 2026-11-13 | Conjunto fictício de times, pessoas e demandas definido (P-03, R-04) e disponibilidade do gestor confirmada (P-05) |
 | M3 | TDD aprovado | 2026-11-13 | Decisões da seção 9.3 fechadas como `DT-*`; roadmap de changes definido; hospedagem decidida (R-02) |
-| M4 | Must entregues | 2026-11-20 | RF-01 a RF-12 implementados, testados (RNF-08) e acessíveis pela rede (RNF-03) |
-| M5 | Should entregues | 2026-11-24 | RF-13 a RF-19 implementados e testados |
+| M4 | Must entregues | 2026-11-21 | RF-01 a RF-12 e RF-17 implementados, testados (RNF-08) e acessíveis pela rede (RNF-03) |
+| M5 | Should entregues | 2026-11-24 | RF-13 a RF-16, RF-18 e RF-19 implementados e testados |
 | M6 | Could e congelamento | 2026-11-25 | Could que couberem no prazo implementados; a partir daqui, só correções |
-| M7 | Validação executada | 2026-11-26 | Histórico cadastrado, desvios medidos (seção 7) e questionário respondido pelo gestor |
+| M7 | Validação executada | 2026-11-26 | Simulação executada (7.3): métricas de eficiência e desvios medidos e questionário respondido pelo gestor |
 | M8 | Entrega pronta | 2026-11-27 | Documentação revisada, apresentação pronta e ensaiada |
 | — | Entrega do TCC | 2026-11-28 | — |
 
 ### 10.1 Pontos de decisão de corte
 
-- **Em 2026-11-20 (M4):** se os Must não estiverem completos, os Could saem do escopo e os Should são reavaliados um a um.
+- **Em 2026-11-21 (M4):** se os Must não estiverem completos, os Could saem do escopo e os Should são reavaliados um a um.
 - **Em 2026-11-24 (M5):** se os Should não estiverem completos, os Could saem do escopo e os Should restantes são reavaliados.
 - **A validação (M7) e a entrega (M8) não são cortadas:** se necessário, a implementação de Should e Could cede tempo a elas.
 - Todo corte é proposto com justificativa e decidido pelo autor do TCC, nunca aplicado silenciosamente.
