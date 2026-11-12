@@ -3,3 +3,5 @@ dist/
 node_modules/
 package-lock.json
 coverage/
+# Código gerado pelo ng-openapi-gen; é reescrito a cada `npm run generate:api`.
+src/app/api/
