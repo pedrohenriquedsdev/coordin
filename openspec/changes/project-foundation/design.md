@@ -110,14 +110,23 @@ Um middleware próprio de poucas linhas, sem pacote:
 2. `mcr.microsoft.com/dotnet/sdk:10.0` executa `dotnet publish -c Release` e copia o `dist/coordin-web/browser` para o `wwwroot` publicado;
 3. `mcr.microsoft.com/dotnet/aspnet:10.0` roda com o usuário não root da imagem (`$APP_UID`), na porta `8080`.
 
-Um `.dockerignore` exclui `bin/`, `obj/`, `node_modules/`, `.git` e `.env`. O `compose.yaml` ganha um perfil opcional `app` para subir a imagem junto do banco, o que permite verificar ponta a ponta localmente.
+Um `.dockerignore` exclui `bin/`, `obj/`, `node_modules/`, `.git` e `.env`. O `compose.yaml` ganha um perfil opcional `app` para subir a imagem junto do banco, o que permite verificar ponta a ponta localmente. Esse perfil roda com `ASPNETCORE_ENVIRONMENT=Staging` (ajustado na implementação, task 10.2): o ambiente `Production` força HTTPS, e localmente não há proxy com TLS na frente, então a imagem só abriria por HTTPS na porta 443. `Staging` mantém todo o resto do comportamento de produção (CSP, sem Swagger, sem endpoints de teste) e só não força o HTTPS.
 
 ### D15 — CI
 `.github/workflows/ci.yml` roda em `pull_request` e em `push` para a `main`, com `concurrency` cancelando execuções antigas da mesma branch. Tem dois jobs em `ubuntu-latest`:
 - **`dotnet`:** `setup-dotnet` lendo o `global.json`, `dotnet format --verify-no-changes`, build e testes com cobertura (o Docker do runner atende os Testcontainers). O resumo da cobertura é publicado como artefato.
-- **`web`:** `setup-node` 24 com cache do npm, `npm ci`, `lint`, `test` e `build` em `src/coordin-web`.
+- **`web`:** `setup-node` 24 com cache do npm, `npm ci`, `format:check`, `lint`, `test` e `build` em `src/coordin-web`. A checagem de formatação do Prettier (`format:check`) foi acrescentada na implementação, em paralelo ao `dotnet format --verify-no-changes` do job .NET.
 
-As versões das actions (`checkout`, `setup-dotnet`, `setup-node`, `upload-artifact`) são verificadas nas releases oficiais durante a implementação, fechando a pendência 3 do TDD (10.2).
+As versões das actions foram verificadas nas releases oficiais (`gh api`) em 2026-11-12, junto das entradas de cada `action.yml`, fechando a pendência 3 do TDD (10.2). Os workflows usam a tag da versão principal:
+
+| Action | Release verificada | Uso no workflow |
+|---|---|---|
+| `actions/checkout` | v7.0.1 | `@v7`, com `persist-credentials: false` |
+| `actions/setup-dotnet` | v6.1.0 | `@v6`, com `global-json-file` e cache |
+| `actions/setup-node` | v7.1.0 | `@v7`, com `cache: npm` |
+| `actions/upload-artifact` | v7.0.2 | `@v7`, para a cobertura (14 dias) |
+
+Todas rodam em Node 24. O workflow declara `permissions: contents: read`, porque nenhum job precisa escrever no repositório. Trocar as tags por SHAs de commit seria mais estrito contra alteração de tags, mas exigiria manutenção manual a cada atualização; fica como possibilidade futura.
 
 ## Risks / Trade-offs
 
