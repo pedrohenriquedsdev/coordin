@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Mvc.Testing;
 namespace Coordin.Api.Tests.Infrastructure;
 
 /// <summary>API no ambiente <c>Testing</c> (com os endpoints de diagnóstico), compartilhada por classe de teste.</summary>
-public sealed class TestingApiFactory() : CoordinApiFactory("Testing");
+public sealed class TestingApiFactory(PostgresFixture postgres) : CoordinApiFactory("Testing", postgres);
 
 /// <summary>API no ambiente <c>Development</c>, para a CSP da Swagger UI e a ausência de HSTS.</summary>
-public sealed class DevelopmentApiFactory() : CoordinApiFactory("Development")
+public sealed class DevelopmentApiFactory(PostgresFixture postgres) : CoordinApiFactory("Development", postgres)
 {
     /// <summary>Cliente HTTPS com host público (o HSTS ignora <c>localhost</c> por padrão).</summary>
     public HttpClient CreateHttpsClient() => CreateClient(Options("https"));
@@ -16,7 +16,7 @@ public sealed class DevelopmentApiFactory() : CoordinApiFactory("Development")
 }
 
 /// <summary>API no ambiente <c>Production</c>, para HSTS, HTTPS e documentação bloqueada.</summary>
-public sealed class ProductionApiFactory() : CoordinApiFactory("Production")
+public sealed class ProductionApiFactory(PostgresFixture postgres) : CoordinApiFactory("Production", postgres)
 {
     /// <summary>Cliente que fala HTTPS, para a requisição não ser redirecionada em produção.</summary>
     public HttpClient CreateHttpsClient() => CreateClient(Options("https"));

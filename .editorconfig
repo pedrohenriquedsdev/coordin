@@ -35,6 +35,10 @@ dotnet_naming_symbols.private_fields.applicable_accessibilities = private
 dotnet_naming_style.underscore_camel.required_prefix = _
 dotnet_naming_style.underscore_camel.capitalization = camel_case
 
+# Migrations são geradas pelo dotnet-ef e não seguem o estilo do projeto
+[src/Coordin.Api/Infrastructure/Persistence/Migrations/*.cs]
+generated_code = true
+
 # Testes usam o padrão Metodo_Situacao_ResultadoEsperado (TDD 8.2)
 [tests/**/*.cs]
 dotnet_diagnostic.CA1707.severity = none

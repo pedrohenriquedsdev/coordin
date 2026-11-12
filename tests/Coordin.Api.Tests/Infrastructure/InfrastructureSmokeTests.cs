@@ -1,12 +1,13 @@
 namespace Coordin.Api.Tests.Infrastructure;
 
 /// <summary>Provam que a base de testes de integração funciona (host em memória e Docker).</summary>
-public class InfrastructureSmokeTests(PostgresFixture postgres) : IClassFixture<PostgresFixture>
+public class InfrastructureSmokeTests(PostgresFixture postgres)
 {
     [Fact]
     public async Task Factory_Starts_AndHostAnswersRequests()
     {
-        using var factory = new CoordinApiFactory();
+        await using var factory = new CoordinApiFactory("Testing", postgres);
+        await factory.InitializeAsync();
         using var client = factory.CreateClient();
 
         var response = await client.GetAsync("/", TestContext.Current.CancellationToken);
@@ -17,14 +18,14 @@ public class InfrastructureSmokeTests(PostgresFixture postgres) : IClassFixture<
     [Fact]
     public async Task PostgresFixture_Starts_AndAcceptsCommands()
     {
-        Assert.True(await postgres.CanExecuteAsync(TestContext.Current.CancellationToken));
+        await postgres.ExecuteAsync("SELECT 1;", TestContext.Current.CancellationToken);
     }
 
     [Fact]
     public async Task PostgresFixture_CreateDatabase_ReturnsConnectionStringForNewDatabase()
     {
-        var connectionString = await postgres.CreateDatabaseAsync(TestContext.Current.CancellationToken);
+        var database = await postgres.CreateDatabaseAsync(TestContext.Current.CancellationToken);
 
-        Assert.Contains("Database=coordin_test_", connectionString, StringComparison.Ordinal);
+        Assert.Contains($"Database={database.Name}", database.ConnectionString, StringComparison.Ordinal);
     }
 }
