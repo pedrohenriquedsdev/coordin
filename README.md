@@ -160,26 +160,88 @@ Some rules still need to be detailed during specification and development. They 
 
 ## Tech Stack
 
-> To be defined. Update this section as technology decisions are made.
+The decisions and their rationale are recorded in [`docs/TDD.md`](docs/TDD.md).
 
 | Layer | Technology |
 |-------|------------|
-| Backend | _TBD_ |
-| Frontend | _TBD_ |
-| Database | _TBD_ |
-| Infrastructure | _TBD_ |
+| Backend | .NET 10 (LTS), ASP.NET Core Minimal APIs, EF Core 10 |
+| Calculation engine | `Coordin.Engine`: a pure C# library with no database, HTTP, or clock access |
+| Frontend | Angular 22 (standalone components, signals), TypeScript 6, Tailwind CSS 4 |
+| Database | PostgreSQL 18 |
+| Infrastructure | Docker (a single image with the API and the Angular build), GitHub Actions |
 
 ## Getting Started
 
-> Setup instructions will be added once the first implementation is available.
+### Prerequisites
+
+- [.NET SDK](https://dotnet.microsoft.com/download) 10 (the exact version is pinned in `global.json`)
+- [Node.js](https://nodejs.org) 24 LTS and npm
+- [Docker](https://www.docker.com/products/docker-desktop/) (local PostgreSQL and the integration tests)
+
+### Run locally
 
 ```bash
-# Clone the repository
-git clone https://github.com/<your-username>/coordin-planner.git
-cd coordin-planner
+# 1. Clone the repository
+git clone https://github.com/pedrohenriquedsdev/coordin.git
+cd coordin
 
-# Installation and run instructions coming soon
+# 2. Create your local .env and set POSTGRES_PASSWORD (letters and numbers only).
+#    The .env file is ignored by Git. Never commit passwords or other secrets.
+cp .env.example .env
+
+# 3. Start PostgreSQL
+docker compose up -d
+
+# 4. Give the API the connection string as a user secret (stored outside the repository).
+#    The password must be the same one you set in .env.
+dotnet user-secrets set "ConnectionStrings:Default" "Host=localhost;Port=5432;Database=coordin;Username=coordin;Password=YOUR_PASSWORD" --project src/Coordin.Api
+
+# 5. Run the API (http://localhost:5080; applies the database migrations on startup)
+dotnet run --project src/Coordin.Api
 ```
+
+In a second terminal, run the front end:
+
+```bash
+cd src/coordin-web
+npm ci
+npm start   # http://localhost:4200, proxies /api to the API on port 5080
+```
+
+While the API runs in `Development`, the OpenAPI document is at `http://localhost:5080/openapi/v1.json` and the interactive documentation at `http://localhost:5080/swagger`. Check that everything is connected at `http://localhost:4200/api/health`, which should answer `{"status":"Healthy"}`.
+
+### Tests and checks
+
+```bash
+# .NET: build, formatting and tests (Docker must be running: the integration tests start a PostgreSQL container)
+dotnet build Coordin.slnx
+dotnet format Coordin.slnx --verify-no-changes
+dotnet test Coordin.slnx
+
+# Front end (inside src/coordin-web)
+npm run lint
+npm test
+npm run build
+```
+
+### Regenerate the typed API client
+
+With the API running in `Development`, from `src/coordin-web`:
+
+```bash
+npm run generate:api
+```
+
+The generated code in `src/coordin-web/src/app/api/` is committed, so a contract change shows up in the pull request diff.
+
+### Run the production image locally
+
+```bash
+docker compose --profile app up -d --build   # http://localhost:8080
+docker compose --profile app down
+```
+
+This builds the single image (API plus the Angular build) and runs it next to the database. It runs as `Staging`: identical to production except that HTTPS is not forced, since there is no TLS-terminating proxy in front of it locally.
 
 ## Roadmap
 
