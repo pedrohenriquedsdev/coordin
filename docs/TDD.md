@@ -977,7 +977,7 @@ Complementam os riscos de produto do PRD (9.2).
 |---|---|---|---|
 | 1 | Provedor da PaaS (DT-09): escolher entre Render, Railway e Fly.io após verificar planos e limites na documentação oficial | Change 7 | 2026-11-21 |
 | 2 | Conjunto fictício da simulação, faixa de variação do esforço e disponibilidade do gestor (PRD P-03 a P-05; M2; DT-37) | Autor, com o gestor | 2026-11-13 |
-| 3 | Versões das GitHub Actions do CI (DT-33) | Change 1 | 2026-11-13 |
+| 3 | ~~Versões das GitHub Actions do CI (DT-33)~~ **Resolvida na change 1 (2026-11-12):** verificadas nas releases oficiais; `checkout` v7.0.1, `setup-dotnet` v6.1.0, `setup-node` v7.1.0 e `upload-artifact` v7.0.2, usadas pela tag da versão principal | Change 1 | 2026-11-13 |
 | 4 | Período do relatório por time: semana por enquanto, pode mudar (DT-24, já parametrizado) | Autor | Quando decidir |
 | 5 | Atualização para o .NET 11 (DT-05) | Change opcional após a 11 | Se houver tempo |
 
