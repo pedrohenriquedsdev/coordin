@@ -43,12 +43,12 @@ Regras para todas as tasks:
 
 ## 7. Front Angular
 
-- [ ] 7.1 Gerar `src/coordin-web` com o Angular CLI 22.2.6 (roteamento, CSS, sem SSR; D11); verificar com `npm run build` e `npm test` padrão passando
-- [ ] 7.2 Instalar e configurar o Tailwind CSS 4 (`@tailwindcss/postcss`, `.postcssrc.json`, `@import "tailwindcss"`); verificar que uma classe utilitária aparece no CSS do build
-- [ ] 7.3 Configurar ESLint (`angular-eslint`) e Prettier 3 com `eslint-config-prettier` e os scripts `lint` e `format`; verificar com `npm run lint` sem erros
-- [ ] 7.4 Configurar pt-BR (`lang="pt-BR"`, título "Coordin", `registerLocaleData`, `LOCALE_ID`, `DATE_PIPE_DEFAULT_OPTIONS` com `-0300`) e desligar o `inlineCritical` no build de produção (D7); verificar com teste Vitest do cenário "Formatação pt-BR" (`1.234,5` e `28/11/2026`)
-- [ ] 7.5 Criar a casca responsiva (cabeçalho "Coordin", `<main>` com `router-outlet`, página inicial placeholder em pt-BR) com Tailwind; verificar com teste Vitest de que o componente renderiza "Coordin" e manualmente em 360 px e 1280 px sem rolagem horizontal (spec `web-shell`)
-- [ ] 7.6 Criar `proxy.conf.json` encaminhando `/api` para a API local e ligá-lo ao `ng serve`; verificar que `http://localhost:4200/api/health` responde pela API
+- [x] 7.1 Gerar `src/coordin-web` com o Angular CLI 22.2.6 (roteamento, CSS, sem SSR; D11); verificar com `npm run build` e `npm test` padrão passando
+- [x] 7.2 Instalar e configurar o Tailwind CSS 4 (`@tailwindcss/postcss`, `.postcssrc.json`, `@import "tailwindcss"`); verificar que uma classe utilitária aparece no CSS do build
+- [x] 7.3 Configurar ESLint (`angular-eslint`) e Prettier 3 com `eslint-config-prettier` e os scripts `lint` e `format`; verificar com `npm run lint` sem erros
+- [x] 7.4 Configurar pt-BR (`lang="pt-BR"`, título "Coordin", `registerLocaleData`, `LOCALE_ID`, `DATE_PIPE_DEFAULT_OPTIONS` com `-0300`) e desligar o `inlineCritical` no build de produção (D7); verificar com teste Vitest do cenário "Formatação pt-BR" (`1.234,5` e `28/11/2026`)
+- [x] 7.5 Criar a casca responsiva (cabeçalho "Coordin", `<main>` com `router-outlet`, página inicial placeholder em pt-BR) com Tailwind; verificar com teste Vitest de que o componente renderiza "Coordin" e manualmente em 360 px e 1280 px sem rolagem horizontal (spec `web-shell`)
+- [x] 7.6 Criar `proxy.conf.json` encaminhando `/api` para a API local e ligá-lo ao `ng serve`; verificar que `http://localhost:4200/api/health` responde pela API
 
 ## 8. SPA servida pela API
 
