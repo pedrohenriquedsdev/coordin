@@ -62,11 +62,14 @@ coordin/
 ├── Directory.Build.props         # propriedades comuns dos projetos .NET
 ├── Directory.Packages.props      # versões centralizadas dos pacotes NuGet
 ├── global.json                   # versão fixa do SDK .NET
-├── compose.yaml                  # PostgreSQL para desenvolvimento local
-└── Dockerfile                    # imagem única: API + build do Angular
+├── compose.yaml                  # PostgreSQL local; perfil `app` roda a imagem de produção
+├── Dockerfile                    # imagem única: API + build do Angular
+├── .dockerignore · .gitignore    # o que o Docker e o Git ignoram
+├── .editorconfig                 # convenções de código e formatação
+├── .env.example                  # modelo do .env local (o .env real é ignorado pelo Git, nunca versionado)
+├── README.md                     # como rodar, testar e containerizar localmente
+└── LICENSE
 ```
-
-As pastas de código e os arquivos de infraestrutura são criados ao longo da change `project-foundation`; até ela ser integrada, parte da árvore acima ainda não existe.
 
 - **IDs rastreáveis:** requisitos funcionais `RF-01`, não funcionais `RNF-01`, decisões técnicas do TDD `DT-01`. Changes do OpenSpec, commits relevantes e PRs citam os IDs que atendem.
 - **Datas** em ISO 8601 (`2026-11-28`), fuso `America/Sao_Paulo`. **Esforço** sempre em horas.
@@ -269,10 +272,11 @@ Pode fazer sem perguntar: ler arquivos, buscar no repositório, rodar build/test
 - [x] Artefatos de design em `docs/design/` (ERD, protótipos de telas e especificações consolidadas), commitados direto na `main` em 2026-11-12 por decisão do autor
 - [x] Hospedagem (DT-09) decidida em 2026-11-12, na branch `docs/hosting-decision`: container Docker em PaaS com PostgreSQL gerenciado, validado com o orientador; o provedor (Render, Railway ou Fly.io) é escolhido na change 7
 - [x] `openspec/config.yaml` aponta para `docs/PRD.md` e `docs/TDD.md` (context + rules por artefato)
+- [x] Change 1 `project-foundation` implementada na branch `chore/project-foundation` (2026-11-12): solução .NET com motor puro e teste de arquitetura, API com Problem Details, cabeçalhos de segurança e HTTPS em produção, PostgreSQL com migration inicial e `GET /api/health`, OpenAPI e Swagger só em desenvolvimento, SPA Angular 22 com Tailwind e pt-BR servida pela API, cliente tipado gerado, Dockerfile, README e workflow de CI. Verificado localmente: 44 testes .NET e 7 do front aprovados, lint, formatação e builds limpos, imagem Docker rodando. **PR e CI ainda a confirmar** (task 11.2)
 - [ ] Changes do OpenSpec, implementação e PRs, conforme o roadmap do TDD (9.1): 1 `project-foundation` · 2 `authentication` · 3 `capacity-registry` · 4 `forecast-engine` · 5 `demand-planning` · 6 `team-report` · 7 `deployment` (M4) · 8 `demand-dependencies` · 9 `sequencing-scenarios` · 10 `schedule-export` (M5) · 11 `simulation-validation` · 12 `delivery-insights` · 13 `e2e-smoke`
 
 **Desvios registrados (2026-11-10 e 2026-11-11):** a `docs/prd` foi criada a partir da `chore/project-setup` porque a `main` ainda não tinha este arquivo; o PR #1 foi aberto antes do template de PR. Ambos registrados nas descrições dos PRs. PRs são integrados sempre com merge commit (`gh pr merge <n> --merge`), nunca squash ou rebase.
 
-**Próximo passo:** abrir e integrar o PR da `docs/hosting-decision`; depois, criar a branch `chore/project-foundation` a partir da `main` e propor a change 1 com `/opsx:propose`. **Pendente com prazo:** M2 (até 2026-11-13): definir o conjunto fictício da simulação e a faixa de variação do esforço e confirmar a participação do gestor (P-03 a P-05).
+**Próximo passo:** abrir o PR da `chore/project-foundation` (o autor faz o push e abre o PR; Claude prepara a descrição), conferir o CI com `gh pr checks` e integrar com `gh pr merge <n> --merge`; depois, `/opsx:archive project-foundation`, atualizar este estado e iniciar a change 2: criar a `feat/authentication` a partir da `main` e rodar `/opsx:propose`. **Pendente com prazo:** M2 (até 2026-11-13): definir o conjunto fictício da simulação e a faixa de variação do esforço e confirmar a participação do gestor (P-03 a P-05).
 
 Mantenha esta seção atualizada ao concluir cada etapa.
