@@ -60,9 +60,9 @@ Regras para todas as tasks:
 
 ## 10. Imagem Docker
 
-- [ ] 10.1 Criar o `Dockerfile` multiestágio (D14) e o `.dockerignore`; verificar com `docker build -t coordin:local .` concluído sem erros
-- [ ] 10.2 Adicionar o perfil `app` ao `compose.yaml` e subir a imagem com o banco; verificar que `GET http://localhost:8080/api/health` responde `200`, que `/` abre a casca e que o console do navegador não mostra violações de CSP (cenário "SPA funciona sob a CSP")
-- [ ] 10.3 Escrever no `README.md` como rodar localmente (Compose, user-secrets, API, `ng serve`, testes e imagem); verificar seguindo os passos a partir de um clone limpo
+- [x] 10.1 Criar o `Dockerfile` multiestágio (D14) e o `.dockerignore`; verificar com `docker build -t coordin:local .` concluído sem erros
+- [x] 10.2 Adicionar o perfil `app` ao `compose.yaml` e subir a imagem com o banco; verificar que `GET http://localhost:8080/api/health` responde `200`, que `/` abre a casca e que o console do navegador não mostra violações de CSP (cenário "SPA funciona sob a CSP")
+- [x] 10.3 Escrever no `README.md` como rodar localmente (Compose, user-secrets, API, `ng serve`, testes e imagem); verificar seguindo os passos a partir de um clone limpo
 
 ## 11. CI
 
