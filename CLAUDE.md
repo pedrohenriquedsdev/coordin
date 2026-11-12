@@ -31,24 +31,42 @@ Instruções permanentes para o Claude Code neste repositório. Leia este arquiv
 
 - **Nomes de pastas, arquivos, branches, commits e identificadores de código: sempre em inglês.**
 - **Conteúdo dos documentos** (PRD, TDD, specs, descrição de PR): em português.
-- **A estrutura de pastas do código ainda será definida** (no TDD). Até lá, não crie pastas de código nem proponha estrutura sem discutir comigo.
+- **A estrutura de pastas do código está definida no TDD (DT-04).** Não crie pastas fora dela nem proponha outra estrutura sem discutir comigo.
 
 ```
 coordin/
 ├── CLAUDE.md                     # este arquivo
 ├── .claude/                      # comandos e skills do OpenSpec + skills generate-prd e generate-tdd
+├── .config/                      # manifesto das ferramentas .NET locais (dotnet-ef)
 ├── .github/
-│   └── pull_request_template.md  # template obrigatório de PR
+│   ├── pull_request_template.md  # template obrigatório de PR
+│   └── workflows/ci.yml          # CI: jobs dotnet e web (DT-33)
 ├── docs/
 │   ├── PRD.md
 │   ├── TDD.md
+│   ├── design/                   # ERD, protótipos de telas e especificações consolidadas
 │   └── references/
 │       └── tcc-proposal.pdf
-└── openspec/
-    ├── config.yaml               # contexto do projeto; aponta para PRD e TDD
-    ├── specs/                    # specs vigentes (fonte da verdade do comportamento)
-    └── changes/                  # changes em andamento e arquivadas
+├── openspec/
+│   ├── config.yaml               # contexto do projeto; aponta para PRD e TDD
+│   ├── specs/                    # specs vigentes (fonte da verdade do comportamento)
+│   └── changes/                  # changes em andamento e arquivadas
+├── src/
+│   ├── Coordin.Engine/           # biblioteca pura de cálculo (DT-02)
+│   ├── Coordin.Api/              # ASP.NET Core: endpoints, auth, persistência, exportação
+│   └── coordin-web/              # Angular SPA
+├── tests/
+│   ├── Coordin.Engine.Tests/     # testes de unidade do motor (obrigatórios)
+│   └── Coordin.Api.Tests/        # testes de integração da API
+├── Coordin.slnx                  # solução .NET
+├── Directory.Build.props         # propriedades comuns dos projetos .NET
+├── Directory.Packages.props      # versões centralizadas dos pacotes NuGet
+├── global.json                   # versão fixa do SDK .NET
+├── compose.yaml                  # PostgreSQL para desenvolvimento local
+└── Dockerfile                    # imagem única: API + build do Angular
 ```
+
+As pastas de código e os arquivos de infraestrutura são criados ao longo da change `project-foundation`; até ela ser integrada, parte da árvore acima ainda não existe.
 
 - **IDs rastreáveis:** requisitos funcionais `RF-01`, não funcionais `RNF-01`, decisões técnicas do TDD `DT-01`. Changes do OpenSpec, commits relevantes e PRs citam os IDs que atendem.
 - **Datas** em ISO 8601 (`2026-11-28`), fuso `America/Sao_Paulo`. **Esforço** sempre em horas.

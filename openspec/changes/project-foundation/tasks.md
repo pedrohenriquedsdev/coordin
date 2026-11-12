@@ -6,15 +6,15 @@ Regras para todas as tasks:
 
 ## 1. Base do repositório
 
-- [ ] 1.1 Criar `.gitignore` (D10), `.editorconfig` (convenções C#, TypeScript, JSON, YAML e Markdown) e `global.json` (SDK `10.0.403`, `rollForward: latestFeature`); verificar que `git status` não lista `Claude outputs/` e que `dotnet --version` dentro do repositório responde `10.0.403`
-- [ ] 1.2 Criar `Directory.Build.props` (Nullable, ImplicitUsings, TreatWarningsAsErrors, AnalysisLevel) e `Directory.Packages.props` com as versões NuGet do TDD 3 e do design; verificar que o arquivo de versões é aceito por `dotnet restore` na task 2.1
-- [ ] 1.3 Criar a solução `Coordin.slnx` e a ferramenta local `dotnet-ef` 10.0.15 (`.config/dotnet-tools.json`); verificar com `dotnet tool run dotnet-ef --version`
+- [x] 1.1 Criar `.gitignore` (D10), `.editorconfig` (convenções C#, TypeScript, JSON, YAML e Markdown) e `global.json` (SDK `10.0.403`, `rollForward: latestFeature`); verificar que `git status` não lista `Claude outputs/` e que `dotnet --version` dentro do repositório responde `10.0.403`
+- [x] 1.2 Criar `Directory.Build.props` (Nullable, ImplicitUsings, TreatWarningsAsErrors, AnalysisLevel) e `Directory.Packages.props` com as versões NuGet do TDD 3 e do design; verificar que o arquivo de versões é aceito por `dotnet restore` na task 2.1
+- [x] 1.3 Criar a solução `Coordin.slnx` e a ferramenta local `dotnet-ef` 10.0.15 (`.config/dotnet-tools.json`); verificar com `dotnet tool run dotnet-ef --version`
 - [ ] 1.4 Atualizar o `CLAUDE.md` §3 com a estrutura de pastas do DT-04 (agora existente); verificar que a árvore do §3 coincide com o repositório
 
 ## 2. Motor de cálculo (projeto vazio e puro)
 
-- [ ] 2.1 Criar `src/Coordin.Engine` (`classlib`, `net10.0`, sem `PackageReference`) e `tests/Coordin.Engine.Tests` (`.csproj` escrito à mão com xUnit v3, VSTest e coverlet; D2), ambos na solução; verificar com `dotnet build Coordin.slnx`
-- [ ] 2.2 Escrever o teste de arquitetura `EngineAssembly_References_OnlyRuntimeAssemblies` (D3) e um marcador de assembly no motor; verificar que `dotnet test` passa e que o teste falha ao referenciar temporariamente um pacote externo
+- [x] 2.1 Criar `src/Coordin.Engine` (`classlib`, `net10.0`, sem `PackageReference`) e `tests/Coordin.Engine.Tests` (`.csproj` escrito à mão com xUnit v3, VSTest e coverlet; D2), ambos na solução; verificar com `dotnet build Coordin.slnx`
+- [x] 2.2 Escrever o teste de arquitetura `EngineAssembly_References_OnlyRuntimeAssemblies` (D3) e um marcador de assembly no motor; verificar que `dotnet test` passa e que o teste falha ao referenciar temporariamente um pacote externo
 
 ## 3. API: esqueleto, Problem Details e base de testes de integração
 
