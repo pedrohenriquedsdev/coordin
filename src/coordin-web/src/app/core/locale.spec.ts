@@ -18,7 +18,9 @@ describe('provideLocalePtBr', () => {
   it('formats dates as dd/MM/yyyy', () => {
     const date = TestBed.inject(DatePipe);
 
-    expect(date.transform('2026-11-28', 'dd/MM/yyyy')).toBe('28/11/2026');
+    // Instante fixo (meio-dia UTC): o resultado não depende do fuso da máquina que roda o teste.
+    // Uma string só com a data ('2026-11-28') seria lida como meia-noite no fuso local da máquina.
+    expect(date.transform('2026-11-28T12:00:00Z', 'dd/MM/yyyy')).toBe('28/11/2026');
   });
 
   it('shows instants in the America/Sao_Paulo offset', () => {
