@@ -39,7 +39,7 @@ Regras para todas as tasks:
 
 ## 6. Documentação da API (OpenAPI e Swagger UI)
 
-- [ ] 6.1 Adicionar `Microsoft.AspNetCore.OpenApi` (`/openapi/v1.json`) e `Swashbuckle.AspNetCore.SwaggerUI` (`/swagger`) só em `Development` (DT-19); verificar com os testes "Documentação em desenvolvimento" (documento contém `/api/health`) e "Documentação bloqueada em produção"
+- [x] 6.1 Adicionar `Microsoft.AspNetCore.OpenApi` (`/openapi/v1.json`) e `Swashbuckle.AspNetCore.SwaggerUI` (`/swagger`) só em `Development` (DT-19); verificar com os testes "Documentação em desenvolvimento" (documento contém `/api/health`) e "Documentação bloqueada em produção"
 
 ## 7. Front Angular
 

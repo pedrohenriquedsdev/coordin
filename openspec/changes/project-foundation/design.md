@@ -78,8 +78,9 @@ Um middleware próprio de poucas linhas, sem pacote:
 - *Alternativa:* aplicar as migrations por um comando separado no deploy. É mais seguro com várias instâncias, mas o Coordin roda em uma instância só, e aplicar na inicialização elimina um passo manual na PaaS.
 
 ### D9 — Health check
-`AddHealthChecks().AddDbContextCheck<CoordinDbContext>()` (pacote oficial `Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore`), mapeado em `/api/health` com `AllowAnonymous` e um `ResponseWriter` que escreve só `{"status":"..."}`. O status padrão já é `200`/`503`.
+`AddHealthChecks().AddDbContextCheck<CoordinDbContext>()` (pacote oficial `Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore`). O `/api/health` é um endpoint comum de Minimal API, anônimo, que consulta o `HealthCheckService` e devolve só `{"status":"..."}` com `200` (saudável) ou `503` (não saudável), com resposta tipada (`HealthResponse`).
 - *Alternativa:* `AspNetCore.HealthChecks.NpgSql`. É um pacote comunitário que duplica a configuração da conexão, enquanto o check pelo `DbContext` reusa a mesma.
+- *Alternativa descartada (ajustada na implementação, task 6.1):* `MapHealthChecks` com um `ResponseWriter`. Ele não entra no documento OpenAPI (o `paths` saía vazio), e o cliente Angular gerado (D12) nunca receberia o endpoint.
 
 ### D10 — Configuração e segredos
 - `appsettings.json` não tem string de conexão.
