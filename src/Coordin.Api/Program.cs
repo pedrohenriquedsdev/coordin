@@ -10,6 +10,7 @@ builder.Services.AddCoordinProblemDetails();
 builder.Services.AddCoordinTransportSecurity();
 builder.Services.AddCoordinPersistence();
 builder.Services.AddCoordinHealth();
+builder.Services.AddCoordinApiDocumentation();
 
 var app = builder.Build();
 
@@ -21,6 +22,8 @@ await app.MigrateCoordinDatabaseAsync();
 app.UseCoordinTransportSecurity();
 app.UseCoordinSecurityHeaders();
 app.UseCoordinProblemDetails();
+
+app.UseCoordinApiDocumentation();
 
 app.MapHealthEndpoint();
 app.MapTestOnlyEndpoints();

@@ -1,6 +1,6 @@
 using Coordin.Api.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Coordin.Api.Features.Health;
 
@@ -17,20 +17,29 @@ public static class HealthEndpoints
         return services;
     }
 
+    // Um endpoint comum de Minimal API (e não MapHealthChecks) para constar no documento OpenAPI,
+    // de onde sai o cliente tipado do Angular (DT-19).
     public static IEndpointRouteBuilder MapHealthEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapHealthChecks("/api/health", new HealthCheckOptions
-        {
-            // 200 para saudável e 503 para não saudável (padrão do ASP.NET Core).
-            ResponseWriter = (context, report) =>
+        app.MapGet("/api/health", async (HealthCheckService healthChecks, CancellationToken cancellationToken) =>
             {
-                context.Response.ContentType = "application/json";
-                return context.Response.WriteAsJsonAsync(new HealthResponse(report.Status.ToString()));
-            },
-        }).AllowAnonymous();
+                var report = await healthChecks.CheckHealthAsync(cancellationToken);
+                var response = new HealthResponse(report.Status.ToString());
+
+                return report.Status == HealthStatus.Unhealthy
+                    ? Results.Json(response, statusCode: StatusCodes.Status503ServiceUnavailable)
+                    : Results.Ok(response);
+            })
+            .WithName("GetHealth")
+            .WithTags("Health")
+            .WithSummary("Verifica se a aplicação e o banco estão no ar.")
+            .Produces<HealthResponse>(StatusCodes.Status200OK)
+            .Produces<HealthResponse>(StatusCodes.Status503ServiceUnavailable)
+            .AllowAnonymous();
 
         return app;
     }
 }
 
+/// <summary>Estado geral da aplicação: <c>Healthy</c>, <c>Degraded</c> ou <c>Unhealthy</c>.</summary>
 public sealed record HealthResponse(string Status);
