@@ -1,0 +1,25 @@
+name: coordin
+
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: coordin
+      POSTGRES_DB: coordin
+      # A senha vem do arquivo .env (ignorado pelo Git); veja o .env.example.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env (copie o .env.example)}
+    ports:
+      # Só a própria máquina acessa o banco.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # A imagem 18 guarda os dados em /var/lib/postgresql/18/docker.
+      - coordin-pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coordin -d coordin"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  coordin-pgdata:
