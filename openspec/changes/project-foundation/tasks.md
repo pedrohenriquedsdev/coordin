@@ -18,10 +18,10 @@ Regras para todas as tasks:
 
 ## 3. API: esqueleto, Problem Details e base de testes de integração
 
-- [ ] 3.1 Criar `src/Coordin.Api` (Minimal APIs, `net10.0`) com a organização do D4 (`Features/`, `Infrastructure/Http`, `Infrastructure/Persistence`) e `public partial class Program`, referenciando o `Coordin.Engine`; verificar com `dotnet build` e `dotnet run` respondendo em `http://localhost`
-- [ ] 3.2 Criar `tests/Coordin.Api.Tests` com a fixture do Testcontainers (`postgres:18`) e a `CoordinApiFactory` (D13: string de conexão, ambiente, web root temporário com `index.html` falso); verificar com um teste de fumaça que sobe a factory
-- [ ] 3.3 Configurar Problem Details em português (D6: `AddProblemDetails`, `UseExceptionHandler`, `UseStatusCodePages`, `traceId`, fábrica `ApiProblems.Conflict`) e a validação nativa (`AddValidation`); verificar com os testes dos cenários `404`, `500` sem detalhes internos, `409` com `code` e `400` com `errors.name` (spec `api-conventions`), usando os endpoints `/api/_test/*` do ambiente `Testing`
-- [ ] 3.4 Garantir o JSON em `camelCase` e o prefixo `/api` com o fallback `MapFallback("/api/{**path}")` → `404` (D5, passo 7); verificar com os testes "Propriedades em camelCase" e "Rota de API inexistente" e com o teste de que `/api/_test/*` responde `404` em `Production`
+- [x] 3.1 Criar `src/Coordin.Api` (Minimal APIs, `net10.0`) com a organização do D4 (`Features/`, `Infrastructure/Http`, `Infrastructure/Persistence`) e `public partial class Program`, referenciando o `Coordin.Engine`; verificar com `dotnet build` e `dotnet run` respondendo em `http://localhost`
+- [x] 3.2 Criar `tests/Coordin.Api.Tests` com a fixture do Testcontainers (`postgres:18`) e a `CoordinApiFactory` (D13: string de conexão, ambiente, web root temporário com `index.html` falso); verificar com um teste de fumaça que sobe a factory
+- [x] 3.3 Configurar Problem Details em português (D6: `AddProblemDetails`, `UseExceptionHandler`, `UseStatusCodePages`, `traceId`, fábrica `ApiProblems.Conflict`) e a validação nativa (`AddValidation`); verificar com os testes dos cenários `404`, `500` sem detalhes internos, `409` com `code` e `400` com `errors.name` (spec `api-conventions`), usando os endpoints `/api/_test/*` do ambiente `Testing`
+- [x] 3.4 Garantir o JSON em `camelCase` e o prefixo `/api` com o fallback `MapFallback("/api/{**path}")` → `404` (D5, passo 7); verificar com os testes "Propriedades em camelCase" e "Rota de API inexistente" e com o teste de que `/api/_test/*` responde `404` em `Production`
 
 ## 4. Segurança HTTP
 
