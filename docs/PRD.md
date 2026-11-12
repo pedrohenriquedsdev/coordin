@@ -254,6 +254,19 @@ O gestor registra a data real de conclusão de uma demanda.
 - O sistema guarda a **primeira previsão** calculada para a demanda (linha de base); replanejamentos posteriores não a alteram.
 - Para cada demanda concluída, o sistema mostra a data real e dois desvios, em dias: em relação à primeira previsão e em relação à previsão vigente no momento da conclusão.
 
+#### RF-17 — Relatório por time
+
+O RF-17 passou de Should para Must em 2026-11-12, por atender diretamente à dor central (seção 2); o ID foi mantido para preservar as referências.
+
+Para cada time, o sistema mostra por período a capacidade disponível (descontadas as ausências), as horas alocadas e a ocupação.
+
+- **Ociosidade:** período em que o time tem capacidade sem trabalho alocado; o relatório indica quantas horas estão livres.
+- **Sobrecarga:** período em que o trabalho na fila do time excede sua capacidade, empurrando entregas para depois; o relatório indica as demandas afetadas.
+- O relatório permite identificar times com capacidade livre para receber novas demandas ou apoiar outros times.
+- Demandas não previsíveis do time não entram nas horas alocadas, mas o relatório informa quantas existem.
+- A capacidade disponível e as horas alocadas de cada time por período também são apresentadas em gráfico, com ociosidade e sobrecarga destacadas, e os mesmos valores ficam disponíveis em tabela.
+- O tamanho do período (semana, mês) é decidido no TDD.
+
 ### 5.2 Should
 
 O relatório de planejamento geral previsto na proposta (comparar sequências e seu impacto no cronograma do setor) é atendido pelos cenários (RF-13 a RF-15). O critério que define um cenário "melhor" (prazo total, entregas prioritárias, utilização ou combinação) é decidido no TDD.
@@ -292,17 +305,6 @@ Antes de incluir uma nova demanda no planejamento, o gestor simula seu efeito no
 
 - O sistema mostra quais demandas têm a data prevista alterada e em quantos dias.
 - O gestor confirma a inclusão, que passa a valer no cronograma, ou descarta a simulação, sem nenhum efeito.
-
-#### RF-17 — Relatório por time
-
-Para cada time, o sistema mostra por período a capacidade disponível (descontadas as ausências), as horas alocadas e a ocupação.
-
-- **Ociosidade:** período em que o time tem capacidade sem trabalho alocado; o relatório indica quantas horas estão livres.
-- **Sobrecarga:** período em que o trabalho na fila do time excede sua capacidade, empurrando entregas para depois; o relatório indica as demandas afetadas.
-- O relatório permite identificar times com capacidade livre para receber novas demandas ou apoiar outros times.
-- Demandas não previsíveis do time não entram nas horas alocadas, mas o relatório informa quantas existem.
-- A capacidade disponível e as horas alocadas de cada time por período também são apresentadas em gráfico, com ociosidade e sobrecarga destacadas, e os mesmos valores ficam disponíveis em tabela.
-- O tamanho do período (semana, mês) é decidido no TDD.
 
 #### RF-18 — Dependências entre demandas
 
@@ -463,8 +465,8 @@ Métricas que dependem de requisitos Should ou Could só são medidas se esses r
 
 | Prioridade | Requisitos | O que cobre |
 |---|---|---|
-| Must | RF-01 a RF-12 | Cadastros de times, pessoas, capacidade, ausências, feriados e demandas; alocação; estimativas; cálculo da previsão com margem de segurança; demandas não previsíveis; cronograma; conclusão real e desvio |
-| Should | RF-13 a RF-19 | Cenários de sequenciamento (recomendados e simulados) com aprovação do gestor; simulação de nova demanda; relatório por time; dependências entre demandas; exportação em planilha |
+| Must | RF-01 a RF-12 e RF-17 | Cadastros de times, pessoas, capacidade, ausências, feriados e demandas; alocação; estimativas; cálculo da previsão com margem de segurança; demandas não previsíveis; cronograma; conclusão real e desvio; relatório por time com ociosidade e sobrecarga |
+| Should | RF-13 a RF-16, RF-18 e RF-19 | Cenários de sequenciamento (recomendados e simulados) com aprovação do gestor; simulação de nova demanda; dependências entre demandas; exportação em planilha |
 | Could | RF-20 a RF-23 | Histórico de estimativas e da data prevista; esforço real; indicadores de precisão |
 | Não funcionais | RNF-01 a RNF-08 | Valem para tudo o que for entregue |
 
@@ -542,8 +544,8 @@ Em 2026-11-28 tudo precisa estar pronto: software funcionando, documentação (P
 | M1 | Repositório integrado | 2026-11-11 | Template de PR criado; `chore/project-setup` e `docs/prd` integradas à `main` por PR |
 | M2 | Dados da validação verificados | 2026-11-13 | Confirmado se existem demandas históricas e registros das datas comunicadas (P-03, P-04); amostra da validação definida (R-04) |
 | M3 | TDD aprovado | 2026-11-13 | Decisões da seção 9.3 fechadas como `DT-*`; roadmap de changes definido; hospedagem decidida (R-02) |
-| M4 | Must entregues | 2026-11-20 | RF-01 a RF-12 implementados, testados (RNF-08) e acessíveis pela rede (RNF-03) |
-| M5 | Should entregues | 2026-11-24 | RF-13 a RF-19 implementados e testados |
+| M4 | Must entregues | 2026-11-21 | RF-01 a RF-12 e RF-17 implementados, testados (RNF-08) e acessíveis pela rede (RNF-03) |
+| M5 | Should entregues | 2026-11-24 | RF-13 a RF-16, RF-18 e RF-19 implementados e testados |
 | M6 | Could e congelamento | 2026-11-25 | Could que couberem no prazo implementados; a partir daqui, só correções |
 | M7 | Validação executada | 2026-11-26 | Histórico cadastrado, desvios medidos (seção 7) e questionário respondido pelo gestor |
 | M8 | Entrega pronta | 2026-11-27 | Documentação revisada, apresentação pronta e ensaiada |
@@ -551,7 +553,7 @@ Em 2026-11-28 tudo precisa estar pronto: software funcionando, documentação (P
 
 ### 10.1 Pontos de decisão de corte
 
-- **Em 2026-11-20 (M4):** se os Must não estiverem completos, os Could saem do escopo e os Should são reavaliados um a um.
+- **Em 2026-11-21 (M4):** se os Must não estiverem completos, os Could saem do escopo e os Should são reavaliados um a um.
 - **Em 2026-11-24 (M5):** se os Should não estiverem completos, os Could saem do escopo e os Should restantes são reavaliados.
 - **A validação (M7) e a entrega (M8) não são cortadas:** se necessário, a implementação de Should e Could cede tempo a elas.
 - Todo corte é proposto com justificativa e decidido pelo autor do TCC, nunca aplicado silenciosamente.
