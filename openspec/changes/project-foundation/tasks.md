@@ -52,7 +52,7 @@ Regras para todas as tasks:
 
 ## 8. SPA servida pela API
 
-- [ ] 8.1 Adicionar `UseStaticFiles` e `MapFallbackToFile("index.html")` depois do fallback de `/api` (D5); verificar com os testes "Página inicial", "Arquivos estáticos", "Recarregar uma rota da SPA" e "Rota de API não cai na SPA" (spec `web-shell`) e "Cabeçalhos na SPA" (spec `http-security`)
+- [x] 8.1 Adicionar `UseStaticFiles` e `MapFallbackToFile("index.html")` depois do fallback de `/api` (D5); verificar com os testes "Página inicial", "Arquivos estáticos", "Recarregar uma rota da SPA" e "Rota de API não cai na SPA" (spec `web-shell`) e "Cabeçalhos na SPA" (spec `http-security`)
 
 ## 9. Cliente gerado
 
