@@ -1,6 +1,6 @@
 # PRD — Coordin
 
-- **Status:** aprovado (2026-11-10); ajustes aprovados em 2026-11-11 em RF-02, RF-03, RF-06, RF-10 e 8.1, decorrentes do TDD, e em RF-13, RF-17 e RF-23 (justificativa dos cenários e apresentação em gráficos). Ajustes aprovados em 2026-11-12: dor central reenquadrada (seções 1 a 3), RF-17 promovido a Must com M4 em 2026-11-21, métricas de eficiência (7.2) e validação por simulação (7.3, 9, 10)
+- **Status:** aprovado (2026-11-10); ajustes aprovados em 2026-11-11 em RF-02, RF-03, RF-06, RF-10 e 8.1, decorrentes do TDD, e em RF-13, RF-17 e RF-23 (justificativa dos cenários e apresentação em gráficos). Ajustes aprovados em 2026-11-12: dor central reenquadrada (seções 1 a 3), RF-17 promovido a Must com M4 em 2026-11-21, métricas de eficiência (7.2), validação por simulação (7.3, 9, 10) e RF-24 (5.4)
 - **Última atualização:** 2026-11-12
 - **Fonte original:** [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -366,6 +366,23 @@ O sistema apresenta indicadores de precisão calculados sobre as demandas conclu
 - Uma demanda com vários times entra nos indicadores de cada time envolvido.
 - Times com diferença recorrente entre estimado e realizado ficam evidenciados na comparação entre times.
 
+### 5.4 Apoio à validação do TCC
+
+Requisito fora da priorização MoSCoW, criado em 2026-11-12 para executar a validação por simulação (7.3) dentro do próprio sistema. É protegido como o marco M7: não é cortado.
+
+#### RF-24 — Validação por simulação
+
+O gestor executa no Coordin a comparação entre o planejamento do processo atual e o planejamento feito com o sistema, sobre um conjunto fictício de dados.
+
+- A área de validação só fica disponível quando habilitada na configuração do ambiente; desabilitada, ela não aparece e não pode ser acessada.
+- O gestor carrega o conjunto fictício da simulação (7.3, passo 1). Como o carregamento substitui todos os dados do planejamento, ele exige confirmação explícita e informa o que será substituído.
+- O gestor registra, para cada demanda do conjunto, a data que comunicaria ao gestor de produto sem o sistema (linha de base, passo 2).
+- O gestor guarda o planejamento do processo atual (passo 3) antes de usar o relatório por time e os cenários; esse planejamento guardado não muda depois.
+- O gestor informa os parâmetros do realizado simulado (faixa de variação do esforço e semente) e solicita a comparação (passos 5 a 7).
+- O resultado mostra, para o planejamento do processo atual e para o planejamento com o Coordin, as métricas de eficiência (7.2), e, para cada demanda e na média, o desvio das datas da linha de base e o desvio das previsões do Coordin em relação às datas reais simuladas.
+- Com os mesmos dados e parâmetros, a comparação produz sempre o mesmo resultado (RNF-02).
+- O resultado é apresentado em gráficos e em tabela com os mesmos valores.
+
 ---
 
 ## 6. Requisitos não funcionais e regras invioláveis
@@ -485,9 +502,10 @@ Métricas que dependem de requisitos Should ou Could só são medidas se esses r
 | Must | RF-01 a RF-12 e RF-17 | Cadastros de times, pessoas, capacidade, ausências, feriados e demandas; alocação; estimativas; cálculo da previsão com margem de segurança; demandas não previsíveis; cronograma; conclusão real e desvio; relatório por time com ociosidade e sobrecarga |
 | Should | RF-13 a RF-16, RF-18 e RF-19 | Cenários de sequenciamento (recomendados e simulados) com aprovação do gestor; simulação de nova demanda; dependências entre demandas; exportação em planilha |
 | Could | RF-20 a RF-23 | Histórico de estimativas e da data prevista; esforço real; indicadores de precisão |
+| Apoio à validação | RF-24 | Validação por simulação dentro do sistema (7.3), protegida como o M7 |
 | Não funcionais | RNF-01 a RNF-08 | Valem para tudo o que for entregue |
 
-O escopo é protegido na ordem **Must → Should → Could**. Se o prazo exigir cortes, eles começam pelos Could, são propostos com justificativa e dependem de aprovação; nenhum Must é cortado sem decisão explícita.
+O escopo é protegido na ordem **Must → Should → Could**; o RF-24 não entra nessa ordem e não é cortado, porque sustenta a validação (M7). Se o prazo exigir cortes, eles começam pelos Could, são propostos com justificativa e dependem de aprovação; nenhum Must é cortado sem decisão explícita.
 
 ### 8.2 Não objetivos
 
@@ -524,11 +542,11 @@ O Coordin **não** vai:
 
 | ID | Risco | Impacto | Mitigação |
 |---|---|---|---|
-| R-01 | **Prazo:** 23 requisitos funcionais, TDD e implementação até 2026-11-28. | Should e Could não entregues. | Proteger Must → Should → Could (seção 8); revisar o andamento ao fim de cada etapa e propor cortes cedo. |
+| R-01 | **Prazo:** 24 requisitos funcionais, TDD e implementação até 2026-11-28. | Should e Could não entregues. | Proteger Must → Should → Could (seção 8); revisar o andamento ao fim de cada etapa e propor cortes cedo. |
 | R-02 | **Hospedagem:** o uso no computador e no celular (RNF-03) exige que o sistema esteja acessível pela rede. | Sem hospedagem, o celular não acessa os dados; custo e configuração extras. | Decidir hospedagem e implantação no TDD, cedo no roadmap. |
 | R-03 | **Validade da simulação:** dados fictícios e realizado gerado pelo mesmo modelo do Coordin (P-03). | A banca questionar o quanto os resultados representam o setor real. | Limitação declarada (7.3); conjunto revisado com o gestor; eficiência comparada com o mesmo cálculo nos dois planejamentos. |
-| R-04 | **Cadastro do conjunto da simulação:** sem importação (seção 8), os dados precisam ser carregados no sistema. | Horas de cadastro perto do prazo. | Limitar o tamanho do conjunto, definido no M2; reservar tempo nos marcos (seção 10). |
-| R-05 | **Agregação da métrica principal depende do RF-23 (Could).** | Sem média e % no prazo calculados pelo sistema. | Calcular a partir da exportação (RF-19) ou manualmente na validação. |
+| R-04 | **Conjunto da simulação:** o conjunto fictício precisa ser montado e carregado no sistema (RF-24). | Horas de preparação perto do prazo. | Limitar o tamanho do conjunto, definido no M2; carregamento pelo RF-24, sem digitação manual. |
+| R-05 | **Agregação da métrica principal no uso real depende do RF-23 (Could).** | Fora da validação, sem média e % no prazo calculados pelo sistema. | Na validação, o RF-24 calcula os desvios; no uso real, calcular a partir da exportação (RF-19) até o RF-23 existir. |
 | R-06 | **Complexidade do cálculo:** ausências, vários times por demanda, dependências e busca de cenários com até 200 demandas. | Erros de previsão ou cenários acima do tempo do RNF-01. | Motor de cálculo isolado e testado (RNF-08); método de busca de cenários definido no TDD respeitando o RNF-01. |
 | R-07 | **Exposição de dados reais** do setor na validação ou no repositório. | Problema de confidencialidade e de dados pessoais. | A simulação usa apenas dados fictícios; nada real versionado (RNF-05). |
 | R-08 | **Telas no celular:** o cronograma tem muitas informações para telas de 360 px. | Retrabalho de interface. | Celular só para consulta (RNF-03); definir no TDD a apresentação compacta. |
