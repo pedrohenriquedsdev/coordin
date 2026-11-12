@@ -56,7 +56,7 @@ Regras para todas as tasks:
 
 ## 9. Cliente gerado
 
-- [ ] 9.1 Instalar o `ng-openapi-gen` 1.1.x, criar a configuração e o script `generate:api` (D12) e gerar o cliente em `src/app/api/` a partir da API local; verificar que o serviço do endpoint de saúde foi gerado e que `npm run build` e `npm run lint` passam com o código gerado (excluído do lint se necessário)
+- [x] 9.1 Instalar o `ng-openapi-gen` 1.1.x, criar a configuração e o script `generate:api` (D12) e gerar o cliente em `src/app/api/` a partir da API local; verificar que o serviço do endpoint de saúde foi gerado e que `npm run build` e `npm run lint` passam com o código gerado (excluído do lint se necessário)
 
 ## 10. Imagem Docker
 
