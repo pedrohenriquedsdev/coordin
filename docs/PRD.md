@@ -10,7 +10,7 @@
 
 O **Coordin** é um sistema de planejamento e apoio à decisão para a gestão de desenvolvimento. Ele transforma uma lista de demandas priorizadas, o esforço estimado de cada uma e a capacidade dos times em um cronograma de entregas mais previsível. Além de calcular datas, compara sequências alternativas de execução, aponta possíveis ociosidades e sobrecargas e recomenda alternativas de organização.
 
-> **Objetivo central:** dar ao gestor de desenvolvimento visibilidade suficiente para responder ao gestor de produto quando cada demanda poderá ser entregue, considerando a capacidade real dos times.
+> **Objetivo central:** reduzir o trabalho do gestor de desenvolvimento para encontrar ociosidade, sobrecarga e sequências de execução mais eficazes, dando a ele visibilidade sobre a capacidade real dos times. Com essa visibilidade, as previsões de entrega comunicadas ao gestor de produto passam a ser fundamentadas em dados, cálculos e alternativas descritas.
 
 **Princípio central:** o gestor sempre decide. O sistema calcula, mostra o impacto de cada alternativa e recomenda, mas nunca substitui a decisão do gestor nem a prioridade combinada entre produto e desenvolvimento.
 
@@ -24,12 +24,13 @@ O **Coordin** é um sistema de planejamento e apoio à decisão para a gestão d
 
 **Resultados esperados:**
 
-- Maior previsibilidade das datas de entrega.
+- Identificação antecipada de ociosidade, sobrecarga e oportunidades de realocação.
+- Carga de trabalho mais equilibrada entre os times.
+- Comparação de cenários para apoiar decisões de sequenciamento.
 - Visão centralizada das demandas e da capacidade dos times.
 - Melhor sincronização entre times que participam de uma mesma demanda.
-- Identificação antecipada de ociosidade, sobrecarga e oportunidades de realocação.
-- Comparação de cenários para apoiar decisões de sequenciamento.
-- Mais clareza na comunicação entre os gestores de desenvolvimento e de produto.
+- Maior previsibilidade das datas de entrega.
+- Mais clareza na comunicação entre os gestores de desenvolvimento e de produto, como consequência dos itens anteriores.
 
 ---
 
@@ -39,15 +40,17 @@ O planejamento de entregas fica difícil quando há várias demandas concorrente
 
 **Situação atual:** hoje esse planejamento é feito de maneira manual, com ferramentas soltas, planilhas ou até mesmo apenas na cabeça do gestor. Não existe uma ferramenta voltada ao desenvolvimento para tratar esse problema.
 
-Nesse cenário, o gestor de desenvolvimento precisa responder ao gestor de produto quando cada demanda será entregue, mas enfrenta as seguintes dificuldades:
+**Dor central:** nesse cenário, encontrar ociosidades, equilibrar a carga entre os times e descobrir sequências de execução mais eficazes exige do gestor de desenvolvimento um trabalho manual grande. As dificuldades são:
 
-1. **Falta de visão consolidada** sobre demandas, responsáveis, esforço e datas previstas.
-2. **Distribuição desigual de trabalho**, com possibilidade de ociosidade em alguns times e sobrecarga em outros.
-3. **Impacto de novas demandas pouco claro:** é difícil entender como uma nova demanda afeta o cronograma já planejado.
-4. **Comparação de alternativas difícil:** é difícil comparar sequências de execução e identificar uma organização mais eficiente.
+1. **Ociosidade e sobrecarga difíceis de enxergar:** o trabalho fica distribuído de forma desigual, com times parados enquanto outros acumulam fila, e as oportunidades de realocação passam despercebidas.
+2. **Comparação de alternativas difícil:** é difícil comparar sequências de execução e identificar uma organização mais eficaz em relação a datas e times.
+3. **Impacto de novas demandas pouco claro:** é difícil entender como uma nova demanda afeta o cronograma já planejado e a carga de cada time.
+4. **Falta de visão consolidada** sobre demandas, responsáveis, esforço e datas previstas.
 5. **Previsões dependentes das estimativas dos times:** a data de entrega depende do esforço levantado pelos próprios times, e não apenas da prioridade da demanda. Essa estimativa pode não existir quando a demanda chega: inicialmente a demanda traz apenas sua prioridade, e as demais informações são complementadas ao longo do planejamento.
 
-**Em síntese:** o desafio não é somente acompanhar tarefas, e sim coordenar a capacidade de vários times para prever e melhorar as entregas do setor.
+**Consequência:** sem essa análise, o gestor de desenvolvimento responde ao gestor de produto quando cada demanda será entregue com base em intuição, e a produtividade do setor fica abaixo do que a capacidade disponível dos times permitiria.
+
+**Em síntese:** o desafio não é somente acompanhar tarefas, e sim dar ao gestor visibilidade sobre a capacidade dos times para equilibrar o trabalho e encontrar alternativas mais eficazes. Previsões confiáveis e uma comunicação clara com o produto decorrem disso.
 
 ---
 
@@ -75,13 +78,14 @@ Responsável pelo planejamento de entregas de todo o setor, com 7 ou mais times.
 
 **Objetivos:**
 
-- Responder ao gestor de produto quando cada demanda poderá ser entregue, com base na capacidade real dos times.
-- Ter uma visão consolidada de demandas, responsáveis, esforço e datas previstas.
 - Perceber cedo ociosidade e sobrecarga nos times e encontrar times com capacidade para receber novas demandas ou apoiar outras equipes.
-- Entender o impacto de uma nova demanda no cronograma já planejado.
+- Equilibrar a carga de trabalho entre os times.
 - Comparar sequências de execução antes de decidir.
+- Entender o impacto de uma nova demanda no cronograma já planejado.
+- Ter uma visão consolidada de demandas, responsáveis, esforço e datas previstas.
+- Responder ao gestor de produto quando cada demanda poderá ser entregue, com base na capacidade real dos times.
 
-**Dores atuais:** planeja de forma manual, com ferramentas soltas, planilhas ou de cabeça, sem uma visão consolidada (ver seção 2).
+**Dores atuais:** encontrar ociosidade, equilibrar a carga e comparar alternativas de forma manual, com ferramentas soltas, planilhas ou de cabeça, sem uma visão consolidada (ver seção 2).
 
 ### 3.2 Gestor de produto (não usuário)
 
