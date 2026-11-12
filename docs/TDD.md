@@ -757,7 +757,7 @@ Logout ──► POST /api/auth/logout → revoga o refresh token e apaga o cook
   - *Variáveis de ambiente em produção e `dotnet user-secrets` em desenvolvimento:* nada sensível em arquivos versionados.
   - *Arquivos de configuração com segredos fora do Git:* fácil de versionar por engano.
 - **Decisão:**
-  - **Segredos** (`ConnectionStrings__Default`, `Jwt__SigningKey` com no mínimo 32 bytes aleatórios, `Manager__*`) vêm de variáveis de ambiente em produção e de `dotnet user-secrets` em desenvolvimento. `appsettings*.json` não contêm segredos. O `compose.yaml` lê a senha local do PostgreSQL de um `.env` ignorado pelo Git; o repositório traz apenas um `.env.example`.
+  - **Segredos** (`ConnectionStrings__Default`, `Jwt__SigningKey` com no mínimo 32 bytes aleatórios, `Manager__*`) vêm de variáveis de ambiente em produção e de `dotnet user-secrets` em desenvolvimento. `appsettings*.json` não contêm segredos. O `compose.yaml` lê a senha local do PostgreSQL de um `.env` ignorado pelo Git; o repositório não traz nenhum modelo de `.env`; o README explica como criá-lo.
   - **Transporte:** HTTPS (TLS terminado pela hospedagem, DT-09), `UseHttpsRedirection` e HSTS em produção.
   - **Cabeçalhos:** `Content-Security-Policy` restritiva (`default-src 'self'`; sem scripts inline), `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` e `frame-ancestors 'none'`. Sem CORS, porque a origem é única (DT-01).
 - **Justificativa:** a CSP é a segunda barreira contra XSS, complementando o escape automático de templates do Angular; com ela, mesmo um token em memória fica difícil de exfiltrar.
