@@ -141,11 +141,12 @@ Qualquer mudança nessas regras exige minha aprovação explícita.
 - **Estimativas:** em horas, informadas pelos times e registradas pelo gestor.
 - **Dependências** entre demandas acontecem às vezes: suportadas, mas não são o caso principal.
 - **Escopo:** tudo o que está na proposta, priorizado com MoSCoW:
-  - **Must:** cadastros (times, pessoas, capacidade, demandas), cálculo de previsão com margem, cronograma.
-  - **Should:** cenários de sequenciamento com aprovação do gestor, relatório por time (ocupação, ociosidade, sobrecarga).
+  - **Must:** cadastros (times, pessoas, capacidade, demandas), cálculo de previsão com margem, cronograma, relatório por time (ocupação, ociosidade, sobrecarga; promovido em 2026-11-12).
+  - **Should:** cenários de sequenciamento com aprovação do gestor.
   - **Could:** previsto × realizado detalhado.
   - Ajustes podem ser propostos, com justificativa.
-- **Métrica principal de sucesso:** desvio entre a data prevista e a data realizada.
+- **Dor central (2026-11-12):** o trabalho manual do gestor de desenvolvimento para encontrar ociosidade, equilibrar a carga entre os times e descobrir sequências mais eficazes; previsões confiáveis e a comunicação com o gestor de produto são consequência.
+- **Métrica principal de sucesso:** desvio entre a data prevista e a data realizada, acompanhada das métricas de eficiência do setor (horas ociosas, equilíbrio de ocupação, períodos de sobrecarga e prazo total; PRD 7.2).
 
 ### 7.3 Pontos em aberto (decidir no TDD)
 Modelo de capacidade (horas por pessoa e por time, férias, ausências, outras alocações) · paralelismo entre times na mesma demanda · representação de dependências · tipo da margem (percentual, fixa ou configurável) e etapa em que é aplicada · critério de otimização (prazo total, prioritárias, utilização ou combinação) · registro de mudanças de estimativa e comparação previsto × realizado.
