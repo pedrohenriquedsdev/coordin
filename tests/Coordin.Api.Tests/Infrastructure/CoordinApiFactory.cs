@@ -73,7 +73,11 @@ public class CoordinApiFactory(string environment, PostgresFixture? postgres = n
         Directory.CreateDirectory(path);
         File.WriteAllText(
             Path.Combine(path, "index.html"),
-            "<!doctype html><html lang=\"pt-BR\"><head><title>Coordin</title></head><body>Coordin</body></html>");
+            "<!doctype html><html lang=\"pt-BR\"><head><title>Coordin</title>" +
+            "<link rel=\"stylesheet\" href=\"styles.css\"></head>" +
+            "<body>Coordin<script src=\"main.js\" type=\"module\"></script></body></html>");
+        File.WriteAllText(Path.Combine(path, "main.js"), "console.log('coordin');");
+        File.WriteAllText(Path.Combine(path, "styles.css"), "body{margin:0}");
         return path;
     }
 

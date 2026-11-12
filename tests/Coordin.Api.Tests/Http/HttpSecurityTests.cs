@@ -26,6 +26,17 @@ public class HttpSecurityTests(
     }
 
     [Fact]
+    public async Task SpaIndexHtml_CarriesSecurityHeaders()
+    {
+        using var client = testing.CreateClient();
+
+        var response = await client.GetAsync("/", TestContext.Current.CancellationToken);
+
+        Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
+        AssertSecurityHeaders(response);
+    }
+
+    [Fact]
     public async Task Csp_NeverAllowsInlineScripts_OutsideSwagger()
     {
         using var client = testing.CreateClient();

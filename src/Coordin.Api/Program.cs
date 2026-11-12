@@ -24,10 +24,12 @@ app.UseCoordinSecurityHeaders();
 app.UseCoordinProblemDetails();
 
 app.UseCoordinApiDocumentation();
+app.UseCoordinSpaFiles();
 
 app.MapHealthEndpoint();
 app.MapTestOnlyEndpoints();
 app.MapApiFallback();
+app.MapSpaFallback(); // por último: o fallback de /api é mais específico e vem antes
 
 app.Run();
 
