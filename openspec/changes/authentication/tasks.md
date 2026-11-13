@@ -22,8 +22,8 @@ Regras para todas as tasks:
 
 ## 4. Token de acesso e proteção por padrão
 
-- [ ] 4.1 Configurar o JwtBearer (validação de emissor, audiência, assinatura e validade, sem tolerância de relógio), a política de fallback `RequireAuthenticatedUser`, `UseAuthentication`/`UseAuthorization` na ordem do D5 e o `TokenService` que emite o JWT de 15 minutos; verificar com testes de unidade/integração dos cenários "Token válido", "Token expirado", "Token adulterado ou de outro emissor" (tokens fabricados com a mesma chave)
-- [ ] 4.2 Marcar `AllowAnonymous` em `GET /api/health`, nos fallbacks de `/api` e da SPA, no `MapOpenApi()` e no grupo `/api/_test/*`; criar `GET /api/_test/protected` (só em `Testing`, sem metadado); acrescentar 401, 403 e 429 ao `ProblemTexts`; verificar com os cenários "Endpoint de negócio sem token", "com token inválido", "Saúde continua pública", "Rota inexistente continua 404", "Formato do 401" (Problem Details em português e `WWW-Authenticate: Bearer`) e com a suíte da change 1 inteira passando (erros, validação, Swagger em `Development`, SPA)
+- [x] 4.1 Configurar o JwtBearer (validação de emissor, audiência, assinatura e validade, sem tolerância de relógio), a política de fallback `RequireAuthenticatedUser`, `UseAuthentication`/`UseAuthorization` na ordem do D5 e o `TokenService` que emite o JWT de 15 minutos; verificar com testes de unidade/integração dos cenários "Token válido", "Token expirado", "Token adulterado ou de outro emissor" (tokens fabricados com a mesma chave)
+- [x] 4.2 Marcar `AllowAnonymous` em `GET /api/health`, nos fallbacks de `/api` e da SPA, no `MapOpenApi()` e no grupo `/api/_test/*`; criar `GET /api/_test/protected` (só em `Testing`, sem metadado); acrescentar 401, 403 e 429 ao `ProblemTexts`; verificar com os cenários "Endpoint de negócio sem token", "com token inválido", "Saúde continua pública", "Rota inexistente continua 404", "Formato do 401" (Problem Details em português e `WWW-Authenticate: Bearer`) e com a suíte da change 1 inteira passando (erros, validação, Swagger em `Development`, SPA)
 
 ## 5. Login, bloqueio e usuário autenticado
 

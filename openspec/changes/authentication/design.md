@@ -69,6 +69,7 @@ Usar `AddIdentityCore<ApplicationUser>().AddEntityFrameworkStores<CoordinDbConte
 | `login`, `refresh`, `logout`, `GET /api/health` | `AllowAnonymous` |
 | `GET /api/auth/me` | protegido (política padrão) |
 | fallback `/api/{**path}` e fallback da SPA | `AllowAnonymous`; senão uma rota de API inexistente responderia `401` em vez de `404` (spec vigente) e a SPA não abriria |
+| arquivo estático inexistente (ex.: `/x.js`) | descoberto na implementação: sem endpoint, a política de fallback também vale e daria `401` em vez do `404` da spec `web-shell`. A política passa a ser "autenticado **ou** nenhum endpoint casou" (sem endpoint não há código que devolva dados). Duas alternativas foram tentadas e descartadas: um fallback genérico `AllowAnonymous` (engolia os arquivos estáticos reais, pois o roteamento roda antes) e `UseAuthorization` dentro de `UseWhen` (o `WebApplication` então o insere sozinho antes dos arquivos estáticos) |
 | `MapOpenApi()` (só em `Development`) | `AllowAnonymous`; senão o Swagger UI e o `generate:api` quebram. O documento não contém dados do planejamento |
 | grupo `/api/_test/*` (só em `Testing`) | `AllowAnonymous`, para os testes de erro e validação da change 1 continuarem valendo |
 | `GET /api/_test/protected` (só em `Testing`) | **fora** do grupo, sem metadado: prova que o padrão exige login |
