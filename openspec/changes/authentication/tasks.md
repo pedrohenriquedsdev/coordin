@@ -7,9 +7,9 @@ Regras para todas as tasks:
 
 ## 1. Pacotes, opções e base dos testes
 
-- [ ] 1.1 Pedir a autorização do autor e conferir nas fontes oficiais (NuGet) as versões de `Microsoft.AspNetCore.Identity.EntityFrameworkCore` e `Microsoft.AspNetCore.Authentication.JwtBearer` (TDD indica 10.0.15); adicionar ao `Directory.Packages.props` e ao `Coordin.Api.csproj`; verificar com `dotnet restore` e `dotnet build Coordin.slnx` sem avisos
-- [ ] 1.2 Criar `JwtOptions` (`Issuer`, `Audience`, `SigningKey`) e `ManagerOptions` (`Email`, `Password`, `ResetPassword`) com validação na inicialização (chave com no mínimo 32 bytes); colocar só `Jwt:Issuer` e `Jwt:Audience` no `appsettings.json`; verificar com testes dos cenários "Chave ausente ou curta" (a API não inicia e a mensagem não contém o valor) e "Nenhum segredo versionado" (o teste existente de `appsettings*.json` continua passando)
-- [ ] 1.3 Ajustar a `CoordinApiFactory` para fornecer, em memória, `Jwt:SigningKey` aleatória por execução, `Manager:Email` e `Manager:Password` fictícios e o limite de requisições elevado, e criar o auxiliar de teste que faz login e devolve um cliente autenticado; verificar que os 44 testes da change 1 seguem passando
+- [x] 1.1 Pedir a autorização do autor e conferir nas fontes oficiais (NuGet) as versões de `Microsoft.AspNetCore.Identity.EntityFrameworkCore` e `Microsoft.AspNetCore.Authentication.JwtBearer` (TDD indica 10.0.15); adicionar ao `Directory.Packages.props` e ao `Coordin.Api.csproj`; verificar com `dotnet restore` e `dotnet build Coordin.slnx` sem avisos
+- [x] 1.2 Criar `JwtOptions` (`Issuer`, `Audience`, `SigningKey`) e `ManagerOptions` (`Email`, `Password`, `ResetPassword`) com validação na inicialização (chave com no mínimo 32 bytes); colocar só `Jwt:Issuer` e `Jwt:Audience` no `appsettings.json`; verificar com testes dos cenários "Chave ausente ou curta" (a API não inicia e a mensagem não contém o valor) e "Nenhum segredo versionado" (o teste existente de `appsettings*.json` continua passando)
+- [x] 1.3 Ajustar a `CoordinApiFactory` para fornecer, em memória, `Jwt:SigningKey` aleatória por execução, `Manager:Email` e `Manager:Password` fictícios e o limite de requisições elevado, e aceitar sobrescritas de configuração por teste; verificar que os 44 testes da change 1 seguem passando
 
 ## 2. Persistência: Identity e refresh token
 
@@ -27,7 +27,7 @@ Regras para todas as tasks:
 
 ## 5. Login, bloqueio e usuário autenticado
 
-- [ ] 5.1 Implementar `POST /api/auth/login` (DTOs com `[Required]`, mensagem genérica, cookie `refresh_token` com os atributos do D4) e o `RefreshTokenService` na parte de emissão; verificar com os cenários "Credenciais válidas" (inclui `Set-Cookie` com `HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/api/auth`, 7 dias, e o token ausente do corpo), "Senha incorreta", "E-mail inexistente" e "Campos ausentes"
+- [ ] 5.1 Implementar `POST /api/auth/login` (DTOs com `[Required]`, mensagem genérica, cookie `refresh_token` com os atributos do D4) e o `RefreshTokenService` na parte de emissão; criar o auxiliar de teste que faz login e devolve um cliente autenticado (movido da 1.3, pois depende deste endpoint); verificar com os cenários "Credenciais válidas" (inclui `Set-Cookie` com `HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/api/auth`, 7 dias, e o token ausente do corpo), "Senha incorreta", "E-mail inexistente" e "Campos ausentes"
 - [ ] 5.2 Implementar o bloqueio no login (D2); verificar com os cenários "Quinta tentativa errada", "Fim do bloqueio" (ajustando `LockoutEnd` no banco) e "Acerto zera as tentativas"
 - [ ] 5.3 Implementar `GET /api/auth/me`; verificar com os cenários "Com token válido" (só `email`, sem hash nem campos internos) e "Sem token"; e com o cenário "Não existe cadastro público" (`POST /api/auth/register` responde `404`)
 
