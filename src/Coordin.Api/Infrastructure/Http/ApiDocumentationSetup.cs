@@ -22,7 +22,9 @@ public static class ApiDocumentationSetup
             return app;
         }
 
-        app.MapOpenApi(DocumentPath);
+        // Só em desenvolvimento e sem dados do planejamento: precisa ser anônimo para o Swagger UI
+        // e para o gerador do cliente do Angular (DT-19) lerem o contrato.
+        app.MapOpenApi(DocumentPath).AllowAnonymous();
         app.UseSwaggerUI(options => options.SwaggerEndpoint(DocumentPath, "Coordin API v1"));
 
         return app;

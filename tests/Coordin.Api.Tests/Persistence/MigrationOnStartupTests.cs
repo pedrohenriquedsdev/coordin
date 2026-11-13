@@ -10,7 +10,7 @@ namespace Coordin.Api.Tests.Persistence;
 public class MigrationOnStartupTests(PostgresFixture postgres)
 {
     [Fact]
-    public async Task EmptyDatabase_GetsInitialMigrationApplied_AndHealthIsOk()
+    public async Task EmptyDatabase_GetsAllMigrationsApplied_AndHealthIsOk()
     {
         await using var factory = new CoordinApiFactory("Testing", postgres);
         await factory.InitializeAsync();
@@ -19,8 +19,10 @@ public class MigrationOnStartupTests(PostgresFixture postgres)
         var health = await client.GetAsync("/api/health", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, health.StatusCode);
-        var applied = Assert.Single(await AppliedMigrationsAsync(factory));
-        Assert.EndsWith("_InitialCreate", applied, StringComparison.Ordinal);
+        var applied = await AppliedMigrationsAsync(factory);
+        Assert.Equal(2, applied.Count);
+        Assert.EndsWith("_InitialCreate", applied[0], StringComparison.Ordinal);
+        Assert.EndsWith("_AddAuthentication", applied[1], StringComparison.Ordinal);
     }
 
     [Fact]
@@ -37,7 +39,7 @@ public class MigrationOnStartupTests(PostgresFixture postgres)
             var health = await client.GetAsync("/api/health", TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.OK, health.StatusCode);
-            Assert.Single(await AppliedMigrationsAsync(factory));
+            Assert.Equal(2, (await AppliedMigrationsAsync(factory)).Count);
         }
     }
 

@@ -192,11 +192,17 @@ echo "POSTGRES_PASSWORD=YOUR_PASSWORD" > .env
 # 3. Start PostgreSQL
 docker compose up -d
 
-# 4. Give the API the connection string as a user secret (stored outside the repository).
-#    The password must be the same one you set in .env.
+# 4. Give the API its secrets as user secrets (stored outside the repository, never in a file Git tracks).
+#    The password in the connection string must be the same one you set in .env.
 dotnet user-secrets set "ConnectionStrings:Default" "Host=localhost;Port=5432;Database=coordin;Username=coordin;Password=YOUR_PASSWORD" --project src/Coordin.Api
 
-# 5. Run the API (http://localhost:5080; applies the database migrations on startup)
+# 5. Configure authentication (see "Authentication" below for how to generate the key).
+#    Without Jwt:SigningKey the API refuses to start; without the Manager values nobody can sign in.
+dotnet user-secrets set "Jwt:SigningKey" "YOUR_RANDOM_KEY_WITH_AT_LEAST_32_BYTES" --project src/Coordin.Api
+dotnet user-secrets set "Manager:Email" "you@example.com" --project src/Coordin.Api
+dotnet user-secrets set "Manager:Password" "A_PASSWORD_WITH_AT_LEAST_12_CHARACTERS" --project src/Coordin.Api
+
+# 6. Run the API (http://localhost:5080; applies the database migrations and creates the manager account on startup)
 dotnet run --project src/Coordin.Api
 ```
 
@@ -208,7 +214,43 @@ npm ci
 npm start   # http://localhost:4200, proxies /api to the API on port 5080
 ```
 
+Open `http://localhost:4200` and sign in with the `Manager:Email` and `Manager:Password` you set in step 5.
+
 While the API runs in `Development`, the OpenAPI document is at `http://localhost:5080/openapi/v1.json` and the interactive documentation at `http://localhost:5080/swagger`. Check that everything is connected at `http://localhost:4200/api/health`, which should answer `{"status":"Healthy"}`.
+
+### Authentication
+
+There is a single account, the development manager's, and no sign-up screen. The account is created when the API starts, from configuration, so no credential ever passes through the repository.
+
+| Setting | Environment variable (production) | What it is |
+|---------|-----------------------------------|------------|
+| `Jwt:SigningKey` | `Jwt__SigningKey` | Secret that signs the access tokens. At least 32 bytes; the API refuses to start without it. |
+| `Manager:Email` | `Manager__Email` | E-mail of the manager account, created if no account exists yet. |
+| `Manager:Password` | `Manager__Password` | Password of the account, at least 12 characters. |
+| `Manager:ResetPassword` | `Manager__ResetPassword` | `true` replaces the password of the existing account (see below). |
+
+`Jwt:Issuer` and `Jwt:Audience` are not secrets and live in `appsettings.json`.
+
+Generate a random key with one of:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"
+```
+
+```powershell
+$bytes = New-Object byte[] 48; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes); [Convert]::ToBase64String($bytes)
+```
+
+**How a session works:** signing in returns an access token that lives for 15 minutes and is kept only in the browser's memory (never in `localStorage`). The session is renewed silently by a refresh token in an `HttpOnly` cookie, valid for 7 days and replaced on every renewal. Reloading the page keeps you signed in. Five wrong passwords lock the account for 15 minutes, and sign-in and renewal are limited to 10 requests per minute per IP address.
+
+**Forgot the password?** Set `Manager:Password` to the new value and `Manager:ResetPassword` to `true`, restart the API, then remove the `ResetPassword` flag. This also clears a lockout and ends every open session. Only the password changes, not the e-mail.
+
+**Changing `Jwt:SigningKey`** invalidates the access tokens already issued; the browser renews them on its own from the refresh token, so nobody has to sign in again.
+
+Notes:
+
+- The refresh cookie is `Secure`. Chrome, Edge, and Firefox accept it on `http://localhost`; Safari does not, so use another browser for local development. In production the host serves HTTPS.
+- If you run the built API directly (`dotnet bin/Debug/net10.0/Coordin.Api.dll`), do it from the `src/Coordin.Api` folder: the application looks for `appsettings.json` in the current folder and, without it, refuses to start because the issuer and audience are missing.
 
 ### Tests and checks
 
@@ -236,12 +278,24 @@ The generated code in `src/coordin-web/src/app/api/` is committed, so a contract
 
 ### Run the production image locally
 
+Besides `POSTGRES_PASSWORD`, the image needs the authentication values, which Compose reads from the same `.env` file (ignored by Git):
+
+```bash
+# .env
+POSTGRES_PASSWORD=YOUR_PASSWORD
+JWT_SIGNING_KEY=YOUR_RANDOM_KEY_WITH_AT_LEAST_32_BYTES
+MANAGER_EMAIL=you@example.com
+MANAGER_PASSWORD=A_PASSWORD_WITH_AT_LEAST_12_CHARACTERS
+```
+
 ```bash
 docker compose --profile app up -d --build   # http://localhost:8080
 docker compose --profile app down
 ```
 
 This builds the single image (API plus the Angular build) and runs it next to the database. It runs as `Staging`: identical to production except that HTTPS is not forced, since there is no TLS-terminating proxy in front of it locally.
+
+If the container exits right after starting, read its log with `docker compose logs app`: a missing `JWT_SIGNING_KEY` is reported there. A missing `MANAGER_EMAIL` or `MANAGER_PASSWORD` does not stop the application, but nobody will be able to sign in. The plain `docker compose up -d` (database only) does not need any of these three values.
 
 ## Roadmap
 
