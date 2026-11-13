@@ -129,7 +129,7 @@ Em `src/app/core/auth/`:
 
 ### D12. Infra e documentação
 
-- `compose.yaml`, perfil `app`: repassa `Jwt__SigningKey`, `Manager__Email` e `Manager__Password` a partir do `.env` ignorado pelo Git (mesmo padrão `${VAR:?mensagem}` da senha do banco). A imagem não muda.
+- `compose.yaml`, perfil `app`: repassa `Jwt__SigningKey`, `Manager__Email` e `Manager__Password` a partir do `.env` ignorado pelo Git com padrão vazio `${VAR:-}` (e não `${VAR:?mensagem}`, como a senha do banco): o Compose resolve as variáveis do arquivo inteiro, inclusive de serviços de perfis inativos, e a exigência quebraria o `docker compose up -d` comum, só com o banco. Sem a chave é a própria API que se recusa a iniciar, com mensagem clara nos logs do contêiner. A imagem não muda.
 - `README`: seção "Configurar a autenticação" com as variáveis, como gerar uma chave aleatória com um comando e como definir tudo por `dotnet user-secrets`; e o aviso do `Secure` no Safari. Nenhum valor real e nenhum arquivo-modelo de `.env` entram no repositório.
 - CI: não precisa de segredos, porque os testes geram a chave em memória.
 

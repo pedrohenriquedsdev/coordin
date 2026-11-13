@@ -59,12 +59,12 @@ Regras para todas as tasks:
 
 ## 11. Infra e documentação
 
-- [ ] 11.1 Ajustar o perfil `app` do `compose.yaml` para repassar `Jwt__SigningKey`, `Manager__Email` e `Manager__Password` do `.env` (com `${VAR:?mensagem}`); verificar que `docker compose --profile app up` sobe a imagem, que `GET /api/health` responde `200` sem login, que `GET /api/auth/me` sem token responde `401` e que o login funciona pela SPA servida pela API
-- [ ] 11.2 Documentar no `README.md` a configuração da autenticação (variáveis, como gerar uma chave aleatória com um comando, `dotnet user-secrets`, redefinição de senha e o aviso do `Secure` no Safari); verificar seguindo os passos a partir de um clone limpo, sem nenhum arquivo-modelo de `.env`
+- [x] 11.1 Ajustar o perfil `app` do `compose.yaml` para repassar `Jwt__SigningKey`, `Manager__Email` e `Manager__Password` do `.env` (com padrão vazio `${VAR:-}`: o Compose resolve as variáveis do arquivo inteiro, e `${VAR:?}` quebraria o `docker compose up -d` comum, só com o banco); verificar que `docker compose --profile app up` sobe a imagem, que `GET /api/health` responde `200` sem login, que `GET /api/auth/me` sem token responde `401` e que o login funciona pela SPA servida pela API
+- [x] 11.2 Documentar no `README.md` a configuração da autenticação (variáveis, como gerar uma chave aleatória com um comando, `dotnet user-secrets`, redefinição de senha e o aviso do `Secure` no Safari); verificar seguindo os passos a partir de um clone limpo, sem nenhum arquivo-modelo de `.env`
 
 ## 12. Verificação final
 
-- [ ] 12.1 Rodar todos os comandos do TDD 8.6 que se aplicam (`dotnet build Coordin.slnx`, `dotnet format Coordin.slnx --verify-no-changes`, `dotnet test Coordin.slnx --collect:"XPlat Code Coverage"`, `npm ci`, `npm run lint`, `npm test`, `npm run build`) e `openspec validate authentication --strict`; revisar o diff completo contra a `main` procurando segredos, senhas e e-mails reais; registrar os resultados reais na descrição do PR, separando local de CI
+- [x] 12.1 Rodar todos os comandos do TDD 8.6 que se aplicam (`dotnet build Coordin.slnx`, `dotnet format Coordin.slnx --verify-no-changes`, `dotnet test Coordin.slnx --collect:"XPlat Code Coverage"`, `npm ci`, `npm run lint`, `npm test`, `npm run build`) e `openspec validate authentication --strict`; revisar o diff completo contra a `main` procurando segredos, senhas e e-mails reais; registrar os resultados reais na descrição do PR, separando local de CI
 
 ## Workflow follow-up
 
