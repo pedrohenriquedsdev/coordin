@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Coordin.Api.Infrastructure.Auth;
 using Coordin.Api.Infrastructure.Http;
 using Microsoft.AspNetCore.Identity;
 
@@ -25,6 +26,8 @@ public static class AuthEndpoints
             .Produces<AccessTokenResponse>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status429TooManyRequests)
+            .RequireRateLimiting(AuthRateLimiting.PolicyName)
             .AllowAnonymous();
 
         // Anônimo: a "credencial" aqui é o cookie do refresh token, não o token de acesso (que já expirou).
@@ -33,6 +36,8 @@ public static class AuthEndpoints
             .WithSummary("Renova a sessão: troca o refresh token do cookie e devolve um novo token de acesso.")
             .Produces<AccessTokenResponse>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status429TooManyRequests)
+            .RequireRateLimiting(AuthRateLimiting.PolicyName)
             .AllowAnonymous();
 
         // Anônimo e idempotente: precisa funcionar mesmo com o token de acesso já expirado.

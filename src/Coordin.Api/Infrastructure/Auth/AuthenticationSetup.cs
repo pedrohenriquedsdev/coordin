@@ -54,6 +54,7 @@ public static class AuthenticationSetup
         services.AddScoped<RefreshTokenService>();
 
         AddJwtBearer(services);
+        services.AddCoordinAuthRateLimiting();
 
         // Proteção por padrão (DT-28): todo endpoint sem regra própria exige o gestor autenticado.
         // As poucas exceções usam AllowAnonymous de forma explícita.
@@ -65,6 +66,10 @@ public static class AuthenticationSetup
     /// <summary>Authentication antes de Authorization; os dois depois dos arquivos estáticos (D5).</summary>
     public static WebApplication UseCoordinAuthentication(this WebApplication app)
     {
+        // Depois do roteamento (para conhecer o endpoint) e antes da autenticação: uma rajada de
+        // tentativas é recusada sem gastar tempo conferindo senha.
+        app.UseRateLimiter();
+
         // Chamados direto no app (e não dentro de UseWhen): o WebApplication só reconhece assim que
         // a autorização já foi posicionada e deixa de inseri-la sozinho antes dos arquivos estáticos.
         app.UseAuthentication();
