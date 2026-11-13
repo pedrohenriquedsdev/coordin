@@ -49,7 +49,7 @@ Regras para todas as tasks:
 
 ## 9. Verificação manual
 
-- [ ] 9.1 Com a autorização do autor, subir a API real servindo o build de produção (banco descartável e credenciais temporárias, como na change 2) e, num Chrome real guiado pelo protocolo de depuração, percorrer: cadastrar 8 times e as pessoas, erro de nome repetido, exclusão bloqueada de time com pessoas, mover uma pessoa de time, ausências e feriados, e a data `31/12/2026` exibida igual com o navegador emulando `America/Sao_Paulo`, `Asia/Tokyo` e `America/Los_Angeles`; verificar também 1280 px sem rolagem horizontal nas duas telas, **0 violações de CSP** e a limpeza completa do que foi criado
+- [x] 9.1 Com a autorização do autor, subir a API real servindo o build de produção (banco descartável e credenciais temporárias, como na change 2) e, num Chrome real guiado pelo protocolo de depuração, percorrer: cadastrar 8 times e as pessoas, erro de nome repetido, exclusão bloqueada de time com pessoas, mover uma pessoa de time, ausências e feriados, e a data `31/12/2026` exibida igual com o navegador emulando `America/Sao_Paulo`, `Asia/Tokyo` e `America/Los_Angeles`; verificar também 1280 px sem rolagem horizontal nas duas telas, **0 violações de CSP** e a limpeza completa do que foi criado
 
 ## 10. Documentos e verificação final
 
