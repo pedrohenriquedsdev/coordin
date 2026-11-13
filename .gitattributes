@@ -1,0 +1,4 @@
+# Fim de linha sempre LF, no repositorio e na pasta de trabalho (igual ao .editorconfig: end_of_line = lf).
+# Sem isto, o Git do Windows (core.autocrlf=true) grava CRLF na pasta de trabalho, e o dotnet format e o
+# Prettier locais acusam arquivos que o CI (Linux) considera limpos. Arquivos binarios sao detectados e preservados.
+* text=auto eol=lf
