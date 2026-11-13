@@ -18,7 +18,7 @@ Regras para todas as tasks:
 
 ## 3. Conta do gestor
 
-- [ ] 3.1 Implementar o `ManagerAccountSeeder` (D8) e chamá-lo depois da migração; verificar com testes dos cenários "Primeira inicialização" (login possível), "Conta já existente" (senha inalterada), "Redefinição de senha" (nova senha vale, bloqueio zerado, refresh tokens revogados), "Senha curta na configuração" (falha sem repetir a senha) e "Configuração ausente" (API sobe e registra aviso)
+- [x] 3.1 Implementar o `ManagerAccountSeeder` (D8) e chamá-lo depois da migração; verificar com testes dos cenários "Primeira inicialização" (login possível), "Conta já existente" (senha inalterada), "Redefinição de senha" (nova senha vale, bloqueio zerado, refresh tokens revogados), "Senha curta na configuração" (falha sem repetir a senha) e "Configuração ausente" (API sobe e registra aviso)
 
 ## 4. Token de acesso e proteção por padrão
 
