@@ -53,8 +53,8 @@ Regras para todas as tasks:
 
 ## 10. Documentos e verificação final
 
-- [ ] 10.1 Atualizar o `CLAUDE.md`: §3 (incluir o `.gitattributes` na árvore), §9.2 (trocar "Um commit por bloco lógico. Não economize commits." pela regra de cerca de um commit por grupo de tasks, com as marcações do `tasks.md` dentro do commit do código) e §13 (change 3 implementada, com as lições novas, se houver, e o próximo passo: change 4); verificar que a árvore do §3 coincide com o repositório
-- [ ] 10.2 Rodar todos os comandos do TDD 8.6 que se aplicam (`dotnet build Coordin.slnx`, `dotnet format Coordin.slnx --verify-no-changes`, `dotnet test Coordin.slnx --collect:"XPlat Code Coverage"`, `npm ci`, `npm run lint`, `npm test`, `npm run build`) numa cópia limpa do commit, mais `npm run format:check` e `openspec validate capacity-registry --strict`; revisar o diff completo contra a `main` procurando segredos, senhas e e-mails reais; registrar os resultados reais na descrição do PR, separando local de CI
+- [x] 10.1 Atualizar o `CLAUDE.md`: §3 (incluir o `.gitattributes` na árvore), §9.2 (trocar "Um commit por bloco lógico. Não economize commits." pela regra de cerca de um commit por grupo de tasks, com as marcações do `tasks.md` dentro do commit do código) e §13 (change 3 implementada, com as lições novas, se houver, e o próximo passo: change 4); verificar que a árvore do §3 coincide com o repositório
+- [x] 10.2 Rodar todos os comandos do TDD 8.6 que se aplicam (`dotnet build Coordin.slnx`, `dotnet format Coordin.slnx --verify-no-changes`, `dotnet test Coordin.slnx --collect:"XPlat Code Coverage"`, `npm ci`, `npm run lint`, `npm test`, `npm run build`) numa cópia limpa do commit, mais `npm run format:check` e `openspec validate capacity-registry --strict`; revisar o diff completo contra a `main` procurando segredos, senhas e e-mails reais; registrar os resultados reais na descrição do PR, separando local de CI
 
 ## Workflow follow-up
 
