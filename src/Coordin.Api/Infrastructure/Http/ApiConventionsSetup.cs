@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Coordin.Api.Infrastructure.Http;
 
@@ -11,6 +12,11 @@ public static class ApiConventionsSetup
         {
             options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             options.SerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+
+            // Enums como texto ("Vacation", "Other"): legível no contrato e estável se um valor for acrescentado.
+            // Um valor desconhecido na entrada vira 400, e o OpenAPI descreve os valores permitidos.
+            // allowIntegerValues: false, senão "type": 7 entraria como um valor que não existe.
+            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(namingPolicy: null, allowIntegerValues: false));
         });
         return services;
     }

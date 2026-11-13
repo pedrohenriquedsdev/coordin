@@ -61,7 +61,7 @@ Uma consulta prévia ("já existe?") dá o caminho feliz, mas não protege duas 
 - **Nome:** `Trim()` antes de validar e guardar; vazio ou só espaços é erro em `name`.
 - **Referência a time inexistente** no cadastro e na edição de pessoa é `400` com o erro em `teamId` (o corpo está errado), e não `404` (o recurso da URL existe). Já `404` é para o `id` da URL.
 - **Enum em JSON:** `JsonStringEnumConverter` registrado em `AddCoordinJson`, para `type` ir e voltar como `"Vacation"`/`"Other"`, e o OpenAPI descrever os valores. Isso vale para toda a API daqui em diante, o que é intencional.
-- **A verificar na primeira task de API:** um corpo JSON inválido (por exemplo, `31/12/2026` em um `DateOnly`) deve virar `400`. A expectativa é que o ASP.NET converta o `BadHttpRequestException` em `400` mesmo com o `UseExceptionHandler` da change 1. Se vier `500`, a correção é um tratador que mapeia esse tipo de exceção para `400` em Problem Details, dentro da mesma task.
+- **Corpo JSON inválido (verificado na task 2.1):** um valor de enum desconhecido, uma data em formato inválido (`31/12/2026`), um dia que não existe (`2026-02-30`), um corpo cortado ou texto que não é JSON respondem `400` em Problem Details, sem tratador extra: o ASP.NET já converte o `BadHttpRequestException` em `400` mesmo com o `UseExceptionHandler`. O conversor de enums **não aceita números** (`allowIntegerValues: false`); senão `"type": 7` entraria como um tipo que não existe. Um campo de data não anulável (`DateOnly`) ausente no corpo viraria `0001-01-01` sem erro, por isso os contratos usam `DateOnly?` com `[Required]`.
 
 ### D5. Capacidade do time no motor (DT-02)
 

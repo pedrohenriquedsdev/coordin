@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Coordin.Api.Features.Calendar;
 using Coordin.Api.Infrastructure.Http;
 
 namespace Coordin.Api.Features.Diagnostics;
@@ -28,6 +29,9 @@ public static class TestOnlyEndpoints
 
         group.MapPost("/validation", (ValidationProbe input) => Results.Ok(input));
 
+        // Prova como a API trata enums como texto e datas de calendário na entrada (corpo JSON).
+        group.MapPost("/enum-date", (EnumDateProbe input) => Results.Ok(input));
+
         group.MapGet("/json", () => new JsonProbe("ok", new DateOnly(2026, 11, 28)));
 
         // De propósito FORA do grupo e sem nenhum metadado de autorização: prova que um endpoint
@@ -40,6 +44,8 @@ public static class TestOnlyEndpoints
 
 public sealed record ValidationProbe(
     [property: Required(ErrorMessage = "O campo é obrigatório.")] string? Name);
+
+public sealed record EnumDateProbe(AbsenceType Type, DateOnly Date);
 
 public sealed record JsonProbe(string DatabaseStatus, DateOnly PlanningDate);
 
