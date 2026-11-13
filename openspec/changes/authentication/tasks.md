@@ -39,7 +39,7 @@ Regras para todas as tasks:
 
 ## 7. Limite de requisições
 
-- [ ] 7.1 Configurar o rate limiter (`auth`, 10 por minuto por IP, limite configurável) e aplicá-lo só a `login` e `refresh`, com `429` em Problem Details e `Retry-After`; verificar com os cenários "Limite excedido" (a 11ª chamada) e "Outros endpoints não sofrem o limite"
+- [x] 7.1 Configurar o rate limiter (`auth`, 10 por minuto por IP, limite configurável) e aplicá-lo só a `login` e `refresh`, com `429` em Problem Details e `Retry-After`; verificar com os cenários "Limite excedido" (a 11ª chamada) e "Outros endpoints não sofrem o limite"
 
 ## 8. Contrato e cliente gerado
 
