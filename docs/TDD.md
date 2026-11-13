@@ -672,9 +672,9 @@ Demandas não previsíveis e demandas concluídas ficam fora da simulação e n�
   - *Planilha a partir das exportações:* frágil, e o realizado simulado ainda dependeria do motor.
 - **Decisão:**
   - **Cálculo** no motor (`ValidationEvaluator`, seção 6.6), reutilizando a simulação (DT-21), a margem (DT-22), o relatório por time (DT-24) e o desvio (DT-27), com gerador pseudoaleatório próprio e semente informada.
-  - **Conjunto fictício** em JSON, versionado como recurso embutido da `Coordin.Api` e carregado por `POST /api/validation/dataset` com `confirmReplaceAll: true`, em uma transação que apaga e recria os dados do planejamento (times, pessoas, ausências, feriados, demandas, previsões, linha de base e plano guardado) e recalcula as previsões (DT-03). A conta do gestor e os refresh tokens não são tocados.
+  - **Conjunto fictício** em JSON, versionado como recurso embutido da `Coordin.Api` (dimensionado no M2: 7 times, cerca de 35 pessoas e 30 demandas) e carregado por `POST /api/validation/dataset` com `confirmReplaceAll: true`, em uma transação que apaga e recria os dados do planejamento (times, pessoas, ausências, feriados, demandas, previsões, linha de base e plano guardado) e recalcula as previsões (DT-03). A conta do gestor e os refresh tokens não são tocados.
   - **Plano do processo atual** guardado como o snapshot serializado (`ValidationCurrentPlan`), uma única vez; só um novo carregamento o apaga.
-  - **Parâmetros** do realizado simulado (`minEffortFactor`, `maxEffortFactor`, `seed`) informados a cada avaliação; a faixa é combinada com o gestor no M2. O resultado não é persistido: é recalculado a cada pedido, como os cenários (DT-03).
+  - **Parâmetros** do realizado simulado (`minEffortFactor`, `maxEffortFactor`, `seed`) informados a cada avaliação; a faixa definida no M2 (2026-11-13) é de 0,9 a 1,1 (±10%), a confirmar com o gestor, e continua sendo informada a cada avaliação. O resultado não é persistido: é recalculado a cada pedido, como os cenários (DT-03).
   - **Habilitação:** os endpoints só são mapeados com `Validation__Enabled=true` (variável de ambiente; desligada por padrão), e o Angular só mostra o menu quando `GET /api/validation/status` responde.
   - **Tela:** um assistente em quatro etapas (carregar, linha de base, guardar plano atual, comparar), com o resultado em gráfico e tabela pelo `ChartComponent` (DT-36).
 - **Justificativa:** a escolha do autor por operar a validação dentro do produto dá ao gestor o mesmo material visual do uso real; a regra de cálculo continua no motor (DT-02) e testável; a flag desligada por padrão e a confirmação explícita evitam apagar o planejamento por engano.
@@ -976,7 +976,7 @@ Complementam os riscos de produto do PRD (9.2).
 | # | Pendência | Responsável | Prazo |
 |---|---|---|---|
 | 1 | Provedor da PaaS (DT-09): escolher entre Render, Railway e Fly.io após verificar planos e limites na documentação oficial | Change 7 | 2026-11-21 |
-| 2 | Conjunto fictício da simulação, faixa de variação do esforço e disponibilidade do gestor (PRD P-03 a P-05; M2; DT-37) | Autor, com o gestor | 2026-11-13 |
+| 2 | ~~Conjunto fictício da simulação, faixa de variação do esforço e disponibilidade do gestor (PRD P-03 a P-05; M2; DT-37)~~ **Resolvida no M2 (2026-11-13):** conjunto de 7 times, cerca de 35 pessoas e 30 demandas; faixa de variação do esforço de 0,9 a 1,1 (a confirmar com o gestor); disponibilidade do gestor confirmada pelo autor | Autor, com o gestor | 2026-11-13 |
 | 3 | ~~Versões das GitHub Actions do CI (DT-33)~~ **Resolvida na change 1 (2026-11-12):** verificadas nas releases oficiais; `checkout` v7.0.1, `setup-dotnet` v6.1.0, `setup-node` v7.1.0 e `upload-artifact` v7.0.2, usadas pela tag da versão principal | Change 1 | 2026-11-13 |
 | 4 | Período do relatório por time: semana por enquanto, pode mudar (DT-24, já parametrizado) | Autor | Quando decidir |
 | 5 | Atualização para o .NET 11 (DT-05) | Change opcional após a 11 | Se houver tempo |
