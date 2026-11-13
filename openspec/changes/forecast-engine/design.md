@@ -59,9 +59,9 @@ Toda ordenação usa chave total (ranking, depois `Id`), nunca a ordem de chegad
 
 O motor valida o snapshot ao receber: capacidade negativa, esforço informado menor ou igual a zero, margem negativa, `Id`s duplicados, alocação a pessoa ou demanda inexistente, alocação de uma pessoa cujo time não é um dos times da demanda, ausência com fim antes do início. A API já valida o mesmo nas bordas (change 3), então estes erros indicam um defeito de quem monta o snapshot; falhar alto evita uma previsão silenciosamente errada.
 
-### D7. Demanda que estoura o horizonte: refazer a simulação sem ela
+### D7. Demanda que estoura o horizonte: retirar uma por vez e refazer a simulação
 
-Se, ao chegar a 5 anos, alguma parte não terminou, as demandas dela viram `NoCapacity` e a simulação é **refeita sem elas**, para que horas "gastas" por uma demanda sem previsão não atrasem as demais (RF-10, regra 5). Retirar uma demanda só libera capacidade, então a segunda passada não gera novas falhas e basta uma repetição.
+Se, ao chegar a 5 anos, alguma parte não terminou, o motor retira **só a demanda de maior prioridade entre as que não terminaram**, marca-a como `NoCapacity` e refaz a simulação, repetindo até que todas as restantes terminem. A de maior prioridade é a única cuja falha é dela mesma: nenhuma demanda anterior na fila foi atrasada por outra, enquanto as de trás podem só estar sem vez porque a primeira consome toda a capacidade. Assim horas "gastas" por uma demanda sem previsão nunca atrasam as demais (RF-10, regra 5), e uma demanda comum atrás de uma gigante não é descartada por engano. Descoberto pelos testes: a versão inicial (retirar todas as não terminadas de uma vez) marcava como `NoCapacity` também a demanda pequena que vinha depois da gigante.
 
 ### D8. Testes: construtor de cenários e gerador de semente fixa
 
