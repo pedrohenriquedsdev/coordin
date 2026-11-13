@@ -1,7 +1,10 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { provideApiConfiguration } from './api/api-configuration';
 import { routes } from './app.routes';
 import { SessionService } from './core/auth/session.service';
 
@@ -15,6 +18,10 @@ describe('routes', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter(routes),
+        // As telas pedem dados à API: nos testes de navegação, um HttpClient de teste, sem rede de verdade.
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideApiConfiguration(''),
         { provide: SessionService, useValue: { isAuthenticated: authenticated } },
       ],
     });
@@ -40,6 +47,12 @@ describe('routes', () => {
       expect(url).toBe('/login?returnUrl=%2Fcronograma');
     });
 
+    it.each(['/teams', '/calendar'])('sends %s to /login, remembering it', async (path) => {
+      const { url } = await open(path);
+
+      expect(url).toBe(`/login?returnUrl=${encodeURIComponent(path)}`);
+    });
+
     it('shows the login page', async () => {
       const { harness, url } = await open('/login');
 
@@ -56,6 +69,16 @@ describe('routes', () => {
 
       expect(url).toBe('/');
       expect(harness.routeNativeElement?.textContent).toContain(homeText);
+    });
+
+    it.each([
+      ['/teams', 'Times ('],
+      ['/calendar', 'Calendário'],
+    ])('opens %s', async (path, title) => {
+      const { harness, url } = await open(path);
+
+      expect(url).toBe(path);
+      expect(harness.routeNativeElement?.textContent).toContain(title);
     });
 
     it('sends /login to the home page', async () => {

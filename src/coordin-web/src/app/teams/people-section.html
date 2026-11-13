@@ -1,0 +1,157 @@
+<section aria-label="Pessoas do time">
+  <h3 class="text-base font-semibold">Pessoas ({{ store.selectedPeople().length }})</h3>
+
+  @if (store.selectedPeople().length === 0) {
+    <p class="mt-2 text-slate-600">Este time ainda não tem pessoas.</p>
+  } @else {
+    <div class="mt-2 overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-slate-200 text-slate-600">
+          <tr>
+            <th scope="col" class="py-2 pr-4 font-medium">Pessoa</th>
+            <th scope="col" class="py-2 pr-4 font-medium">Capacidade (h/dia útil)</th>
+            <th scope="col" class="py-2 pr-4 font-medium">Ausências</th>
+            <th scope="col" class="py-2 font-medium">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (person of store.selectedPeople(); track person.id) {
+            <tr class="border-b border-slate-100">
+              <td class="py-2 pr-4">{{ person.name }}</td>
+              <td class="py-2 pr-4">
+                @if (person.dailyCapacityHours === 0) {
+                  <span class="text-slate-500">não contribui</span>
+                } @else {
+                  {{ person.dailyCapacityHours | number: '1.0-2' }}
+                }
+              </td>
+              <td class="py-2 pr-4">{{ nextAbsence(person) }}</td>
+              <td class="py-2">
+                @if (deletingId() === person.id) {
+                  <span class="mr-2">Excluir {{ person.name }}?</span>
+                  <button
+                    type="button"
+                    (click)="confirmDelete(person)"
+                    [disabled]="saving()"
+                    class="mr-2 font-medium text-red-700 hover:underline"
+                  >
+                    Confirmar
+                  </button>
+                  <button type="button" (click)="deletingId.set(null)" class="hover:underline">
+                    Cancelar
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    (click)="edit(person)"
+                    [attr.aria-label]="'Editar ' + person.name"
+                    class="mr-3 hover:underline"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    (click)="deletingId.set(person.id)"
+                    [attr.aria-label]="'Excluir ' + person.name"
+                    class="text-red-700 hover:underline"
+                  >
+                    Excluir
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+    novalidate
+    class="mt-4 max-w-xl space-y-3 rounded-md border border-slate-200 bg-white p-3"
+  >
+    <h4 class="text-sm font-semibold">
+      {{ editingId() === null ? 'Adicionar pessoa' : 'Editar pessoa' }}
+    </h4>
+
+    <div class="grid gap-3 sm:grid-cols-2">
+      <div>
+        <label for="person-name" class="block text-sm font-medium text-slate-700">Nome</label>
+        <input
+          id="person-name"
+          type="text"
+          formControlName="name"
+          class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2"
+        />
+        @if (form.controls.name.invalid && form.controls.name.touched) {
+          <p class="mt-1 text-sm text-red-700">Informe o nome da pessoa.</p>
+        }
+      </div>
+
+      <div>
+        <label for="person-hours" class="block text-sm font-medium text-slate-700">
+          Horas por dia útil
+        </label>
+        <input
+          id="person-hours"
+          type="number"
+          step="0.25"
+          formControlName="dailyCapacityHours"
+          class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2"
+        />
+        @if (
+          form.controls.dailyCapacityHours.errors?.['required'] &&
+          form.controls.dailyCapacityHours.touched
+        ) {
+          <p class="mt-1 text-sm text-red-700">Informe a capacidade em horas por dia útil.</p>
+        } @else if (
+          form.controls.dailyCapacityHours.invalid && form.controls.dailyCapacityHours.touched
+        ) {
+          <p class="mt-1 text-sm text-red-700">
+            A capacidade deve estar entre 0 e 24 horas por dia útil.
+          </p>
+        }
+      </div>
+    </div>
+
+    @if (editingId() !== null) {
+      <div>
+        <label for="person-team" class="block text-sm font-medium text-slate-700">Time</label>
+        <select
+          id="person-team"
+          formControlName="teamId"
+          class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 sm:w-1/2"
+        >
+          @for (team of store.teams(); track team.id) {
+            <option [value]="team.id">{{ team.name }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    @if (message(); as text) {
+      <p role="alert" class="text-sm text-red-700">{{ text }}</p>
+    }
+
+    <div class="flex gap-2">
+      <button
+        type="submit"
+        [disabled]="saving()"
+        class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60"
+      >
+        {{ editingId() === null ? 'Adicionar pessoa' : 'Salvar alterações' }}
+      </button>
+      @if (editingId() !== null) {
+        <button
+          type="button"
+          (click)="cancelEdit()"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+        >
+          Cancelar
+        </button>
+      }
+    </div>
+  </form>
+</section>

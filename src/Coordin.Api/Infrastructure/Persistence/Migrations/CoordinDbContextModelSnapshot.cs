@@ -122,6 +122,105 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
+            modelBuilder.Entity("Coordin.Api.Features.Calendar.Absence", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonId");
+
+                    b.ToTable("Absences", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Absences_Period", "\"EndDate\" >= \"StartDate\"");
+                        });
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Calendar.Holiday", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Date")
+                        .IsUnique();
+
+                    b.ToTable("Holidays", (string)null);
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.People.Person", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("DailyCapacityHours")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("People", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_People_DailyCapacityHours_Range", "\"DailyCapacityHours\" >= 0 AND \"DailyCapacityHours\" <= 24");
+                        });
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Teams.Team", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique();
+
+                    b.ToTable("Teams", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -268,6 +367,28 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Coordin.Api.Features.Calendar.Absence", b =>
+                {
+                    b.HasOne("Coordin.Api.Features.People.Person", "Person")
+                        .WithMany("Absences")
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Person");
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.People.Person", b =>
+                {
+                    b.HasOne("Coordin.Api.Features.Teams.Team", "Team")
+                        .WithMany("People")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -317,6 +438,16 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.People.Person", b =>
+                {
+                    b.Navigation("Absences");
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Teams.Team", b =>
+                {
+                    b.Navigation("People");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,7 +1,9 @@
 import { Routes } from '@angular/router';
 import { authGuard, guestGuard, unknownPageGuard } from './core/auth/auth.guard';
+import { CalendarPage } from './calendar/calendar-page';
 import { Home } from './home/home';
 import { Login } from './login/login';
+import { TeamsPage } from './teams/teams-page';
 
 export const routes: Routes = [
   // Pública: a única rota que não exige sessão. Quem já tem sessão é levado à página inicial.
@@ -12,7 +14,11 @@ export const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
-    children: [{ path: '', component: Home }],
+    children: [
+      { path: '', component: Home },
+      { path: 'teams', component: TeamsPage },
+      { path: 'calendar', component: CalendarPage },
+    ],
   },
 
   // Um caminho que não existe: login (guardando o destino) para visitantes, página inicial para o gestor.

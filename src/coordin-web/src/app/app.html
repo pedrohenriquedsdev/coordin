@@ -1,10 +1,31 @@
 <div class="flex min-h-screen flex-col bg-slate-50 text-slate-900">
   <header class="border-b border-slate-200 bg-white">
-    <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+    <div
+      class="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 sm:px-6"
+    >
       <h1 class="text-xl font-bold tracking-tight">Coordin</h1>
 
-      <!-- Só com sessão: na tela de login não há o que encerrar. -->
+      <!-- Só com sessão: na tela de login não há para onde navegar. -->
       @if (session.isAuthenticated()) {
+        <nav aria-label="Principal" class="flex flex-1 flex-wrap items-center gap-1">
+          <a
+            routerLink="/teams"
+            routerLinkActive="bg-slate-100 text-slate-900"
+            ariaCurrentWhenActive="page"
+            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
+          >
+            Times e pessoas
+          </a>
+          <a
+            routerLink="/calendar"
+            routerLinkActive="bg-slate-100 text-slate-900"
+            ariaCurrentWhenActive="page"
+            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
+          >
+            Calendário
+          </a>
+        </nav>
+
         <button
           type="button"
           (click)="signOut()"
