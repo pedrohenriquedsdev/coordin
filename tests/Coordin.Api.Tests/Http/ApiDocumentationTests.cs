@@ -23,6 +23,33 @@ public class ApiDocumentationTests(DevelopmentApiFactory development, Production
         Assert.True(document.RootElement.GetProperty("paths").TryGetProperty("/api/health", out _));
     }
 
+    [Theory]
+    [InlineData("/api/auth/login", "post", "Login", new[] { "200", "400", "401", "429" })]
+    [InlineData("/api/auth/refresh", "post", "Refresh", new[] { "200", "401", "429" })]
+    [InlineData("/api/auth/logout", "post", "Logout", new[] { "204" })]
+    [InlineData("/api/auth/me", "get", "GetCurrentUser", new[] { "200", "401" })]
+    public async Task Development_OpenApiDocument_DescribesTheAuthenticationEndpoints_WithoutRequiringLogin(
+        string path,
+        string method,
+        string operationId,
+        string[] responses)
+    {
+        // Sem Authorization: o Swagger UI e o gerador do cliente do Angular leem o contrato anonimamente.
+        using var client = development.CreateClient();
+
+        var response = await client.GetAsync("/openapi/v1.json", TestContext.Current.CancellationToken);
+        using var document = await JsonDocument.ParseAsync(
+            await response.Content.ReadAsStreamAsync(TestContext.Current.CancellationToken),
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var operation = document.RootElement.GetProperty("paths").GetProperty(path).GetProperty(method);
+        Assert.Equal(operationId, operation.GetProperty("operationId").GetString());
+        Assert.Equal("Auth", Assert.Single(operation.GetProperty("tags").EnumerateArray()).GetString());
+        var documented = operation.GetProperty("responses").EnumerateObject().Select(property => property.Name);
+        Assert.Equivalent(responses, documented.ToArray());
+    }
+
     [Fact]
     public async Task Development_SwaggerUi_IsServed()
     {

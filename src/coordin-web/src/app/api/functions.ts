@@ -3,3 +3,11 @@
 
 export type { GetHealth$Params as GetHealth$Params } from './fn/health/get-health';
 export { getHealth as getHealth } from './fn/health/get-health';
+export type { Login$Params as Login$Params } from './fn/auth/login';
+export { login as login } from './fn/auth/login';
+export type { Refresh$Params as Refresh$Params } from './fn/auth/refresh';
+export { refresh as refresh } from './fn/auth/refresh';
+export type { Logout$Params as Logout$Params } from './fn/auth/logout';
+export { logout as logout } from './fn/auth/logout';
+export type { GetCurrentUser$Params as GetCurrentUser$Params } from './fn/auth/get-current-user';
+export { getCurrentUser as getCurrentUser } from './fn/auth/get-current-user';
