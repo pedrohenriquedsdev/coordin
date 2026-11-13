@@ -1,5 +1,6 @@
 using Coordin.Api.Features.Auth;
 using Coordin.Api.Infrastructure.Persistence;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace Coordin.Api.Infrastructure.Auth;
@@ -42,6 +43,9 @@ public static class AuthenticationSetup
                 options.User.RequireUniqueEmail = true;
             })
             .AddEntityFrameworkStores<CoordinDbContext>();
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddScoped<ManagerAccountSeeder>();
 
         return services;
     }

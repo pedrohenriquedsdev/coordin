@@ -1,3 +1,4 @@
+using Coordin.Api.Features.Auth;
 using Coordin.Api.Features.Diagnostics;
 using Coordin.Api.Features.Health;
 using Coordin.Api.Infrastructure.Auth;
@@ -18,6 +19,9 @@ var app = builder.Build();
 
 // O banco precisa estar na versão esperada pelo código antes de qualquer requisição.
 await app.MigrateCoordinDatabaseAsync();
+
+// A conta do gestor vem da configuração (DT-29); sem cadastro público.
+await app.EnsureManagerAccountAsync();
 
 // A ordem importa (D5): esquema original e HTTPS primeiro, cabeçalhos de segurança antes de
 // tudo o que gera resposta e, só então, o formato de erro.
