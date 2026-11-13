@@ -2,7 +2,6 @@ using System.Net;
 using Coordin.Api.Features.Auth;
 using Coordin.Api.Infrastructure.Persistence;
 using Coordin.Api.Tests.Infrastructure;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -177,10 +176,11 @@ public class ManagerAccountTests(PostgresFixture postgres)
         using var client = factory.CreateClient();
     }
 
-    private static LoggingFactory Factory(
+    private static LoggingApiFactory Factory(
         string connectionString,
         Dictionary<string, string?>? configuration = null,
-        ListLoggerProvider? logs = null) => new(connectionString, configuration, logs);
+        ListLoggerProvider? logs = null) =>
+        new(logs, connectionString: connectionString, configuration: configuration);
 
     private static string Flatten(Exception exception)
     {
@@ -191,30 +191,5 @@ public class ManagerAccountTests(PostgresFixture postgres)
         }
 
         return string.Join(" | ", parts);
-    }
-
-    /// <summary>Uma <see cref="CoordinApiFactory"/> sobre um banco já criado, com logs opcionais capturados.</summary>
-    private sealed class LoggingFactory : CoordinApiFactory
-    {
-        private readonly ListLoggerProvider? _logs;
-
-        public LoggingFactory(
-            string connectionString,
-            Dictionary<string, string?>? configuration,
-            ListLoggerProvider? logs)
-            : base("Testing", connectionString: connectionString, configuration: configuration)
-        {
-            _logs = logs;
-        }
-
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            base.ConfigureWebHost(builder);
-
-            if (_logs is not null)
-            {
-                builder.ConfigureLogging(logging => logging.AddProvider(_logs));
-            }
-        }
     }
 }

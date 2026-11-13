@@ -13,6 +13,8 @@ public static class AuthEndpoints
     /// <summary>Mensagem única para qualquer falha de login: não revela se o e-mail existe nem se a conta está bloqueada.</summary>
     private const string InvalidCredentials = "E-mail ou senha inválidos.";
 
+    private const string InvalidSession = "Sessão inválida ou expirada. Entre novamente.";
+
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/auth").WithTags("Auth");
@@ -23,6 +25,21 @@ public static class AuthEndpoints
             .Produces<AccessTokenResponse>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .AllowAnonymous();
+
+        // Anônimo: a "credencial" aqui é o cookie do refresh token, não o token de acesso (que já expirou).
+        group.MapPost("/refresh", RefreshAsync)
+            .WithName("Refresh")
+            .WithSummary("Renova a sessão: troca o refresh token do cookie e devolve um novo token de acesso.")
+            .Produces<AccessTokenResponse>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .AllowAnonymous();
+
+        // Anônimo e idempotente: precisa funcionar mesmo com o token de acesso já expirado.
+        group.MapPost("/logout", LogoutAsync)
+            .WithName("Logout")
+            .WithSummary("Encerra a sessão: revoga o refresh token do cookie e apaga o cookie.")
+            .Produces(StatusCodes.Status204NoContent)
             .AllowAnonymous();
 
         // Sem metadado de autorização: herda a política padrão (exige o gestor autenticado).
@@ -70,6 +87,45 @@ public static class AuthEndpoints
         RefreshTokenCookie.Append(http.Response, refreshToken);
 
         return Results.Ok(new AccessTokenResponse(tokens.CreateAccessToken(user)));
+    }
+
+    private static async Task<IResult> RefreshAsync(
+        HttpContext http,
+        UserManager<ApplicationUser> users,
+        TokenService tokens,
+        RefreshTokenService refreshTokens,
+        CancellationToken cancellationToken)
+    {
+        var presented = RefreshTokenCookie.Read(http.Request);
+        var rotation = presented is null
+            ? RotationResult.Failed(RotationOutcome.Unknown)
+            : await refreshTokens.RotateAsync(presented, cancellationToken);
+
+        var user = rotation.Succeeded ? await users.FindByIdAsync(rotation.UserId!) : null;
+        if (user is null)
+        {
+            // Qualquer falha responde igual (sem dizer se o token não existe, expirou ou foi reusado)
+            // e apaga o cookie, que não serve mais.
+            RefreshTokenCookie.Delete(http.Response);
+            return ApiProblems.Unauthorized(InvalidSession);
+        }
+
+        RefreshTokenCookie.Append(http.Response, rotation.Token!);
+        return Results.Ok(new AccessTokenResponse(tokens.CreateAccessToken(user)));
+    }
+
+    private static async Task<IResult> LogoutAsync(
+        HttpContext http,
+        RefreshTokenService refreshTokens,
+        CancellationToken cancellationToken)
+    {
+        if (RefreshTokenCookie.Read(http.Request) is { } presented)
+        {
+            await refreshTokens.RevokeAsync(presented, cancellationToken);
+        }
+
+        RefreshTokenCookie.Delete(http.Response);
+        return Results.NoContent();
     }
 
     private static async Task<IResult> GetCurrentUserAsync(
