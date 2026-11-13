@@ -43,8 +43,8 @@ Regras para todas as tasks:
 
 ## 8. Contrato e cliente gerado
 
-- [ ] 8.1 Completar os metadados OpenAPI dos endpoints de autenticação (`WithName`, tag `Auth`, `Produces`, `ProducesProblem`); verificar que `/openapi/v1.json` em `Development` contém os quatro caminhos e continua acessível sem login
-- [ ] 8.2 Rodar `npm run generate:api` com a API local e commitar o cliente regenerado; verificar que o serviço de autenticação foi gerado e que `npm run build` e `npm run lint` passam
+- [x] 8.1 Completar os metadados OpenAPI dos endpoints de autenticação (`WithName`, tag `Auth`, `Produces`, `ProducesProblem`); verificar que `/openapi/v1.json` em `Development` contém os quatro caminhos e continua acessível sem login
+- [x] 8.2 Rodar `npm run generate:api` com a API local e commitar o cliente regenerado; verificar que o serviço de autenticação foi gerado e que `npm run build` e `npm run lint` passam
 
 ## 9. Front: sessão e interceptor
 
