@@ -27,9 +27,9 @@ Regras para todas as tasks:
 
 ## 5. Login, bloqueio e usuário autenticado
 
-- [ ] 5.1 Implementar `POST /api/auth/login` (DTOs com `[Required]`, mensagem genérica, cookie `refresh_token` com os atributos do D4) e o `RefreshTokenService` na parte de emissão; criar o auxiliar de teste que faz login e devolve um cliente autenticado (movido da 1.3, pois depende deste endpoint); verificar com os cenários "Credenciais válidas" (inclui `Set-Cookie` com `HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/api/auth`, 7 dias, e o token ausente do corpo), "Senha incorreta", "E-mail inexistente" e "Campos ausentes"
-- [ ] 5.2 Implementar o bloqueio no login (D2); verificar com os cenários "Quinta tentativa errada", "Fim do bloqueio" (ajustando `LockoutEnd` no banco) e "Acerto zera as tentativas"
-- [ ] 5.3 Implementar `GET /api/auth/me`; verificar com os cenários "Com token válido" (só `email`, sem hash nem campos internos) e "Sem token"; e com o cenário "Não existe cadastro público" (`POST /api/auth/register` responde `404`)
+- [x] 5.1 Implementar `POST /api/auth/login` (DTOs com `[Required]`, mensagem genérica, cookie `refresh_token` com os atributos do D4) e o `RefreshTokenService` na parte de emissão; criar o auxiliar de teste que faz login e devolve um cliente autenticado (movido da 1.3, pois depende deste endpoint); verificar com os cenários "Credenciais válidas" (inclui `Set-Cookie` com `HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/api/auth`, 7 dias, e o token ausente do corpo), "Senha incorreta", "E-mail inexistente" e "Campos ausentes"
+- [x] 5.2 Implementar o bloqueio no login (D2); verificar com os cenários "Quinta tentativa errada", "Fim do bloqueio" (ajustando `LockoutEnd` no banco) e "Acerto zera as tentativas"
+- [x] 5.3 Implementar `GET /api/auth/me`; verificar com os cenários "Com token válido" (só `email`, sem hash nem campos internos) e "Sem token"; e com o cenário "Não existe cadastro público" (`POST /api/auth/register` responde `404`)
 
 ## 6. Refresh, rotação, reuso e logout
 
