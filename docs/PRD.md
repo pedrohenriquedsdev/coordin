@@ -481,6 +481,12 @@ O prazo do TCC não permite acompanhar demandas reais do início à conclusão c
 
 **Plano B:** se o gestor do setor não estiver disponível (P-05), o autor executa os passos 2 e 4, a avaliação do gestor deixa de ser medida e a limitação é registrada no TCC.
 
+**Definições do M2 (2026-11-13):**
+
+- **Tamanho do conjunto (P-03, R-04):** 7 times, cerca de 35 pessoas e 30 demandas, pequeno o bastante para o gestor informar a linha de base sem o sistema (P-04).
+- **Variação do esforço do realizado simulado (passo 6):** fator entre 0,9 e 1,1 (±10%), a confirmar com o gestor na revisão do conjunto (P-03).
+- **Disponibilidade do gestor (P-05):** confirmada pelo autor; o plano B não se aplica.
+
 ### 7.4 Métricas secundárias
 
 | Métrica | Como medir | Resultado esperado relacionado | Requisitos |
@@ -545,7 +551,7 @@ O Coordin **não** vai:
 | R-01 | **Prazo:** 24 requisitos funcionais, TDD e implementação até 2026-11-28. | Should e Could não entregues. | Proteger Must → Should → Could (seção 8); revisar o andamento ao fim de cada etapa e propor cortes cedo. |
 | R-02 | **Hospedagem:** o uso no computador e no celular (RNF-03) exige que o sistema esteja acessível pela rede. | Sem hospedagem, o celular não acessa os dados; custo e configuração extras. | Decidir hospedagem e implantação no TDD, cedo no roadmap. |
 | R-03 | **Validade da simulação:** dados fictícios e realizado gerado pelo mesmo modelo do Coordin (P-03). | A banca questionar o quanto os resultados representam o setor real. | Limitação declarada (7.3); conjunto revisado com o gestor; eficiência comparada com o mesmo cálculo nos dois planejamentos. |
-| R-04 | **Conjunto da simulação:** o conjunto fictício precisa ser montado e carregado no sistema (RF-24). | Horas de preparação perto do prazo. | Limitar o tamanho do conjunto, definido no M2; carregamento pelo RF-24, sem digitação manual. |
+| R-04 | **Conjunto da simulação:** o conjunto fictício precisa ser montado e carregado no sistema (RF-24). | Horas de preparação perto do prazo. | Limitar o tamanho do conjunto, definido no M2 em 2026-11-13 (7 times, cerca de 35 pessoas e 30 demandas); carregamento pelo RF-24, sem digitação manual. |
 | R-05 | **Agregação da métrica principal no uso real depende do RF-23 (Could).** | Fora da validação, sem média e % no prazo calculados pelo sistema. | Na validação, o RF-24 calcula os desvios; no uso real, calcular a partir da exportação (RF-19) até o RF-23 existir. |
 | R-06 | **Complexidade do cálculo:** ausências, vários times por demanda, dependências e busca de cenários com até 200 demandas. | Erros de previsão ou cenários acima do tempo do RNF-01. | Motor de cálculo isolado e testado (RNF-08); método de busca de cenários definido no TDD respeitando o RNF-01. |
 | R-07 | **Exposição de dados reais** do setor na validação ou no repositório. | Problema de confidencialidade e de dados pessoais. | A simulação usa apenas dados fictícios; nada real versionado (RNF-05). |
