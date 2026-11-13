@@ -1,4 +1,5 @@
 using Coordin.Api.Features.Auth;
+using Coordin.Api.Features.Calendar;
 using Coordin.Api.Features.Diagnostics;
 using Coordin.Api.Features.Health;
 using Coordin.Api.Features.People;
@@ -39,6 +40,8 @@ app.MapHealthEndpoint();
 app.MapAuthEndpoints();
 app.MapTeamEndpoints();
 app.MapPersonEndpoints();
+app.MapAbsenceEndpoints();
+app.MapHolidayEndpoints();
 app.MapTestOnlyEndpoints();
 app.MapApiFallback();
 app.MapSpaFallback(); // por último: o fallback de /api é mais específico e vem antes
