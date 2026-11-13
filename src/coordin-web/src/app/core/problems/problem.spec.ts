@@ -52,6 +52,19 @@ describe('readProblem', () => {
     expect(problem.fieldErrors).toEqual({ other: ['ok'] });
   });
 
+  it('reads a Problem Details that arrives as JSON text (requests made with responseType text)', () => {
+    const problem = readProblem(
+      new HttpErrorResponse({
+        status: 409,
+        error:
+          '{"code":"team-has-people","detail":"Não é possível excluir um time que tem pessoas."}',
+      }),
+    );
+
+    expect(problem.code).toBe('team-has-people');
+    expect(problem.detail).toBe('Não é possível excluir um time que tem pessoas.');
+  });
+
   it('copes with a body that is plain text or empty', () => {
     expect(readProblem(new HttpErrorResponse({ status: 500, error: 'Erro' })).code).toBeNull();
     expect(readProblem(new HttpErrorResponse({ status: 404, error: null })).fieldErrors).toEqual(

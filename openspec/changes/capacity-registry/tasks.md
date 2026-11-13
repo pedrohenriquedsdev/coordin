@@ -38,8 +38,8 @@ Regras para todas as tasks:
 
 ## 7. Front: Times e pessoas
 
-- [ ] 7.1 Implementar a tela "Times e pessoas": lista de times com "N pessoas · X h/dia", detalhe com "Capacidade do time", "+ Novo time", renomear e excluir com confirmação, mensagens de `team-name-taken` e `team-has-people` e os estados de carregando, vazio e falha; verificar com testes dos cenários "Lista", "Capacidade do time", "Sem times", "Novo time", "Nome repetido" (sem perder o digitado), "Nome obrigatório", "Excluir time com pessoas", "Excluir time sem pessoas" e "Falha da API"
-- [ ] 7.2 Implementar a tabela de pessoas do time: adicionar, editar (nome, capacidade e time), excluir com confirmação, "não contribui" para capacidade 0 e validação no cliente de capacidade obrigatória e de 0 a 24; verificar com testes dos cenários "Adicionar pessoa", "Capacidade obrigatória e na faixa", "Capacidade zero", "Mudar de time" e "Excluir pessoa"
+- [x] 7.1 Implementar a tela "Times e pessoas": lista de times com "N pessoas · X h/dia", detalhe com "Capacidade do time", "+ Novo time", renomear e excluir com confirmação, mensagens de `team-name-taken` e `team-has-people` e os estados de carregando, vazio e falha; verificar com testes dos cenários "Lista", "Capacidade do time", "Sem times", "Novo time", "Nome repetido" (sem perder o digitado), "Nome obrigatório", "Excluir time com pessoas", "Excluir time sem pessoas" e "Falha da API"
+- [x] 7.2 Implementar a tabela de pessoas do time: adicionar, editar (nome, capacidade e time), excluir com confirmação, "não contribui" para capacidade 0 e validação no cliente de capacidade obrigatória e de 0 a 24; verificar com testes dos cenários "Adicionar pessoa", "Capacidade obrigatória e na faixa", "Capacidade zero", "Mudar de time" e "Excluir pessoa"
 
 ## 8. Front: Calendário
 

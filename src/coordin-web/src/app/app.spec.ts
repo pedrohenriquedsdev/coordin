@@ -1,8 +1,11 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { App } from './app';
+import { provideApiConfiguration } from './api/api-configuration';
 import { routes } from './app.routes';
 import { SessionService } from './core/auth/session.service';
 
@@ -21,6 +24,10 @@ describe('App', () => {
       imports: [App],
       providers: [
         provideRouter(routes),
+        // As telas pedem dados à API: nos testes de navegação, um HttpClient de teste, sem rede de verdade.
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideApiConfiguration(''),
         // A página inicial é protegida: os testes usam uma sessão simulada.
         { provide: SessionService, useValue: { isAuthenticated: authenticated, logout } },
       ],
@@ -148,7 +155,7 @@ describe('App', () => {
       links(element(fixture))[0].click();
       await fixture.whenStable();
       expect(TestBed.inject(Router).url).toBe('/teams');
-      expect(element(fixture).querySelector('main')?.textContent).toContain('Times e pessoas');
+      expect(element(fixture).querySelector('main')?.textContent).toContain('Times (');
 
       links(element(fixture))[1].click();
       await fixture.whenStable();

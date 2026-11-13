@@ -20,10 +20,7 @@ export function readProblem(error: unknown): ApiProblem {
     return NO_RESPONSE;
   }
 
-  const body: Record<string, unknown> =
-    typeof error.error === 'object' && error.error !== null
-      ? (error.error as Record<string, unknown>)
-      : {};
+  const body = bodyOf(error);
 
   return {
     status: error.status,
@@ -36,6 +33,30 @@ export function readProblem(error: unknown): ApiProblem {
 /** A API não respondeu ou falhou por dentro: a tela deve oferecer "tentar de novo", sem culpar o gestor. */
 export function isServiceFailure(problem: ApiProblem): boolean {
   return problem.status === 0 || problem.status >= 500;
+}
+
+/**
+ * O corpo do erro como objeto. As funções geradas de `DELETE` e `logout` pedem a resposta como texto
+ * (o sucesso é `204`, sem corpo), então um Problem Details de erro chega como uma string JSON.
+ */
+function bodyOf(error: HttpErrorResponse): Record<string, unknown> {
+  const raw: unknown = error.error;
+
+  if (typeof raw === 'string') {
+    try {
+      return asRecord(JSON.parse(raw));
+    } catch {
+      return {};
+    }
+  }
+
+  return asRecord(raw);
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
 function readFieldErrors(errors: unknown): Record<string, string[]> {

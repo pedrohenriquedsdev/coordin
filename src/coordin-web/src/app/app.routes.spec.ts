@@ -1,7 +1,10 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { provideApiConfiguration } from './api/api-configuration';
 import { routes } from './app.routes';
 import { SessionService } from './core/auth/session.service';
 
@@ -15,6 +18,10 @@ describe('routes', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter(routes),
+        // As telas pedem dados à API: nos testes de navegação, um HttpClient de teste, sem rede de verdade.
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideApiConfiguration(''),
         { provide: SessionService, useValue: { isAuthenticated: authenticated } },
       ],
     });
@@ -65,7 +72,7 @@ describe('routes', () => {
     });
 
     it.each([
-      ['/teams', 'Times e pessoas'],
+      ['/teams', 'Times ('],
       ['/calendar', 'Calendário'],
     ])('opens %s', async (path, title) => {
       const { harness, url } = await open(path);
