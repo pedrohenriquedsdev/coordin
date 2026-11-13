@@ -33,8 +33,8 @@ Regras para todas as tasks:
 
 ## 6. Front: base e navegação
 
-- [ ] 6.1 Criar `core/dates` (`formatCalendarDate`, `CalendarDatePipe`, `formatPeriod`, `today()` com relógio injetável, D8) e os testes; verificar com Vitest que `2026-12-31` vira `31/12/2026` e `formatPeriod` dá "04–15/01" e "21/12–04/01", e que **os mesmos testes passam com `TZ=UTC`, `TZ=America/Sao_Paulo` e `TZ=Asia/Tokyo`** (cenário "Exibição" da spec `registry-web`)
-- [ ] 6.2 Criar `core/problems` (leitura de Problem Details: `status`, `code`, erros por campo), a navegação na casca com os links "Times e pessoas" e "Calendário" só com sessão, e as rotas protegidas `/teams` e `/calendar` com telas provisórias; verificar com testes dos cenários "Links com sessão" e "Sem sessão" (redirecionamento a `/login` guardando o destino, e sem links na tela de login) e do utilitário de erros (código, erro por campo, falha de rede)
+- [x] 6.1 Criar `core/dates` (`formatCalendarDate`, `CalendarDatePipe`, `formatPeriod`, `today()` com relógio injetável, D8) e os testes; verificar com Vitest que `2026-12-31` vira `31/12/2026` e `formatPeriod` dá "04–15/01" e "21/12–04/01", e que **os mesmos testes passam com `TZ=UTC`, `TZ=America/Sao_Paulo` e `TZ=Asia/Tokyo`** (cenário "Exibição" da spec `registry-web`)
+- [x] 6.2 Criar `core/problems` (leitura de Problem Details: `status`, `code`, erros por campo), a navegação na casca com os links "Times e pessoas" e "Calendário" só com sessão, e as rotas protegidas `/teams` e `/calendar` com telas provisórias; verificar com testes dos cenários "Links com sessão" e "Sem sessão" (redirecionamento a `/login` guardando o destino, e sem links na tela de login) e do utilitário de erros (código, erro por campo, falha de rede)
 
 ## 7. Front: Times e pessoas
 

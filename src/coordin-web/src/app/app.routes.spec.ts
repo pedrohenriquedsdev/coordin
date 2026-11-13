@@ -40,6 +40,12 @@ describe('routes', () => {
       expect(url).toBe('/login?returnUrl=%2Fcronograma');
     });
 
+    it.each(['/teams', '/calendar'])('sends %s to /login, remembering it', async (path) => {
+      const { url } = await open(path);
+
+      expect(url).toBe(`/login?returnUrl=${encodeURIComponent(path)}`);
+    });
+
     it('shows the login page', async () => {
       const { harness, url } = await open('/login');
 
@@ -56,6 +62,16 @@ describe('routes', () => {
 
       expect(url).toBe('/');
       expect(harness.routeNativeElement?.textContent).toContain(homeText);
+    });
+
+    it.each([
+      ['/teams', 'Times e pessoas'],
+      ['/calendar', 'Calendário'],
+    ])('opens %s', async (path, title) => {
+      const { harness, url } = await open(path);
+
+      expect(url).toBe(path);
+      expect(harness.routeNativeElement?.textContent).toContain(title);
     });
 
     it('sends /login to the home page', async () => {
