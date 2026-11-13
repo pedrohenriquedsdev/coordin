@@ -33,9 +33,9 @@ Regras para todas as tasks:
 
 ## 6. Refresh, rotação, reuso e logout
 
-- [ ] 6.1 Implementar `POST /api/auth/refresh` com a rotação atômica do D4; verificar com os cenários "Refresh token válido", "Token já trocado não vale", "Sem cookie ou token desconhecido" e "Refresh token expirado" (cookie apagado)
-- [ ] 6.2 Implementar a detecção de reuso (revoga todos os tokens do usuário) e `POST /api/auth/logout` (anônimo, idempotente, apaga o cookie); verificar com os cenários "Reuso detectado" (o token mais novo também deixa de valer), "Logout com sessão ativa" e "Logout sem sessão", e com um teste de duas chamadas simultâneas ao `refresh` com o mesmo cookie (só uma tem sucesso)
-- [ ] 6.3 Verificar o cenário "Banco sem texto puro" (senha e refresh token não aparecem em nenhuma coluna) e "Resposta de erro sem segredos" (corpo e logs da falha de login não contêm a senha enviada)
+- [x] 6.1 Implementar `POST /api/auth/refresh` com a rotação atômica do D4; verificar com os cenários "Refresh token válido", "Token já trocado não vale", "Sem cookie ou token desconhecido" e "Refresh token expirado" (cookie apagado)
+- [x] 6.2 Implementar a detecção de reuso (revoga todos os tokens do usuário) e `POST /api/auth/logout` (anônimo, idempotente, apaga o cookie); verificar com os cenários "Reuso detectado" (o token mais novo também deixa de valer), "Logout com sessão ativa" e "Logout sem sessão", e com um teste de duas chamadas simultâneas ao `refresh` com o mesmo cookie (só uma tem sucesso)
+- [x] 6.3 Verificar o cenário "Banco sem texto puro" (senha e refresh token não aparecem em nenhuma coluna) e "Resposta de erro sem segredos" (corpo e logs da falha de login não contêm a senha enviada)
 
 ## 7. Limite de requisições
 
