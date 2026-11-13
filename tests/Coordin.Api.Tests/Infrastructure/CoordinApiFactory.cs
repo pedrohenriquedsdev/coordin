@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
@@ -11,9 +12,16 @@ namespace Coordin.Api.Tests.Infrastructure;
 /// pasta temporária com um <c>index.html</c> falso, para os testes não dependerem do build do
 /// Angular (D13).
 /// </summary>
-public class CoordinApiFactory(string environment, PostgresFixture? postgres = null, string? connectionString = null)
+public class CoordinApiFactory(
+    string environment,
+    PostgresFixture? postgres = null,
+    string? connectionString = null,
+    IReadOnlyDictionary<string, string?>? configuration = null)
     : WebApplicationFactory<Program>, IAsyncLifetime
 {
+    // Uma chave nova por execução dos testes: nenhum segredo, nem fictício, fica versionado.
+    private static readonly string SigningKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(48));
+
     private readonly string _webRoot = CreateWebRoot();
     private string? _connectionString = connectionString;
 
@@ -38,15 +46,30 @@ public class CoordinApiFactory(string environment, PostgresFixture? postgres = n
 
         // A fonte em memória entra por último, então vence os user-secrets da máquina de quem
         // roda os testes (em Development) e qualquer outra configuração.
-        builder.ConfigureAppConfiguration((_, configuration) =>
+        builder.ConfigureAppConfiguration((_, appConfiguration) =>
         {
+            var settings = new Dictionary<string, string?>
+            {
+                // Autenticação (DT-28, DT-29, DT-30): valores só dos testes.
+                ["Jwt:SigningKey"] = SigningKey,
+                ["Manager:Email"] = TestManager.Email,
+                ["Manager:Password"] = TestManager.Password,
+                // Limite alto para os testes poderem fazer muitos logins; o teste do limite o reduz.
+                ["Auth:RateLimit:PermitLimit"] = "1000",
+            };
+
             if (_connectionString is not null)
             {
-                configuration.AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    ["ConnectionStrings:Default"] = _connectionString,
-                });
+                settings["ConnectionStrings:Default"] = _connectionString;
             }
+
+            // As sobrescritas de cada teste valem por último.
+            foreach (var (key, value) in configuration ?? new Dictionary<string, string?>())
+            {
+                settings[key] = value;
+            }
+
+            appConfiguration.AddInMemoryCollection(settings);
         });
     }
 

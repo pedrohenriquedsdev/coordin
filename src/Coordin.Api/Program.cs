@@ -1,5 +1,6 @@
 using Coordin.Api.Features.Diagnostics;
 using Coordin.Api.Features.Health;
+using Coordin.Api.Infrastructure.Auth;
 using Coordin.Api.Infrastructure.Http;
 using Coordin.Api.Infrastructure.Persistence;
 
@@ -9,6 +10,7 @@ builder.Services.AddCoordinJson();
 builder.Services.AddCoordinProblemDetails();
 builder.Services.AddCoordinTransportSecurity();
 builder.Services.AddCoordinPersistence();
+builder.Services.AddCoordinAuthentication();
 builder.Services.AddCoordinHealth();
 builder.Services.AddCoordinApiDocumentation();
 
