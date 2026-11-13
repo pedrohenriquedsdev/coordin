@@ -48,8 +48,8 @@ Regras para todas as tasks:
 
 ## 9. Front: sessão e interceptor
 
-- [ ] 9.1 Criar o `SessionService` (token só em um signal, `login`, `refresh` com renovação única compartilhada, `logout`, `clear`) e registrar `provideHttpClient`; verificar com testes Vitest dos cenários "Token de acesso só em memória" (nada em `localStorage`/`sessionStorage`) e de que duas chamadas simultâneas a `refresh()` fazem uma única requisição
-- [ ] 9.2 Criar o `authInterceptor` (anexa `Bearer` só em `/api/`, ignora `/api/auth/login|refresh|logout`, repete uma vez após `401`, encerra a sessão se a renovação falhar); verificar com testes com `HttpTestingController` dos cenários "Token enviado", "Token expirado", "Chamadas simultâneas" (três `401`, um `refresh`), "Renovação falha" e "Endpoints de autenticação"
+- [x] 9.1 Criar o `SessionService` (token só em um signal, `login`, `refresh` com renovação única compartilhada, `logout`, `clear`) e registrar `provideHttpClient`; verificar com testes Vitest dos cenários "Token de acesso só em memória" (nada em `localStorage`/`sessionStorage`) e de que duas chamadas simultâneas a `refresh()` fazem uma única requisição
+- [x] 9.2 Criar o `authInterceptor` (anexa `Bearer` só em `/api/`, ignora `/api/auth/login|refresh|logout`, repete uma vez após `401`, encerra a sessão se a renovação falhar); verificar com testes com `HttpTestingController` dos cenários "Token enviado", "Token expirado", "Chamadas simultâneas" (três `401`, um `refresh`), "Renovação falha" e "Endpoints de autenticação"
 
 ## 10. Front: telas, guarda e casca
 
