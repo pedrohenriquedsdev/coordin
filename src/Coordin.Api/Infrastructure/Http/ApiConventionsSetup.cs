@@ -22,7 +22,8 @@ public static class ApiConventionsSetup
     /// </summary>
     public static IEndpointRouteBuilder MapApiFallback(this IEndpointRouteBuilder app)
     {
-        app.MapFallback("/api/{**path}", () => Results.NotFound());
+        // Anônimo de propósito: uma rota inexistente responde 404 para qualquer um, e não 401.
+        app.MapFallback("/api/{**path}", () => Results.NotFound()).AllowAnonymous();
         return app;
     }
 }

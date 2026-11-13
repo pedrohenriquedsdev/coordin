@@ -24,7 +24,11 @@ public static class SpaHostingSetup
     /// </summary>
     public static IEndpointRouteBuilder MapSpaFallback(this IEndpointRouteBuilder app)
     {
-        app.MapFallbackToFile(IndexFile, new StaticFileOptions { OnPrepareResponse = NoCacheForIndex });
+        // O HTML da SPA é público; os dados é que exigem login (RNF-04). Sem AllowAnonymous a
+        // política de fallback da autenticação bloquearia até a página de login.
+        app.MapFallbackToFile(IndexFile, new StaticFileOptions { OnPrepareResponse = NoCacheForIndex })
+            .AllowAnonymous();
+
         return app;
     }
 

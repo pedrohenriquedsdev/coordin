@@ -31,6 +31,7 @@ app.UseCoordinProblemDetails();
 
 app.UseCoordinApiDocumentation();
 app.UseCoordinSpaFiles();
+app.UseCoordinAuthentication();
 
 app.MapHealthEndpoint();
 app.MapTestOnlyEndpoints();
