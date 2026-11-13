@@ -53,8 +53,8 @@ Regras para todas as tasks:
 
 ## 10. Front: telas, guarda e casca
 
-- [ ] 10.1 Criar o `authGuard`, a guarda inversa de `/login`, as rotas (`/login` pública; `''` protegida) e o `provideAppInitializer` que restaura a sessão; verificar com testes dos cenários "Sem sessão", "Retorno ao destino" (e rejeição de `returnUrl` externo, como `//outro-site`), "Login já feito", "Recarregar com sessão válida" e "Abrir sem sessão válida"
-- [ ] 10.2 Criar a tela `/login` (E-mail, Senha oculta, "Entrar", validação de campos, mensagens do protótipo T01 para `401` e `429`, botão desabilitado durante a chamada) e o botão "Sair" na casca; verificar com testes dos cenários "Login com sucesso", "Credenciais inválidas", "Campos obrigatórios", "Muitas tentativas", "Senha oculta", "Sair" e "Botão oculto no login"
+- [x] 10.1 Criar o `authGuard`, a guarda inversa de `/login`, as rotas (`/login` pública; `''` protegida) e o `provideAppInitializer` que restaura a sessão; verificar com testes dos cenários "Sem sessão", "Retorno ao destino" (e rejeição de `returnUrl` externo, como `//outro-site`), "Login já feito", "Recarregar com sessão válida" e "Abrir sem sessão válida"
+- [x] 10.2 Criar a tela `/login` (E-mail, Senha oculta, "Entrar", validação de campos, mensagens do protótipo T01 para `401` e `429`, botão desabilitado durante a chamada) e o botão "Sair" na casca; verificar com testes dos cenários "Login com sucesso", "Credenciais inválidas", "Campos obrigatórios", "Muitas tentativas", "Senha oculta", "Sair" e "Botão oculto no login"
 - [ ] 10.3 Verificar manualmente, com a API local e `ng serve`, os cenários "Celular" e "Computador" da tela de login (360 px e 1280 px, sem rolagem horizontal, medido por `scrollWidth`) e o fluxo completo: login, recarregar a página sem novo login, esperar o token de 15 minutos expirar (ou fabricar um token curto em ambiente de teste), e sair
 
 ## 11. Infra e documentação
