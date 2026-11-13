@@ -10,6 +10,7 @@
           <tr>
             <th scope="col" class="py-2 pr-4 font-medium">Pessoa</th>
             <th scope="col" class="py-2 pr-4 font-medium">Capacidade (h/dia útil)</th>
+            <th scope="col" class="py-2 pr-4 font-medium">Ausências</th>
             <th scope="col" class="py-2 font-medium">Ações</th>
           </tr>
         </thead>
@@ -24,6 +25,7 @@
                   {{ person.dailyCapacityHours | number: '1.0-2' }}
                 }
               </td>
+              <td class="py-2 pr-4">{{ nextAbsence(person) }}</td>
               <td class="py-2">
                 @if (deletingId() === person.id) {
                   <span class="mr-2">Excluir {{ person.name }}?</span>

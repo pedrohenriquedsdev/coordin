@@ -2,10 +2,15 @@ import { DecimalPipe } from '@angular/common';
 import { Component, effect, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { messageFor } from '../core/problems/messages';
 import { readProblem } from '../core/problems/problem';
-import { messageFor, peopleLabel } from './messages';
 import { PeopleSection } from './people-section';
 import { TeamsStore } from './teams.store';
+
+/** "1 pessoa", "4 pessoas". */
+function peopleLabel(count: number): string {
+  return count === 1 ? '1 pessoa' : `${count} pessoas`;
+}
 
 /** Tela "Times e pessoas" (protótipo T07; RF-01, RF-02): lista de times à esquerda, o time escolhido à direita. */
 @Component({

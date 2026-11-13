@@ -43,9 +43,9 @@ Regras para todas as tasks:
 
 ## 8. Front: Calendário
 
-- [ ] 8.1 Implementar a seção de ausências: tabela (pessoa, time, tipo, início, fim), filtro "Todos os times" feito no navegador, formulário sem campo de motivo, "O fim não pode ser anterior ao início", editar e excluir com confirmação e datas por `CalendarDatePipe`; verificar com testes dos cenários "Lista e filtro", "Registrar ausência", "Fim antes do início", "Sem campo de motivo", "Editar e excluir" e "Envio" (o valor `2026-12-31` chega à API sem conversão, nos três fusos)
-- [ ] 8.2 Implementar a seção de feriados: lista por data, adicionar (data e descrição opcional), remover com confirmação, mensagem de `holiday-date-taken` e "Lista vazia"; verificar com testes dos cenários "Adicionar feriado", "Data repetida", "Remover feriado" e "Lista vazia"
-- [ ] 8.3 **Candidata a corte (1).** Acrescentar a coluna "Ausências" na tabela de pessoas com a próxima ausência (`formatPeriod`, "—" quando não há, `today()` em São Paulo); verificar com testes dos cenários "Com ausência futura", "Período que cruza meses" e "Ausência já terminada" (com um relógio simulado). Se for cortada, ajustar a spec `registry-web` antes do PR
+- [x] 8.1 Implementar a seção de ausências: tabela (pessoa, time, tipo, início, fim), filtro "Todos os times" feito no navegador, formulário sem campo de motivo, "O fim não pode ser anterior ao início", editar e excluir com confirmação e datas por `CalendarDatePipe`; verificar com testes dos cenários "Lista e filtro", "Registrar ausência", "Fim antes do início", "Sem campo de motivo", "Editar e excluir" e "Envio" (o valor `2026-12-31` chega à API sem conversão, nos três fusos)
+- [x] 8.2 Implementar a seção de feriados: lista por data, adicionar (data e descrição opcional), remover com confirmação, mensagem de `holiday-date-taken` e "Lista vazia"; verificar com testes dos cenários "Adicionar feriado", "Data repetida", "Remover feriado" e "Lista vazia"
+- [x] 8.3 **Candidata a corte (1).** Acrescentar a coluna "Ausências" na tabela de pessoas com a próxima ausência (`formatPeriod`, "—" quando não há, `today()` em São Paulo); verificar com testes dos cenários "Com ausência futura", "Período que cruza meses" e "Ausência já terminada" (com um relógio simulado). Se for cortada, ajustar a spec `registry-web` antes do PR
 
 ## 9. Verificação manual
 

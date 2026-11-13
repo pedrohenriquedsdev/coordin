@@ -1,8 +1,10 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, effect, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { absenceTypeLabel } from '../calendar/absence-type-label';
+import { Clock, formatPeriod } from '../core/dates/calendar-date';
+import { messageFor } from '../core/problems/messages';
 import { readProblem } from '../core/problems/problem';
-import { messageFor } from './messages';
 import { Person, TeamsStore } from './teams.store';
 
 /**
@@ -18,6 +20,7 @@ import { Person, TeamsStore } from './teams.store';
 export class PeopleSection {
   protected readonly store = inject(TeamsStore);
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly clock = inject(Clock);
 
   protected readonly form = this.fb.group({
     name: ['', Validators.required],
@@ -40,6 +43,22 @@ export class PeopleSection {
       this.store.selectedId();
       this.reset();
     });
+  }
+
+  /**
+   * A próxima ausência da pessoa: a primeira (por início) que ainda não terminou, em relação à data de
+   * hoje em São Paulo. Datas de calendário comparadas como texto (`yyyy-MM-dd`), sem `Date`.
+   */
+  protected nextAbsence(person: Person): string {
+    const today = this.clock.today();
+    const next = this.store
+      .absences()
+      .filter((absence) => absence.personId === person.id && absence.endDate >= today)
+      .sort((a, b) => a.startDate.localeCompare(b.startDate))[0];
+
+    return next
+      ? `${absenceTypeLabel(next.type)} ${formatPeriod(next.startDate, next.endDate)}`
+      : '—';
   }
 
   protected edit(person: Person): void {

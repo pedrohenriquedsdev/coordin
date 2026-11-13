@@ -1,4 +1,4 @@
-import { ApiProblem, isServiceFailure } from '../core/problems/problem';
+import { ApiProblem, isServiceFailure } from './problem';
 
 /** Mensagem para quando a API não respondeu ou falhou por dentro: a culpa não é do gestor. */
 export const SERVICE_FAILURE = 'Não foi possível concluir agora. Tente novamente em instantes.';
@@ -18,9 +18,4 @@ export function messageFor(problem: ApiProblem, fallback: string): string {
   }
 
   return problem.detail ?? fallback;
-}
-
-/** "1 pessoa", "4 pessoas". */
-export function peopleLabel(count: number): string {
-  return count === 1 ? '1 pessoa' : `${count} pessoas`;
 }

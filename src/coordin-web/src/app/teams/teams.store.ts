@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { catchError, EMPTY, forkJoin, map, Observable, switchMap, tap } from 'rxjs';
 import { ApiConfiguration } from '../api/api-configuration';
+import { getAbsences } from '../api/fn/absences/get-absences';
+import { AbsenceResponse } from '../api/models/absence-response';
 import { createPerson } from '../api/fn/people/create-person';
 import { deletePerson } from '../api/fn/people/delete-person';
 import { getPeople } from '../api/fn/people/get-people';
@@ -46,6 +48,7 @@ export class TeamsStore {
 
   readonly teams = signal<Team[]>([]);
   readonly people = signal<Person[]>([]);
+  readonly absences = signal<AbsenceResponse[]>([]);
   readonly status = signal<LoadStatus>('loading');
   readonly selectedId = signal<string | null>(null);
 
@@ -102,8 +105,13 @@ export class TeamsStore {
 
   /** Busca as duas listas e aplica no estado. Uma falha aqui marca a tela como "falhou", sem propagar. */
   private fetch(): Observable<void> {
-    return forkJoin([getTeams(this.http, this.root), getPeople(this.http, this.root)]).pipe(
-      tap(([teams, people]) => {
+    return forkJoin([
+      getTeams(this.http, this.root),
+      getPeople(this.http, this.root),
+      getAbsences(this.http, this.root),
+    ]).pipe(
+      tap(([teams, people, absences]) => {
+        this.absences.set(absences.body);
         this.teams.set(
           teams.body.map((team) => ({
             id: team.id,

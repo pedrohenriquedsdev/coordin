@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideApiConfiguration } from '../api/api-configuration';
+import { Clock } from '../core/dates/calendar-date';
 import { provideLocalePtBr } from '../core/locale';
 import { TeamsPage } from './teams-page';
 
@@ -20,6 +21,13 @@ const PEOPLE = [
   { id: 'p3', name: 'Diego', teamId: 't1', teamName: 'Pagamentos', dailyCapacityHours: 0 },
 ];
 
+/** "Hoje" fixo (13/11/2026 em São Paulo), para a coluna de próxima ausência não depender do dia em que o teste roda. */
+class FixedClock extends Clock {
+  override now(): number {
+    return Date.parse('2026-11-13T15:00:00Z');
+  }
+}
+
 describe('TeamsPage', () => {
   let fixture: ComponentFixture<TeamsPage>;
   let http: HttpTestingController;
@@ -32,6 +40,7 @@ describe('TeamsPage', () => {
         provideHttpClientTesting(),
         provideApiConfiguration(''),
         provideLocalePtBr(),
+        { provide: Clock, useClass: FixedClock },
       ],
     });
     http = TestBed.inject(HttpTestingController);
@@ -49,12 +58,17 @@ describe('TeamsPage', () => {
   };
 
   /** Abre a tela e responde às duas listas que ela pede ao carregar. */
-  async function open(teams: unknown[] = TEAMS, people: unknown[] = PEOPLE): Promise<void> {
+  async function open(
+    teams: unknown[] = TEAMS,
+    people: unknown[] = PEOPLE,
+    absences: unknown[] = [],
+  ): Promise<void> {
     fixture = TestBed.createComponent(TeamsPage);
     root = fixture.nativeElement as HTMLElement;
     fixture.detectChanges();
     request('GET', '/api/teams').flush(teams);
     request('GET', '/api/people').flush(people);
+    request('GET', '/api/absences').flush(absences);
     await settle();
   }
 
@@ -62,6 +76,7 @@ describe('TeamsPage', () => {
   async function answerReload(teams: unknown[] = TEAMS, people: unknown[] = PEOPLE): Promise<void> {
     request('GET', '/api/teams').flush(teams);
     request('GET', '/api/people').flush(people);
+    request('GET', '/api/absences').flush([]);
     await settle();
   }
 
@@ -102,6 +117,7 @@ describe('TeamsPage', () => {
 
       request('GET', '/api/teams').flush([]);
       request('GET', '/api/people').flush([]);
+      request('GET', '/api/absences').flush([]);
     });
 
     it('shows each team with its people and capacity', async () => {
@@ -148,7 +164,7 @@ describe('TeamsPage', () => {
       await settle();
 
       expect(alertText()).toContain('Não foi possível carregar os times.');
-      http.match((req) => req.url === '/api/people'); // descarta o pedido cancelado pelo forkJoin
+      http.match((req) => req.url === '/api/people' || req.url === '/api/absences'); // cancelados pelo forkJoin
 
       await click('Tentar de novo');
       await answerReload();
@@ -449,6 +465,47 @@ describe('TeamsPage', () => {
 
       expect(text()).not.toContain('Ana');
       expect(text()).toContain('3 pessoas · 6,5 h/dia');
+    });
+  });
+  describe('the next absence of each person', () => {
+    const absence = (personId: string, type: string, startDate: string, endDate: string) => ({
+      id: `a-${personId}-${startDate}`,
+      personId,
+      personName: 'x',
+      teamId: 't1',
+      teamName: 'Pagamentos',
+      type,
+      startDate,
+      endDate,
+    });
+    const cells = () =>
+      [...root.querySelectorAll('tbody tr')].map((row) =>
+        row.querySelectorAll('td')[2].textContent?.trim(),
+      );
+
+    it('shows the first absence that has not ended, in a short period format', async () => {
+      await open(TEAMS, PEOPLE, [
+        absence('p1', 'Vacation', '2027-01-04', '2027-01-15'),
+        absence('p2', 'Other', '2026-12-21', '2027-01-04'),
+      ]);
+
+      expect(cells()).toEqual(['Férias 04–15/01', 'Outra 21/12–04/01', '—']);
+    });
+
+    it('shows "—" when every absence of the person has already ended', async () => {
+      await open(TEAMS, PEOPLE, [absence('p1', 'Vacation', '2026-10-01', '2026-10-12')]);
+
+      expect(cells()).toEqual(['—', '—', '—']);
+    });
+
+    it('counts an absence that ends today, and picks the earliest start among the ones still to come', async () => {
+      await open(TEAMS, PEOPLE, [
+        absence('p1', 'Other', '2026-12-01', '2026-12-02'),
+        absence('p1', 'Vacation', '2026-11-12', '2026-11-13'), // termina hoje: ainda conta
+        absence('p2', 'Vacation', '2026-11-12', '2026-11-12'), // terminou ontem: não conta
+      ]);
+
+      expect(cells()).toEqual(['Férias 12–13/11', '—', '—']);
     });
   });
 });
