@@ -28,8 +28,8 @@ Regras para todas as tasks:
 
 ## 5. Cliente gerado e documentos
 
-- [ ] 5.1 Rodar `npm run generate:api` com a API local em `Development` (chave JWT temporária só no ambiente do processo, como na change 2, e a API encerrada ao final) e commitar o cliente regenerado; verificar que as funções e os modelos de times, pessoas, ausências e feriados foram gerados e que `npm run build` e `npm run lint` passam
-- [ ] 5.2 Registrar no TDD 5.2 o `GET /api/absences` (acréscimo aprovado pelo autor em 2026-11-13) e, no DT-18, os códigos `team-name-taken` e `holiday-date-taken`; verificar que a tabela e o DT-18 citam os acréscimos e a spec `capacity-calendar`
+- [x] 5.1 Rodar `npm run generate:api` com a API local em `Development` (chave JWT temporária só no ambiente do processo, como na change 2, e a API encerrada ao final) e commitar o cliente regenerado; verificar que as funções e os modelos de times, pessoas, ausências e feriados foram gerados e que `npm run build` e `npm run lint` passam
+- [x] 5.2 Registrar no TDD 5.2 o `GET /api/absences` (acréscimo aprovado pelo autor em 2026-11-13) e, no DT-18, os códigos `team-name-taken` e `holiday-date-taken`; verificar que a tabela e o DT-18 citam os acréscimos e a spec `capacity-calendar`
 
 ## 6. Front: base e navegação
 

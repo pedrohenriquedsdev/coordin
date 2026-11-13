@@ -376,7 +376,7 @@ A conta de acesso do gestor usa as tabelas padrão do ASP.NET Core Identity (`As
 | Autenticação | `POST /api/auth/login` · `POST /api/auth/refresh` · `POST /api/auth/logout` · `GET /api/auth/me` (DT-28) | RNF-04 |
 | Times | `GET`, `POST /api/teams` · `PUT`, `DELETE /api/teams/{id}` | RF-01 |
 | Pessoas | `GET`, `POST /api/people` · `PUT`, `DELETE /api/people/{id}` | RF-02 |
-| Ausências | `GET`, `POST /api/people/{id}/absences` · `PUT`, `DELETE /api/absences/{id}` | RF-03 |
+| Ausências | `GET`, `POST /api/people/{id}/absences` · `GET /api/absences` (todas as pessoas; acréscimo aprovado pelo autor em 2026-11-13, para a tela do calendário, change `capacity-registry`, spec `capacity-calendar`) · `PUT`, `DELETE /api/absences/{id}` | RF-03 |
 | Feriados | `GET`, `POST /api/holidays` · `DELETE /api/holidays/{id}` | RF-03 |
 | Demandas | `GET`, `POST /api/demands` · `GET`, `PUT`, `DELETE /api/demands/{id}` | RF-04 a RF-07, RF-18 |
 | Ordem de prioridade | `PUT /api/demands/priority-order` (lista completa de ids na nova ordem) | RF-04 |
@@ -511,7 +511,7 @@ Erros: `409 validation-current-plan-missing` (plano atual não guardado), `409 v
 - **Alternativas consideradas:**
   - *Problem Details com status adequado e uma extensão `code`:* padrão do ASP.NET Core, mensagem para o usuário em `detail`, e um código estável para o front tratar.
   - *Formato de erro próprio:* mais liberdade, menos padronização.
-- **Decisão:** `400` com `errors` por campo para validação; `404` para recurso inexistente; `409` para conflito de regra de negócio, com `code` estável, por exemplo `dependency-cycle`, `team-has-people`, `person-has-open-assignments`, `completed-demand-locked`, `person-not-in-demand-teams`. `detail` em português.
+- **Decisão:** `400` com `errors` por campo para validação; `404` para recurso inexistente; `409` para conflito de regra de negócio, com `code` estável, por exemplo `dependency-cycle`, `team-has-people`, `team-name-taken`, `holiday-date-taken`, `person-has-open-assignments`, `completed-demand-locked`, `person-not-in-demand-teams` (`team-name-taken` e `holiday-date-taken` acrescentados na change `capacity-registry`). `detail` em português.
 - **Justificativa:** um formato só para tratar no front e mensagens já prontas para exibir.
 - **Atende:** RF-06, RF-18, RNF-07.
 
