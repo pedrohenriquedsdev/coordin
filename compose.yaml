@@ -36,6 +36,14 @@ services:
       ASPNETCORE_ENVIRONMENT: Staging
       # A senha vem do .env; dentro da rede do Compose o banco se chama "db".
       ConnectionStrings__Default: Host=db;Port=5432;Database=coordin;Username=coordin;Password=${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
+      # Autenticação (DT-28, DT-29, DT-30): os três valores vêm do .env, que o Git ignora (veja o README).
+      # Padrão vazio (:-) e não obrigatório (:?) de propósito: o Compose resolve as variáveis do arquivo
+      # inteiro, mesmo de serviços de perfis inativos, e a exigência quebraria o `docker compose up -d`
+      # comum (só o banco). Sem a chave, é a própria API que se recusa a iniciar, com uma mensagem clara
+      # nos logs do contêiner; sem a conta do gestor ela sobe, avisa no log, e ninguém consegue entrar.
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:-}
+      Manager__Email: ${MANAGER_EMAIL:-}
+      Manager__Password: ${MANAGER_PASSWORD:-}
     ports:
       - "127.0.0.1:8080:8080"
 
