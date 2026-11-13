@@ -34,6 +34,7 @@ app.UseCoordinSpaFiles();
 app.UseCoordinAuthentication();
 
 app.MapHealthEndpoint();
+app.MapAuthEndpoints();
 app.MapTestOnlyEndpoints();
 app.MapApiFallback();
 app.MapSpaFallback(); // por último: o fallback de /api é mais específico e vem antes

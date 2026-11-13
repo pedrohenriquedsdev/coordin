@@ -51,6 +51,7 @@ public static class AuthenticationSetup
         services.TryAddSingleton(TimeProvider.System);
         services.AddScoped<ManagerAccountSeeder>();
         services.AddSingleton<TokenService>();
+        services.AddScoped<RefreshTokenService>();
 
         AddJwtBearer(services);
 

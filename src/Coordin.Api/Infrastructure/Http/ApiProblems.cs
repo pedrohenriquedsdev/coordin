@@ -7,6 +7,9 @@ public static class ApiProblems
     /// Conflito de regra de negócio: <c>409</c> com a extensão <c>code</c>, um identificador
     /// estável em kebab-case que o front usa para reagir ao erro (por exemplo, <c>team-has-people</c>).
     /// </summary>
+    public static IResult Unauthorized(string detail) =>
+        Results.Problem(statusCode: StatusCodes.Status401Unauthorized, detail: detail);
+
     public static IResult Conflict(string code, string detail) =>
         Results.Problem(
             statusCode: StatusCodes.Status409Conflict,
