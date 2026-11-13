@@ -13,8 +13,8 @@ Regras para todas as tasks:
 
 ## 2. Persistência: Identity e refresh token
 
-- [ ] 2.1 Criar `ApplicationUser`, a entidade `RefreshToken` (`Id`, `UserId`, `TokenHash` com índice único, `ExpiresAt`, `RevokedAt`, `ReplacedById`) e passar o `CoordinDbContext` a `IdentityDbContext<ApplicationUser>`; configurar o Identity em `AddIdentityCore` (bloqueio de 5 tentativas por 15 minutos, senha com no mínimo 12 caracteres); verificar com `dotnet build`
-- [ ] 2.2 Gerar a migration `AddAuthentication` com `dotnet tool run dotnet-ef`, revisar o SQL gerado e ajustar os testes de migração (`MigrationOnStartupTests`) para as duas migrations; verificar com os testes "Banco vazio" e "Banco já atualizado" e com a existência das tabelas de usuário e `RefreshTokens` no banco de teste
+- [x] 2.1 Criar `ApplicationUser`, a entidade `RefreshToken` (`Id`, `UserId`, `TokenHash` com índice único, `ExpiresAt`, `RevokedAt`, `ReplacedById`) e passar o `CoordinDbContext` a `IdentityDbContext<ApplicationUser>`; configurar o Identity em `AddIdentityCore` (bloqueio de 5 tentativas por 15 minutos, senha com no mínimo 12 caracteres); verificar com `dotnet build`
+- [x] 2.2 Gerar a migration `AddAuthentication` com `dotnet tool run dotnet-ef`, revisar o SQL gerado e ajustar os testes de migração (`MigrationOnStartupTests`) para as duas migrations; verificar com os testes "Banco vazio" e "Banco já atualizado" e com a existência das tabelas de usuário e `RefreshTokens` no banco de teste
 
 ## 3. Conta do gestor
 
