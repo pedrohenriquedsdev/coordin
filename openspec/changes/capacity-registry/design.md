@@ -51,7 +51,7 @@ Seguindo o TDD 4.2 e o DT-15 (`Guid` v7 gerado pela aplicação com `Guid.Create
 
 ### D3. Unicidade e corrida: o banco decide, a aplicação traduz
 
-Uma consulta prévia ("já existe?") dá o caminho feliz, mas não protege duas requisições simultâneas. Por isso a violação do índice único (`PostgresException` com `SqlState` `23505`, dentro de `DbUpdateException`) é capturada e traduzida para o mesmo `409` (`team-name-taken` ou `holiday-date-taken`). É o mesmo cuidado da rotação do refresh token na change 2, com o mesmo tipo de teste (duas chamadas simultâneas, exatamente uma vence). Do mesmo modo, a violação da chave estrangeira (`23503`) ao excluir um time vira `team-has-people`, caso uma pessoa seja adicionada entre a consulta e a exclusão.
+Uma consulta prévia ("já existe?") dá o caminho feliz, mas não protege duas requisições simultâneas. Por isso a violação do índice único (`PostgresException` com `SqlState` `23505`, dentro de `DbUpdateException`) é capturada e traduzida para o mesmo `409` (`team-name-taken` ou `holiday-date-taken`). É o mesmo cuidado da rotação do refresh token na change 2, com o mesmo tipo de teste (duas chamadas simultâneas, exatamente uma vence). Do mesmo modo, ao excluir um time, a violação da chave estrangeira vira `team-has-people`, caso uma pessoa seja adicionada entre a consulta e a exclusão. Com `ON DELETE RESTRICT` o PostgreSQL devolve `23001` (`restrict_violation`), e não `23503` (`foreign_key_violation`), que é o código de *inserir* uma pessoa com time inexistente (descoberto nos testes de persistência da task 1.2); o auxiliar da task 2.1 reconhece os dois.
 
 ### D4. Validação de entrada
 
