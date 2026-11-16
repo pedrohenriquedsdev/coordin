@@ -20,7 +20,9 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS api-build
 WORKDIR /src
 
 # Primeiro os arquivos de projeto e de versões, para o `restore` ficar em cache.
-COPY global.json Directory.Build.props Directory.Packages.props ./
+# O .editorconfig é necessário: sem ele, as migrations geradas (dotnet-ef) são analisadas e,
+# com TreatWarningsAsErrors, o publish falha (CA1861).
+COPY global.json Directory.Build.props Directory.Packages.props .editorconfig ./
 COPY src/Coordin.Engine/Coordin.Engine.csproj src/Coordin.Engine/
 COPY src/Coordin.Api/Coordin.Api.csproj src/Coordin.Api/
 RUN dotnet restore src/Coordin.Api/Coordin.Api.csproj
@@ -37,9 +39,8 @@ COPY --from=api-build /app/publish ./
 # O build do Angular vira o wwwroot que a API serve.
 COPY --from=web-build /web/dist/coordin-web/browser ./wwwroot
 
-ENV ASPNETCORE_URLS=http://+:8080 \
-    ASPNETCORE_ENVIRONMENT=Production
-EXPOSE 8080
+# A porta vem da variável PORT (a hospedagem a define; sem ela, 8080): ver ListenUrls.
+ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Usuário sem privilégios, já presente na imagem oficial.
 USER $APP_UID
