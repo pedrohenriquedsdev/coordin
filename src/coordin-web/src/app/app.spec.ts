@@ -129,12 +129,14 @@ describe('App', () => {
         'Demandas',
         'Times e pessoas',
         'Calendário',
+        'Configurações',
       ]);
       expect(anchors.map((a) => a.getAttribute('href'))).toEqual([
         '/',
         '/demands',
         '/teams',
         '/calendar',
+        '/settings',
       ]);
     });
 

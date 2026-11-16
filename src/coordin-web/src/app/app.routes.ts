@@ -4,6 +4,7 @@ import { CalendarPage } from './calendar/calendar-page';
 import { DemandFormPage } from './demands/demand-form-page';
 import { DemandsPage } from './demands/demands-page';
 import { SchedulePage } from './schedule/schedule-page';
+import { SettingsPage } from './settings/settings-page';
 import { Login } from './login/login';
 import { TeamsPage } from './teams/teams-page';
 
@@ -21,6 +22,7 @@ export const routes: Routes = [
       { path: 'demands', component: DemandsPage },
       { path: 'demands/new', component: DemandFormPage },
       { path: 'demands/:id/edit', component: DemandFormPage },
+      { path: 'settings', component: SettingsPage },
       { path: 'teams', component: TeamsPage },
       { path: 'calendar', component: CalendarPage },
     ],

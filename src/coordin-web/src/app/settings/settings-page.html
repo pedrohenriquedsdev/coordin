@@ -1,0 +1,56 @@
+<h2 class="text-lg font-semibold">Configurações</h2>
+
+@switch (store.status()) {
+  @case ('loading') {
+    <p class="mt-3 text-slate-600">Carregando…</p>
+  }
+  @case ('failed') {
+    <div role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">
+      <p>Não foi possível carregar as configurações.</p>
+      <button
+        type="button"
+        (click)="reload()"
+        class="mt-2 rounded-md border border-red-300 px-3 py-1 font-medium hover:bg-red-100"
+      >
+        Tentar de novo
+      </button>
+    </div>
+  }
+  @default {
+    <section class="mt-4 max-w-md rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
+      <h3 class="font-semibold">Margem de segurança</h3>
+      <p class="mt-1 text-sm text-slate-600">
+        A margem só amplia a previsão: a data com margem nunca fica antes da data sem margem.
+      </p>
+
+      <form (submit)="$event.preventDefault(); save()" novalidate class="mt-4 space-y-3">
+        <label for="safety-margin" class="block text-sm font-medium text-slate-700"
+          >Margem de segurança (%)</label
+        >
+        <input
+          id="safety-margin"
+          type="text"
+          inputmode="decimal"
+          [value]="text()"
+          (input)="setText($event)"
+          class="block w-full rounded-md border border-slate-300 px-3 py-2 sm:w-48"
+        />
+
+        @if (error(); as text) {
+          <p role="alert" class="text-sm text-red-700">{{ text }}</p>
+        }
+        @if (message(); as text) {
+          <p role="status" class="text-sm text-emerald-800">{{ text }}</p>
+        }
+
+        <button
+          type="submit"
+          [disabled]="saving()"
+          class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60"
+        >
+          Salvar
+        </button>
+      </form>
+    </section>
+  }
+}
