@@ -1,6 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CalendarDatePipe } from '../core/dates/calendar-date.pipe';
 import { Clock, formatCalendarDate, isEndBeforeStart } from '../core/dates/calendar-date';
 import { messageFor } from '../core/problems/messages';
 import { readProblem } from '../core/problems/problem';
@@ -19,7 +18,7 @@ const COMPLETION_BEFORE_START = 'A data de conclusão não pode ser anterior ao 
  */
 @Component({
   selector: 'app-demands-page',
-  imports: [RouterLink, CalendarDatePipe],
+  imports: [RouterLink],
   providers: [DemandsStore],
   templateUrl: './demands-page.html',
 })

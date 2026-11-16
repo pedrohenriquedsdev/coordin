@@ -1,0 +1,228 @@
+<h2 class="text-lg font-semibold">Relatório por time</h2>
+<p class="mt-1 text-sm text-slate-600">
+  Capacidade, horas alocadas e ociosidade por semana (de segunda a domingo). Sobrecarga é a semana
+  em que o time usou toda a capacidade e ainda ficou trabalho esperando.
+</p>
+
+<form
+  (submit)="$event.preventDefault(); search()"
+  novalidate
+  class="mt-4 flex flex-wrap items-end gap-3"
+>
+  <div>
+    <label for="report-from" class="block text-sm font-medium text-slate-700">Início</label>
+    <input
+      id="report-from"
+      type="date"
+      [value]="from()"
+      (input)="setFrom($event)"
+      class="mt-1 rounded-md border border-slate-300 px-3 py-2"
+    />
+  </div>
+  <div>
+    <label for="report-to" class="block text-sm font-medium text-slate-700">Fim</label>
+    <input
+      id="report-to"
+      type="date"
+      [value]="to()"
+      (input)="setTo($event)"
+      class="mt-1 rounded-md border border-slate-300 px-3 py-2"
+    />
+  </div>
+  <button
+    type="submit"
+    class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700"
+  >
+    Ver relatório
+  </button>
+</form>
+
+@if (message(); as text) {
+  <p role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">{{ text }}</p>
+}
+
+@switch (store.status()) {
+  @case ('loading') {
+    <p class="mt-4 text-slate-600">Carregando…</p>
+  }
+  @case ('failed') {
+    <div role="alert" class="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-800">
+      <p>Não foi possível carregar o relatório.</p>
+      <button
+        type="button"
+        (click)="search()"
+        class="mt-2 rounded-md border border-red-300 px-3 py-1 font-medium hover:bg-red-100"
+      >
+        Tentar de novo
+      </button>
+    </div>
+  }
+  @default {
+    @if (store.report(); as report) {
+      @if (report.teams.length === 0) {
+        <p class="mt-4 text-slate-600">
+          Ainda não há times para o relatório.
+          <a routerLink="/teams" class="font-medium underline">Cadastrar times</a>
+        </p>
+      } @else {
+        <p class="mt-4 text-sm text-slate-600">
+          Período de {{ report.periodStart | calendarDate }} a {{ report.periodEnd | calendarDate }}
+          (semanas completas).
+        </p>
+
+        <!-- Computador: resumo em tabela. -->
+        <table
+          aria-label="Resumo por time em tabela"
+          class="mt-3 hidden w-full text-left text-sm md:table"
+        >
+          <thead class="border-b border-slate-200 text-slate-600">
+            <tr>
+              <th scope="col" class="px-2 py-2">Time</th>
+              <th scope="col" class="px-2 py-2">Capacidade</th>
+              <th scope="col" class="px-2 py-2">Alocadas</th>
+              <th scope="col" class="px-2 py-2">Ocupação</th>
+              <th scope="col" class="px-2 py-2">Ociosas</th>
+              <th scope="col" class="px-2 py-2">Semanas sobrecarregadas</th>
+              <th scope="col" class="px-2 py-2"><span class="sr-only">Ação</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.teamId) {
+              <tr class="border-b border-slate-100 align-top">
+                <td class="px-2 py-2 font-medium">
+                  {{ row.summary.teamName }}
+                  @if (row.summary.unpredictableDemandCount > 0) {
+                    <span class="block text-xs text-slate-600">{{
+                      unpredictableText(row.summary)
+                    }}</span>
+                  }
+                </td>
+                <td class="px-2 py-2">{{ hours(row.summary.capacityHours) }}</td>
+                <td class="px-2 py-2">{{ hours(row.summary.allocatedHours) }}</td>
+                <td class="px-2 py-2">{{ percent(row.summary.occupancy) }}</td>
+                <td class="px-2 py-2">{{ hours(row.summary.idleHours) }}</td>
+                <td class="px-2 py-2">{{ row.summary.overloadedWeeks }}</td>
+                <td class="px-2 py-2">
+                  <button
+                    type="button"
+                    (click)="select(row.teamId)"
+                    class="rounded-md border border-slate-300 px-2 py-1 hover:bg-slate-100"
+                  >
+                    Ver semanas
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <!-- Celular: resumo em cartões. -->
+        <ul aria-label="Resumo por time em cartões" class="mt-3 space-y-3 md:hidden">
+          @for (row of rows(); track row.teamId) {
+            <li class="rounded-md border border-slate-200 bg-white p-3 text-sm">
+              <h3 class="font-semibold">{{ row.summary.teamName }}</h3>
+              <p>
+                Capacidade: {{ hours(row.summary.capacityHours) }} · Alocadas:
+                {{ hours(row.summary.allocatedHours) }}
+              </p>
+              <p>
+                Ocupação: {{ percent(row.summary.occupancy) }} · Ociosas:
+                {{ hours(row.summary.idleHours) }}
+              </p>
+              <p>Semanas sobrecarregadas: {{ row.summary.overloadedWeeks }}</p>
+              @if (row.summary.unpredictableDemandCount > 0) {
+                <p class="text-xs text-slate-600">{{ unpredictableText(row.summary) }}</p>
+              }
+              <button
+                type="button"
+                (click)="select(row.teamId)"
+                class="mt-2 rounded-md border border-slate-300 px-2 py-1 hover:bg-slate-100"
+              >
+                Ver semanas
+              </button>
+            </li>
+          }
+        </ul>
+
+        @if (selectedTeam(); as team) {
+          <section class="mt-8" aria-labelledby="team-weeks-title">
+            <h3 id="team-weeks-title" class="font-semibold">Semanas de {{ team.teamName }}</h3>
+
+            @if (chart(); as config) {
+              <div class="mt-3">
+                <app-chart
+                  [configuration]="config"
+                  [label]="'Horas alocadas e ociosas por semana de ' + team.teamName"
+                />
+              </div>
+            }
+
+            <!-- Os mesmos valores do gráfico, em tabela. -->
+            <table
+              aria-label="Semanas em tabela"
+              class="mt-4 hidden w-full text-left text-sm md:table"
+            >
+              <thead class="border-b border-slate-200 text-slate-600">
+                <tr>
+                  <th scope="col" class="px-2 py-2">Semana</th>
+                  <th scope="col" class="px-2 py-2">Capacidade</th>
+                  <th scope="col" class="px-2 py-2">Alocadas</th>
+                  <th scope="col" class="px-2 py-2">Ocupação</th>
+                  <th scope="col" class="px-2 py-2">Ociosas</th>
+                  <th scope="col" class="px-2 py-2">Situação</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (week of team.weeks; track week.weekStart) {
+                  <tr class="border-b border-slate-100 align-top">
+                    <td class="px-2 py-2">{{ labelOf(week) }}</td>
+                    <td class="px-2 py-2">{{ hours(week.capacityHours) }}</td>
+                    <td class="px-2 py-2">{{ hours(week.allocatedHours) }}</td>
+                    <td class="px-2 py-2">{{ percent(week.occupancy) }}</td>
+                    <td class="px-2 py-2">{{ hours(week.idleHours) }}</td>
+                    <td class="px-2 py-2">
+                      @if (week.isOverloaded) {
+                        <span class="font-medium text-red-800">Sobrecarga</span>
+                        <ul class="mt-1 list-disc pl-4 text-xs">
+                          @for (demand of week.overloadedDemands; track demand.id) {
+                            <li>{{ demand.title }}</li>
+                          }
+                        </ul>
+                      } @else {
+                        <span class="text-slate-600">—</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+
+            <!-- Celular: semanas em cartões. -->
+            <ul aria-label="Semanas em cartões" class="mt-4 space-y-3 md:hidden">
+              @for (week of team.weeks; track week.weekStart) {
+                <li class="rounded-md border border-slate-200 bg-white p-3 text-sm">
+                  <h4 class="font-semibold">{{ labelOf(week) }}</h4>
+                  <p>
+                    Capacidade: {{ hours(week.capacityHours) }} · Alocadas:
+                    {{ hours(week.allocatedHours) }}
+                  </p>
+                  <p>
+                    Ocupação: {{ percent(week.occupancy) }} · Ociosas: {{ hours(week.idleHours) }}
+                  </p>
+                  @if (week.isOverloaded) {
+                    <p class="mt-1 font-medium text-red-800">Sobrecarga</p>
+                    <ul class="list-disc pl-4 text-xs">
+                      @for (demand of week.overloadedDemands; track demand.id) {
+                        <li>{{ demand.title }}</li>
+                      }
+                    </ul>
+                  }
+                </li>
+              }
+            </ul>
+          </section>
+        }
+      }
+    }
+  }
+}

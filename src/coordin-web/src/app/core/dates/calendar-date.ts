@@ -59,3 +59,53 @@ export class Clock {
     return saoPauloDate(this.now());
   }
 }
+
+/*
+ * Semanas e intervalos de datas de calendário. Usam aritmética em UTC: `Date.UTC` e os métodos `getUTC*`
+ * não dependem do fuso do navegador, então a mesma data gera o mesmo resultado em qualquer lugar.
+ */
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function fromCalendar(value: string): Date {
+  const match = CALENDAR_DATE.exec(value);
+  if (!match) {
+    throw new RangeError(`Não é uma data de calendário: ${value}`);
+  }
+
+  return new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+}
+
+function toCalendar(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+/** Soma dias corridos a uma data de calendário (negativo volta no tempo). */
+export function addDays(value: string, days: number): string {
+  const date = fromCalendar(value);
+  date.setUTCDate(date.getUTCDate() + days);
+  return toCalendar(date);
+}
+
+/** A segunda-feira da semana (segunda a domingo) de uma data de calendário. */
+export function mondayOf(value: string): string {
+  const weekday = fromCalendar(value).getUTCDay(); // domingo = 0
+  return addDays(value, -((weekday + 6) % 7));
+}
+
+/** O domingo da semana de uma data de calendário. */
+export function sundayOf(value: string): string {
+  return addDays(mondayOf(value), 6);
+}
+
+/** Quantas semanas completas o período cobre, do início da semana de `from` ao fim da semana de `to`. */
+export function weeksBetween(from: string, to: string): number {
+  const days =
+    (fromCalendar(sundayOf(to)).getTime() - fromCalendar(mondayOf(from)).getTime()) / DAY_MS;
+  return (days + 1) / 7;
+}
+
+/** `2026-12-31` → `31/12`: o dia e o mês de uma data, para os rótulos curtos das semanas. */
+export function formatShortCalendarDate(value: string): string {
+  const match = CALENDAR_DATE.exec(value);
+  return match ? `${match[3]}/${match[2]}` : value;
+}
