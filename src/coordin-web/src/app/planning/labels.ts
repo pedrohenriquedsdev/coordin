@@ -30,3 +30,10 @@ export function deviationLabel(days: number): string {
   const unit = amount === 1 ? 'dia' : 'dias';
   return days > 0 ? `${amount} ${unit} de atraso` : `${amount} ${unit} antes`;
 }
+
+/** Horas em pt-BR (`80 h`, `12,5 h`); `null` vira "sem estimativa", porque o time ainda não estimou. */
+export function hoursLabel(value: number | null): string {
+  return value === null
+    ? 'sem estimativa'
+    : `${value.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} h`;
+}
