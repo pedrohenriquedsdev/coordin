@@ -1,6 +1,7 @@
-# Blueprint do Render (DT-09). Os segredos marcados com sync: false são preenchidos no painel
-# do Render e NUNCA entram neste arquivo (DT-30; RNF-05). Plano gratuito: ambiente de teste
-# (o banco gratuito expira em 30 dias; ver docs/deployment.md).
+# Blueprint do Render (DT-09). O PostgreSQL fica no Neon (plano gratuito), fora do Render: a
+# string de conexão é um segredo preenchido no painel. Os segredos marcados com sync: false são
+# preenchidos no painel e NUNCA entram neste arquivo (DT-30; RNF-05). Plano gratuito: o web
+# service dorme após 15 minutos sem tráfego (ver docs/deployment.md).
 services:
   - type: web
     name: coordin
@@ -11,17 +12,10 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: ConnectionStrings__Default
-        fromDatabase:
-          name: coordin-db
-          property: connectionString
+        sync: false
       - key: Jwt__SigningKey
         generateValue: true
       - key: Manager__Email
         sync: false
       - key: Manager__Password
         sync: false
-
-databases:
-  - name: coordin-db
-    plan: free
-    postgresMajorVersion: "18"
