@@ -9,6 +9,23 @@
       @if (session.isAuthenticated()) {
         <nav aria-label="Principal" class="flex flex-1 flex-wrap items-center gap-1">
           <a
+            routerLink="/"
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="bg-slate-100 text-slate-900"
+            ariaCurrentWhenActive="page"
+            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
+          >
+            Cronograma
+          </a>
+          <a
+            routerLink="/demands"
+            routerLinkActive="bg-slate-100 text-slate-900"
+            ariaCurrentWhenActive="page"
+            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
+          >
+            Demandas
+          </a>
+          <a
             routerLink="/teams"
             routerLinkActive="bg-slate-100 text-slate-900"
             ariaCurrentWhenActive="page"
@@ -23,6 +40,14 @@
             class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
           >
             Calendário
+          </a>
+          <a
+            routerLink="/settings"
+            routerLinkActive="bg-slate-100 text-slate-900"
+            ariaCurrentWhenActive="page"
+            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
+          >
+            Configurações
           </a>
         </nav>
 

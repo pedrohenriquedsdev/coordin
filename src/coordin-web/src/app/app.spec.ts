@@ -61,7 +61,7 @@ describe('App', () => {
 
     const main = element(fixture).querySelector('main');
     expect(main).not.toBeNull();
-    expect(main?.textContent).toContain('Planejamento de entregas');
+    expect(main?.textContent).toContain('Cronograma');
   });
 
   describe('sign out', () => {
@@ -110,7 +110,7 @@ describe('App', () => {
       await fixture.whenStable();
 
       expect(router.url).toBe('/login');
-      expect(element(fixture).textContent).not.toContain('Planejamento de entregas');
+      expect(element(fixture).textContent).not.toContain('Cronograma');
     });
   });
   describe('navigation', () => {
@@ -118,14 +118,26 @@ describe('App', () => {
       ...root.querySelectorAll<HTMLAnchorElement>('header nav a'),
     ];
 
-    it('shows the links to "Times e pessoas" and "Calendário" while there is a session', async () => {
+    it('shows the links to the screens while there is a session', async () => {
       const fixture = TestBed.createComponent(App);
       await TestBed.inject(Router).navigateByUrl('/');
       await fixture.whenStable();
 
       const anchors = links(element(fixture));
-      expect(anchors.map((a) => a.textContent?.trim())).toEqual(['Times e pessoas', 'Calendário']);
-      expect(anchors.map((a) => a.getAttribute('href'))).toEqual(['/teams', '/calendar']);
+      expect(anchors.map((a) => a.textContent?.trim())).toEqual([
+        'Cronograma',
+        'Demandas',
+        'Times e pessoas',
+        'Calendário',
+        'Configurações',
+      ]);
+      expect(anchors.map((a) => a.getAttribute('href'))).toEqual([
+        '/',
+        '/demands',
+        '/teams',
+        '/calendar',
+        '/settings',
+      ]);
     });
 
     it('marks the link of the open screen as the current page', async () => {
@@ -133,7 +145,7 @@ describe('App', () => {
       await TestBed.inject(Router).navigateByUrl('/calendar');
       await fixture.whenStable();
 
-      const [teams, calendar] = links(element(fixture));
+      const [, , teams, calendar] = links(element(fixture));
       expect(calendar.getAttribute('aria-current')).toBe('page');
       expect(teams.hasAttribute('aria-current')).toBe(false);
     });
@@ -152,12 +164,12 @@ describe('App', () => {
       await TestBed.inject(Router).navigateByUrl('/');
       await fixture.whenStable();
 
-      links(element(fixture))[0].click();
+      links(element(fixture))[2].click();
       await fixture.whenStable();
       expect(TestBed.inject(Router).url).toBe('/teams');
       expect(element(fixture).querySelector('main')?.textContent).toContain('Times (');
 
-      links(element(fixture))[1].click();
+      links(element(fixture))[3].click();
       await fixture.whenStable();
       expect(TestBed.inject(Router).url).toBe('/calendar');
       expect(element(fixture).querySelector('main')?.textContent).toContain('Calendário');

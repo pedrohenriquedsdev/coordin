@@ -1,0 +1,147 @@
+<h2 class="text-lg font-semibold">{{ editing ? 'Editar demanda' : 'Nova demanda' }}</h2>
+
+@switch (store.status()) {
+  @case ('loading') {
+    <p class="mt-3 text-slate-600">Carregando…</p>
+  }
+  @case ('missing') {
+    <p class="mt-3 text-slate-600">
+      Demanda não encontrada.
+      <a routerLink="/demands" class="font-medium underline">Voltar às demandas</a>
+    </p>
+  }
+  @case ('failed') {
+    <div role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">
+      <p>Não foi possível carregar o formulário.</p>
+      <button
+        type="button"
+        (click)="reload()"
+        class="mt-2 rounded-md border border-red-300 px-3 py-1 font-medium hover:bg-red-100"
+      >
+        Tentar de novo
+      </button>
+    </div>
+  }
+  @default {
+    @if (locked()) {
+      <p class="mt-3 text-slate-600">Esta demanda já foi concluída e não pode mais ser alterada.</p>
+      <a routerLink="/demands" class="mt-2 inline-block font-medium underline"
+        >Voltar às demandas</a
+      >
+    } @else {
+      @if (message(); as text) {
+        <p role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">{{ text }}</p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="save()" novalidate class="mt-4 max-w-2xl space-y-5">
+        <div>
+          <label for="demand-title" class="block text-sm font-medium text-slate-700">Título</label>
+          <input
+            id="demand-title"
+            type="text"
+            formControlName="title"
+            maxlength="200"
+            class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2"
+          />
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label for="demand-start" class="block text-sm font-medium text-slate-700"
+              >Data de início</label
+            >
+            <input
+              id="demand-start"
+              type="date"
+              formControlName="startDate"
+              class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2"
+            />
+          </div>
+          <div>
+            <label for="demand-end" class="block text-sm font-medium text-slate-700"
+              >Fim informado</label
+            >
+            <input
+              id="demand-end"
+              type="date"
+              formControlName="informedEndDate"
+              class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2"
+            />
+            <p class="mt-1 text-xs text-slate-600">Prazo desejado: não altera a previsão.</p>
+          </div>
+        </div>
+
+        <fieldset>
+          <legend class="text-sm font-medium text-slate-700">Times envolvidos</legend>
+          @if (effortError(); as text) {
+            <p role="alert" class="mt-1 text-sm text-red-700">{{ text }}</p>
+          }
+          <ul class="mt-2 space-y-2">
+            @for (team of store.teams(); track team.id) {
+              <li class="rounded-md border border-slate-200 bg-white p-3">
+                <label class="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    [checked]="isChecked(team.id)"
+                    (change)="toggleTeam(team.id, $any($event.target).checked)"
+                  />
+                  <span>Envolver o time {{ team.name }}</span>
+                </label>
+                @if (isChecked(team.id)) {
+                  <div class="mt-2">
+                    <label for="hours-{{ team.id }}" class="block text-sm text-slate-700">
+                      Esforço estimado de {{ team.name }} (horas)
+                    </label>
+                    <input
+                      id="hours-{{ team.id }}"
+                      type="text"
+                      inputmode="decimal"
+                      [value]="hoursOf(team.id)"
+                      (input)="setHours(team.id, $any($event.target).value)"
+                      placeholder="Vazio = ainda não estimado"
+                      class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 sm:w-48"
+                    />
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        </fieldset>
+
+        <fieldset>
+          <legend class="text-sm font-medium text-slate-700">Pessoas alocadas</legend>
+          @if (offeredPeople().length === 0) {
+            <p class="mt-1 text-sm text-slate-600">Marque um time para ver as pessoas dele.</p>
+          }
+          <ul class="mt-2 space-y-1">
+            @for (person of offeredPeople(); track person.id) {
+              <li>
+                <label class="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    [checked]="isAssigned(person.id)"
+                    (change)="togglePerson(person.id, $any($event.target).checked)"
+                  />
+                  <span>{{ person.name }} ({{ person.teamName }})</span>
+                </label>
+              </li>
+            }
+          </ul>
+        </fieldset>
+
+        <div class="flex gap-2">
+          <button
+            type="submit"
+            [disabled]="saving()"
+            class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60"
+          >
+            Salvar demanda
+          </button>
+          <a routerLink="/demands" class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+            >Cancelar</a
+          >
+        </div>
+      </form>
+    }
+  }
+}
