@@ -59,6 +59,8 @@ export type { CompleteDemand$Params as CompleteDemand$Params } from './fn/demand
 export { completeDemand as completeDemand } from './fn/demands/complete-demand';
 export type { GetSchedule$Params as GetSchedule$Params } from './fn/schedule/get-schedule';
 export { getSchedule as getSchedule } from './fn/schedule/get-schedule';
+export type { GetTeamReport$Params as GetTeamReport$Params } from './fn/reports/get-team-report';
+export { getTeamReport as getTeamReport } from './fn/reports/get-team-report';
 export type { GetSettings$Params as GetSettings$Params } from './fn/settings/get-settings';
 export { getSettings as getSettings } from './fn/settings/get-settings';
 export type { UpdateSettings$Params as UpdateSettings$Params } from './fn/settings/update-settings';
