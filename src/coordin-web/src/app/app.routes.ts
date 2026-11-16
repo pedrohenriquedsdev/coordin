@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard, guestGuard, unknownPageGuard } from './core/auth/auth.guard';
 import { CalendarPage } from './calendar/calendar-page';
-import { Home } from './home/home';
+import { SchedulePage } from './schedule/schedule-page';
 import { Login } from './login/login';
 import { TeamsPage } from './teams/teams-page';
 
@@ -15,7 +15,7 @@ export const routes: Routes = [
     path: '',
     canActivate: [authGuard],
     children: [
-      { path: '', component: Home },
+      { path: '', component: SchedulePage },
       { path: 'teams', component: TeamsPage },
       { path: 'calendar', component: CalendarPage },
     ],

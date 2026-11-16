@@ -1,0 +1,32 @@
+/**
+ * Rótulos em português da tela de planejamento (RF-10, RF-12). As regras (motivos, desvios) vêm prontas
+ * da API; aqui só se escreve o texto para o gestor.
+ */
+
+/** O motivo de uma demanda não previsível, em português. Um motivo desconhecido vira um texto genérico. */
+export function unpredictableReasonLabel(reason: string | null): string {
+  switch (reason) {
+    case 'MissingEstimate':
+      return 'Falta a estimativa de algum time';
+    case 'MissingStartDate':
+      return 'Sem data de início';
+    case 'NoCapacity':
+      return 'Sem capacidade: falta pessoa alocada ou a capacidade é zero';
+    default:
+      return 'Sem previsão';
+  }
+}
+
+/**
+ * O desvio em dias corridos, com a palavra certa: "6 dias de atraso", "1 dia de atraso", "2 dias antes",
+ * "1 dia antes" ou "no prazo" (DT-27). Positivo é atraso; negativo, antes do prazo.
+ */
+export function deviationLabel(days: number): string {
+  if (days === 0) {
+    return 'no prazo';
+  }
+
+  const amount = Math.abs(days);
+  const unit = amount === 1 ? 'dia' : 'dias';
+  return days > 0 ? `${amount} ${unit} de atraso` : `${amount} ${unit} antes`;
+}

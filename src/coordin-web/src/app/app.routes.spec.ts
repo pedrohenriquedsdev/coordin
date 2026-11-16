@@ -11,7 +11,7 @@ import { SessionService } from './core/auth/session.service';
 /** As rotas de verdade, com as guardas de verdade e só a sessão simulada (RNF-04). */
 describe('routes', () => {
   const authenticated = signal(false);
-  const homeText = 'Planejamento de entregas';
+  const homeText = 'Cronograma';
 
   beforeEach(() => {
     authenticated.set(false);
