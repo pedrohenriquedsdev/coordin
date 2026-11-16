@@ -1,3 +1,4 @@
+using Coordin.Api.Features.Planning;
 using Coordin.Api.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -81,67 +82,76 @@ public static class AbsenceEndpoints
         return Results.Ok(Order(absences));
     }
 
-    private static async Task<IResult> CreateAbsenceAsync(
+    private static Task<IResult> CreateAbsenceAsync(
         Guid personId,
         AbsenceRequest request,
         CoordinDbContext db,
-        CancellationToken cancellationToken)
-    {
-        var person = await db.People.Include(item => item.Team).SingleOrDefaultAsync(item => item.Id == personId, cancellationToken);
-        if (person is null)
+        ForecastRecalculator recalculator,
+        CancellationToken cancellationToken) =>
+        PlanningTransaction.RunAsync(db, recalculator, async () =>
         {
-            return Results.NotFound();
-        }
+            var person = await db.People.Include(item => item.Team).SingleOrDefaultAsync(item => item.Id == personId, cancellationToken);
+            if (person is null)
+            {
+                return Results.NotFound();
+            }
 
-        var absence = new Absence
-        {
-            PersonId = person.Id,
-            Type = request.Type!.Value,
-            StartDate = request.StartDate!.Value,
-            EndDate = request.EndDate!.Value,
-        };
+            var absence = new Absence
+            {
+                PersonId = person.Id,
+                Type = request.Type!.Value,
+                StartDate = request.StartDate!.Value,
+                EndDate = request.EndDate!.Value,
+            };
 
-        db.Absences.Add(absence);
-        await db.SaveChangesAsync(cancellationToken);
+            db.Absences.Add(absence);
+            await db.SaveChangesAsync(cancellationToken);
 
-        return Results.Created($"/api/absences/{absence.Id}", ToResponse(absence, person));
-    }
+            return Results.Created($"/api/absences/{absence.Id}", ToResponse(absence, person));
+        }, cancellationToken);
 
-    private static async Task<IResult> UpdateAbsenceAsync(
+    private static Task<IResult> UpdateAbsenceAsync(
         Guid id,
         AbsenceRequest request,
         CoordinDbContext db,
-        CancellationToken cancellationToken)
-    {
-        var absence = await db.Absences
-            .Include(item => item.Person!).ThenInclude(person => person.Team)
-            .SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
-        if (absence is null)
+        ForecastRecalculator recalculator,
+        CancellationToken cancellationToken) =>
+        PlanningTransaction.RunAsync(db, recalculator, async () =>
         {
-            return Results.NotFound();
-        }
+            var absence = await db.Absences
+                .Include(item => item.Person!).ThenInclude(person => person.Team)
+                .SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
+            if (absence is null)
+            {
+                return Results.NotFound();
+            }
 
-        absence.Type = request.Type!.Value;
-        absence.StartDate = request.StartDate!.Value;
-        absence.EndDate = request.EndDate!.Value;
-        await db.SaveChangesAsync(cancellationToken);
+            absence.Type = request.Type!.Value;
+            absence.StartDate = request.StartDate!.Value;
+            absence.EndDate = request.EndDate!.Value;
+            await db.SaveChangesAsync(cancellationToken);
 
-        return Results.Ok(ToResponse(absence, absence.Person!));
-    }
+            return Results.Ok(ToResponse(absence, absence.Person!));
+        }, cancellationToken);
 
-    private static async Task<IResult> DeleteAbsenceAsync(Guid id, CoordinDbContext db, CancellationToken cancellationToken)
-    {
-        var absence = await db.Absences.FindAsync([id], cancellationToken);
-        if (absence is null)
+    private static Task<IResult> DeleteAbsenceAsync(
+        Guid id,
+        CoordinDbContext db,
+        ForecastRecalculator recalculator,
+        CancellationToken cancellationToken) =>
+        PlanningTransaction.RunAsync(db, recalculator, async () =>
         {
-            return Results.NotFound();
-        }
+            var absence = await db.Absences.FindAsync([id], cancellationToken);
+            if (absence is null)
+            {
+                return Results.NotFound();
+            }
 
-        db.Absences.Remove(absence);
-        await db.SaveChangesAsync(cancellationToken);
+            db.Absences.Remove(absence);
+            await db.SaveChangesAsync(cancellationToken);
 
-        return Results.NoContent();
-    }
+            return Results.NoContent();
+        }, cancellationToken);
 
     private static AbsenceResponse ToResponse(Absence absence, People.Person person) =>
         new(

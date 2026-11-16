@@ -1,3 +1,4 @@
+using Coordin.Api.Features.Planning;
 using Coordin.Api.Infrastructure.Http;
 using Coordin.Api.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -45,39 +46,46 @@ public static class HolidayEndpoints
         return Results.Ok(holidays);
     }
 
-    private static async Task<IResult> CreateHolidayAsync(
+    private static Task<IResult> CreateHolidayAsync(
         HolidayRequest request,
         CoordinDbContext db,
-        CancellationToken cancellationToken)
-    {
-        var description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim();
-        var holiday = new Holiday { Date = request.Date!.Value, Description = description };
-        db.Holidays.Add(holiday);
-
-        try
+        ForecastRecalculator recalculator,
+        CancellationToken cancellationToken) =>
+        PlanningTransaction.RunAsync(db, recalculator, async () =>
         {
-            // O índice único da data decide, inclusive em corrida; sem "já existe?" antes.
+            var description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim();
+            var holiday = new Holiday { Date = request.Date!.Value, Description = description };
+            db.Holidays.Add(holiday);
+
+            try
+            {
+                // O índice único da data decide, inclusive em corrida; sem "já existe?" antes.
+                await db.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateException error) when (PostgresErrors.IsUniqueViolation(error))
+            {
+                return ApiProblems.Conflict("holiday-date-taken", DateTaken);
+            }
+
+            return Results.Created($"/api/holidays/{holiday.Id}", new HolidayResponse(holiday.Id, holiday.Date, holiday.Description));
+        }, cancellationToken);
+
+    private static Task<IResult> DeleteHolidayAsync(
+        Guid id,
+        CoordinDbContext db,
+        ForecastRecalculator recalculator,
+        CancellationToken cancellationToken) =>
+        PlanningTransaction.RunAsync(db, recalculator, async () =>
+        {
+            var holiday = await db.Holidays.FindAsync([id], cancellationToken);
+            if (holiday is null)
+            {
+                return Results.NotFound();
+            }
+
+            db.Holidays.Remove(holiday);
             await db.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException error) when (PostgresErrors.IsUniqueViolation(error))
-        {
-            return ApiProblems.Conflict("holiday-date-taken", DateTaken);
-        }
 
-        return Results.Created($"/api/holidays/{holiday.Id}", new HolidayResponse(holiday.Id, holiday.Date, holiday.Description));
-    }
-
-    private static async Task<IResult> DeleteHolidayAsync(Guid id, CoordinDbContext db, CancellationToken cancellationToken)
-    {
-        var holiday = await db.Holidays.FindAsync([id], cancellationToken);
-        if (holiday is null)
-        {
-            return Results.NotFound();
-        }
-
-        db.Holidays.Remove(holiday);
-        await db.SaveChangesAsync(cancellationToken);
-
-        return Results.NoContent();
-    }
+            return Results.NoContent();
+        }, cancellationToken);
 }
