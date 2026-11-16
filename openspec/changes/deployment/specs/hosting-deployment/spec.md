@@ -62,11 +62,11 @@ Na hospedagem, o TLS SHALL ser terminado pela plataforma; a aplicação SHALL re
 - **THEN** a resposta traz `Content-Security-Policy`, `Strict-Transport-Security` e `X-Content-Type-Options: nosniff`
 
 ### Requirement: Blueprint reproduzível
-O repositório SHALL conter `render.yaml` com um web service Docker, o caminho de health check, a região, e um banco PostgreSQL 18 cuja string de conexão é ligada ao serviço, e SHALL conter `docs/deployment.md` com o roteiro para criar os serviços a partir dele (DT-09).
+O repositório SHALL conter `render.yaml` com um web service Docker, o caminho de health check e a região, e SHALL conter `docs/deployment.md` com o roteiro para criar o serviço a partir dele (DT-09). O PostgreSQL 18 é um serviço gratuito externo ao Render (Neon), e a string de conexão é um segredo preenchido no painel, nunca gravado no repositório (DT-30; RNF-05).
 
 #### Scenario: Criar a partir do blueprint
 - **WHEN** o autor cria um Blueprint no Render apontando para o repositório
-- **THEN** o web service e o banco são criados, e o autor preenche no painel os segredos marcados
+- **THEN** o web service é criado, e o autor preenche no painel `ConnectionStrings__Default`, `Manager__Email` e `Manager__Password`
 
 ### Requirement: Roteiro de verificação em produção
 O roteiro SHALL terminar com a verificação ponta a ponta: login com o gestor, cadastro de um time, uma demanda e a leitura do cronograma e do relatório, e a conferência dos cabeçalhos HTTPS (RNF-03).
