@@ -1,5 +1,6 @@
 using Coordin.Api.Features.Auth;
 using Coordin.Api.Features.Calendar;
+using Coordin.Api.Features.Demands;
 using Coordin.Api.Features.Diagnostics;
 using Coordin.Api.Features.Health;
 using Coordin.Api.Features.People;
@@ -44,6 +45,8 @@ app.MapTeamEndpoints();
 app.MapPersonEndpoints();
 app.MapAbsenceEndpoints();
 app.MapHolidayEndpoints();
+app.MapDemandEndpoints();
+app.MapScheduleEndpoints();
 app.MapSettingsEndpoints();
 app.MapTestOnlyEndpoints();
 app.MapApiFallback();
