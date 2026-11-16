@@ -2,6 +2,7 @@ using Coordin.Api.Infrastructure.Http;
 using Coordin.Api.Infrastructure.Persistence;
 using Coordin.Engine.Capacity;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Coordin.Api.Features.Teams;
 
@@ -13,6 +14,7 @@ public static class TeamEndpoints
 {
     private const string NameTaken = "Já existe um time com esse nome.";
     private const string HasPeople = "Não é possível excluir um time que tem pessoas. Remova ou mova as pessoas antes.";
+    private const string HasDemands = "Não é possível excluir um time que faz parte de demandas. Remova o time das demandas antes.";
 
     public static IEndpointRouteBuilder MapTeamEndpoints(this IEndpointRouteBuilder app)
     {
@@ -135,6 +137,12 @@ public static class TeamEndpoints
             return Results.NotFound();
         }
 
+        // Um time que faz parte de alguma demanda, concluída ou não, não sai (RF-05).
+        if (await db.DemandTeams.AnyAsync(part => part.TeamId == id, cancellationToken))
+        {
+            return ApiProblems.Conflict("team-has-demands", HasDemands);
+        }
+
         if (await db.People.AnyAsync(person => person.TeamId == id, cancellationToken))
         {
             return ApiProblems.Conflict("team-has-people", HasPeople);
@@ -148,12 +156,18 @@ public static class TeamEndpoints
         }
         catch (DbUpdateException error) when (PostgresErrors.IsDependentRecordsViolation(error))
         {
-            // Uma pessoa foi adicionada entre a consulta e a exclusão: o RESTRICT do banco a barrou.
-            return ApiProblems.Conflict("team-has-people", HasPeople);
+            // Entre a consulta e a exclusão, uma pessoa ou uma demanda foi ligada ao time: o RESTRICT do banco barrou.
+            return IsDemandReference(error)
+                ? ApiProblems.Conflict("team-has-demands", HasDemands)
+                : ApiProblems.Conflict("team-has-people", HasPeople);
         }
 
         return Results.NoContent();
     }
+
+    /// <summary>A violação veio da tabela de partes de demanda (a FK <c>FK_DemandTeams_Teams_TeamId</c>).</summary>
+    private static bool IsDemandReference(DbUpdateException error) =>
+        (error.InnerException as PostgresException)?.ConstraintName?.Contains("DemandTeams", StringComparison.Ordinal) == true;
 
     private static TeamResponse ToResponse(Guid id, string name, List<decimal> capacities) =>
         new(id, name, capacities.Count, TeamCapacity.DailyHours(capacities));

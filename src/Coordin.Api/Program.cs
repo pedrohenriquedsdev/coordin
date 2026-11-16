@@ -1,8 +1,10 @@
 using Coordin.Api.Features.Auth;
 using Coordin.Api.Features.Calendar;
+using Coordin.Api.Features.Demands;
 using Coordin.Api.Features.Diagnostics;
 using Coordin.Api.Features.Health;
 using Coordin.Api.Features.People;
+using Coordin.Api.Features.Planning;
 using Coordin.Api.Features.Teams;
 using Coordin.Api.Infrastructure.Auth;
 using Coordin.Api.Infrastructure.Http;
@@ -14,6 +16,7 @@ builder.Services.AddCoordinJson();
 builder.Services.AddCoordinProblemDetails();
 builder.Services.AddCoordinTransportSecurity();
 builder.Services.AddCoordinPersistence();
+builder.Services.AddCoordinPlanning();
 builder.Services.AddCoordinAuthentication();
 builder.Services.AddCoordinHealth();
 builder.Services.AddCoordinApiDocumentation();
@@ -42,6 +45,9 @@ app.MapTeamEndpoints();
 app.MapPersonEndpoints();
 app.MapAbsenceEndpoints();
 app.MapHolidayEndpoints();
+app.MapDemandEndpoints();
+app.MapScheduleEndpoints();
+app.MapSettingsEndpoints();
 app.MapTestOnlyEndpoints();
 app.MapApiFallback();
 app.MapSpaFallback(); // por último: o fallback de /api é mais específico e vem antes

@@ -171,6 +171,86 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                     b.ToTable("Holidays", (string)null);
                 });
 
+            modelBuilder.Entity("Coordin.Api.Features.Demands.Demand", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly?>("CompletedOn")
+                        .HasColumnType("date");
+
+                    b.Property<int>("ExecutionRank")
+                        .HasColumnType("integer");
+
+                    b.Property<DateOnly?>("InformedEndDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("PriorityRank")
+                        .HasColumnType("integer");
+
+                    b.Property<DateOnly?>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExecutionRank")
+                        .IsUnique();
+
+                    b.HasIndex("PriorityRank")
+                        .IsUnique();
+
+                    b.ToTable("Demands", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Demands_CompletedAfterStart", "\"CompletedOn\" IS NULL OR \"StartDate\" IS NULL OR \"CompletedOn\" >= \"StartDate\"");
+
+                            t.HasCheckConstraint("CK_Demands_ExecutionRank", "\"ExecutionRank\" >= 1");
+
+                            t.HasCheckConstraint("CK_Demands_PriorityRank", "\"PriorityRank\" >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Demands.DemandAssignment", b =>
+                {
+                    b.Property<Guid>("DemandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("DemandId", "PersonId");
+
+                    b.HasIndex("PersonId");
+
+                    b.ToTable("DemandAssignments", (string)null);
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Demands.DemandTeam", b =>
+                {
+                    b.Property<Guid>("DemandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("EstimatedEffortHours")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.HasKey("DemandId", "TeamId");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("DemandTeams", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_DemandTeams_EstimatedEffortHours", "\"EstimatedEffortHours\" IS NULL OR \"EstimatedEffortHours\" > 0");
+                        });
+                });
+
             modelBuilder.Entity("Coordin.Api.Features.People.Person", b =>
                 {
                     b.Property<Guid>("Id")
@@ -195,6 +275,73 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                     b.ToTable("People", null, t =>
                         {
                             t.HasCheckConstraint("CK_People_DailyCapacityHours_Range", "\"DailyCapacityHours\" >= 0 AND \"DailyCapacityHours\" <= 24");
+                        });
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Planning.Forecast", b =>
+                {
+                    b.Property<Guid>("DemandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly?>("BaselineEndDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("CalculatedAt")
+                        .HasColumnType("timestamptz");
+
+                    b.Property<DateOnly?>("EndDateWithoutMargin")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("ForecastEndDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("ForecastStartDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsPredictable")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UnpredictableReason")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.HasKey("DemandId");
+
+                    b.ToTable("Forecasts", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Forecasts_EndAfterWithoutMargin", "\"ForecastEndDate\" IS NULL OR \"EndDateWithoutMargin\" IS NULL OR \"ForecastEndDate\" >= \"EndDateWithoutMargin\"");
+                        });
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Planning.PlanningSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ExecutionOrderMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<decimal>("SafetyMarginPercent")
+                        .HasPrecision(6, 2)
+                        .HasColumnType("numeric(6,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PlanningSettings", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_PlanningSettings_SafetyMargin", "\"SafetyMarginPercent\" >= 0");
+
+                            t.HasCheckConstraint("CK_PlanningSettings_Singleton", "\"Id\" = 1");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ExecutionOrderMode = "FollowPriority",
+                            SafetyMarginPercent = 20m
                         });
                 });
 
@@ -378,6 +525,44 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                     b.Navigation("Person");
                 });
 
+            modelBuilder.Entity("Coordin.Api.Features.Demands.DemandAssignment", b =>
+                {
+                    b.HasOne("Coordin.Api.Features.Demands.Demand", "Demand")
+                        .WithMany("Assignments")
+                        .HasForeignKey("DemandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Coordin.Api.Features.People.Person", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Demand");
+
+                    b.Navigation("Person");
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Demands.DemandTeam", b =>
+                {
+                    b.HasOne("Coordin.Api.Features.Demands.Demand", "Demand")
+                        .WithMany("Teams")
+                        .HasForeignKey("DemandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Coordin.Api.Features.Teams.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Demand");
+
+                    b.Navigation("Team");
+                });
+
             modelBuilder.Entity("Coordin.Api.Features.People.Person", b =>
                 {
                     b.HasOne("Coordin.Api.Features.Teams.Team", "Team")
@@ -387,6 +572,15 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Planning.Forecast", b =>
+                {
+                    b.HasOne("Coordin.Api.Features.Demands.Demand", null)
+                        .WithOne("Forecast")
+                        .HasForeignKey("Coordin.Api.Features.Planning.Forecast", "DemandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -438,6 +632,15 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Demands.Demand", b =>
+                {
+                    b.Navigation("Assignments");
+
+                    b.Navigation("Forecast");
+
+                    b.Navigation("Teams");
                 });
 
             modelBuilder.Entity("Coordin.Api.Features.People.Person", b =>

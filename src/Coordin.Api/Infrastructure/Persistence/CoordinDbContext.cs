@@ -1,6 +1,8 @@
 using Coordin.Api.Features.Auth;
 using Coordin.Api.Features.Calendar;
+using Coordin.Api.Features.Demands;
 using Coordin.Api.Features.People;
+using Coordin.Api.Features.Planning;
 using Coordin.Api.Features.Teams;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +26,16 @@ public class CoordinDbContext(DbContextOptions<CoordinDbContext> options)
     public DbSet<Absence> Absences => Set<Absence>();
 
     public DbSet<Holiday> Holidays => Set<Holiday>();
+
+    public DbSet<Demand> Demands => Set<Demand>();
+
+    public DbSet<DemandTeam> DemandTeams => Set<DemandTeam>();
+
+    public DbSet<DemandAssignment> DemandAssignments => Set<DemandAssignment>();
+
+    public DbSet<Forecast> Forecasts => Set<Forecast>();
+
+    public DbSet<PlanningSettings> PlanningSettings => Set<PlanningSettings>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
