@@ -385,7 +385,7 @@ A conta de acesso do gestor usa as tabelas padrão do ASP.NET Core Identity (`As
 | Exportação | `GET /api/schedule/export` → `text/csv` | RF-19 |
 | Cenários | `POST /api/scenarios/recommendations` · `POST /api/scenarios/simulate` · `POST /api/scenarios/apply` · `POST /api/scenarios/reset-to-priority` | RF-13 a RF-15 |
 | Simulação de nova demanda | `POST /api/demands/simulate` (mesmo corpo do `POST /api/demands`, sem gravar) | RF-16 |
-| Relatório por time | `GET /api/reports/teams?from=&to=` | RF-17 |
+| Relatório por time | `GET /api/reports/teams?from=&to=` (datas `yyyy-MM-dd` obrigatórias; até 52 semanas; semanas completas de segunda a domingo; calculado sob demanda, sem gravar nada) | RF-17 |
 | Indicadores de precisão | `GET /api/reports/accuracy?from=&to=` | RF-23 (Could) |
 | Históricos | `GET /api/demands/{id}/estimate-history` · `GET /api/demands/{id}/forecast-history` | RF-20, RF-21 (Could) |
 | Configurações | `GET`, `PUT /api/settings` (parâmetros da margem, conforme a seção 6) | RF-09 |
@@ -615,12 +615,12 @@ Demandas não previsíveis e demandas concluídas ficam fora da simulação e n�
 - **Alternativas consideradas:**
   - *Período como parâmetro do cálculo, começando por semana:* troca de período sem reescrever o algoritmo.
   - *Semana fixa no código:* mais simples hoje, mais trabalho para mudar depois.
-- **Decisão:** o relatório recebe o período como parâmetro (hoje, `Week`: segunda a domingo). Para cada time e período, a partir do consumo diário da simulação:
+- **Decisão:** o relatório recebe o período como parâmetro (hoje, `Week`: segunda a domingo). O período pedido é ajustado para semanas completas: o início vira a segunda-feira da sua semana e o fim, o domingo da sua semana. O relatório é calculado sob demanda sobre o planejamento vigente (o consumo diário não é persistido, DT-03). Para cada time e período, a partir do consumo diário da simulação:
   - `capacityHours`: soma das capacidades das pessoas do time;
   - `allocatedHours`: horas efetivamente consumidas por partes de demandas;
   - `occupancy` = `allocatedHours / capacityHours`;
   - **ociosidade** = `capacityHours − allocatedHours`, quando positiva;
-  - **sobrecarga**: o período em que alguma parte do time estava elegível e terminou o período com esforço restante, ou seja, havia trabalho esperando sem capacidade para atendê-lo; o relatório lista essas demandas.
+  - **sobrecarga** (definição esclarecida pelo autor em 2026-11-16, na change `team-report`): o período em que o time usou **toda** a capacidade (`allocatedHours = capacityHours`, com capacidade maior que zero) e, ao fim do período, ainda restava pelo menos uma parte do time **elegível** (demanda previsível já iniciada) com esforço por fazer, ou seja, havia trabalho esperando sem capacidade para atendê-lo; o relatório lista essas demandas. O texto anterior ("elegível e terminou o período com esforço restante") marcaria quase toda semana de trabalho em andamento, mesmo com capacidade sobrando;
   
   O relatório também informa a quantidade de demandas não previsíveis do time.
 - **Justificativa:** ociosidade e sobrecarga saem do mesmo consumo diário que gera a previsão, sem um segundo modelo. Pessoas do time sem alocação aparecem como ociosas, o que é justamente a "oportunidade de realocação" da proposta.
