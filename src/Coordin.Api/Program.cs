@@ -13,6 +13,9 @@ using Coordin.Api.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// A porta vem da hospedagem (variável PORT, DT-09); sem ela, 8080.
+builder.WebHost.UseUrls(ListenUrls.Resolve(Environment.GetEnvironmentVariable("PORT")));
+
 builder.Services.AddCoordinJson();
 builder.Services.AddCoordinProblemDetails();
 builder.Services.AddCoordinTransportSecurity();
