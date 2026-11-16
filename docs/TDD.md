@@ -1,7 +1,7 @@
 # TDD — Coordin
 
 - **Status:** aprovado (2026-11-11); hospedagem (DT-09) decidida em 2026-11-12, com o provedor escolhido na change 7. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23. Ajuste em 2026-11-12, decorrente do PRD: RF-17 como Must no roadmap, validação por simulação no produto (RF-24, DT-37) e roadmap com 13 changes. Ajuste em 2026-11-12, na change 1: endpoint de saúde `GET /api/health` (seção 5.2)
-- **Última atualização:** 2026-11-12
+- **Última atualização:** 2026-11-16
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
 ---
@@ -909,7 +909,8 @@ Cada change é uma fatia vertical (motor, API, tela e testes, conforme o caso), 
 | 2 | `authentication` | `feat/authentication` | Identity + JWT + refresh token, conta por variáveis de ambiente, tela de login, guarda de rotas e interceptor | DT-28, DT-29; RNF-04 | Must | 11-14 |
 | 3 | `capacity-registry` | `feat/capacity-registry` | Times, pessoas com capacidade diária, ausências e feriados (API e telas) | RF-01, RF-02, RF-03; DT-10 | Must | 11-15 |
 | 4 | `forecast-engine` | `feat/forecast-engine` | Motor: capacidade diária, previsibilidade, simulação, margem; casos da seção 8.2 e invariantes | RF-05, RF-08, RF-09, RF-10; DT-21, DT-22, DT-34; RNF-02, RNF-08; regras 1, 4 e 5 | Must | 11-17 |
-| 5 | `demand-planning` | `feat/demand-planning` | Demandas como agregado, ordem de prioridade, estimativas por time, alocações, datas, recálculo na escrita, linha de base, configuração da margem, cronograma com alerta e conclusão real com desvio | RF-04 a RF-07, RF-11, RF-12; DT-03, DT-11 a DT-14, DT-17, DT-27; regras 2, 3 e 5 | Must | 11-19 |
+| 5 | `demand-planning` | `feat/demand-planning` | Back-end das demandas: tabelas, demandas como agregado (API), ordem de prioridade, estimativas por time, alocações, datas, recálculo na escrita com o motor, linha de base, configuração da margem, cronograma (API) e conclusão real com desvio | RF-04 a RF-07, RF-11, RF-12; DT-03, DT-11 a DT-14, DT-17, DT-27; regras 2, 3 e 5 | Must | 11-18 |
+| 5b | `demand-screens` | `feat/demand-screens` | Telas das demandas: lista e formulário (times com estimativa, pessoas, datas), ordem de prioridade, cronograma com alerta de data de fim informada e conclusão real com desvio | RF-04 a RF-07, RF-11, RF-12 (telas); RNF-03, RNF-07 | Must | 11-19 |
 | 6 | `team-report` | `feat/team-report` | Relatório semanal por time com ociosidade e sobrecarga (motor, API e tela), com o `ChartComponent` e o gráfico de capacidade × alocado | RF-17; DT-24, DT-36 | Must | 11-20 |
 | 7 | `deployment` | `chore/deployment` | Implantação na hospedagem escolhida (DT-09), PostgreSQL gerenciado, variáveis de ambiente e roteiro de verificação | DT-09; RNF-03, RNF-06 | Must | 11-21 (M4) |
 | 8 | `demand-dependencies` | `feat/demand-dependencies` | Dependências com detecção de ciclo no motor, API e tela | RF-18; DT-23 | Should | 11-22 |
@@ -930,7 +931,7 @@ Depois do congelamento (2026-11-25), só correções: 11-26 validação por simu
   - *Cerca de dez changes verticais:* cada uma entrega algo utilizável de ponta a ponta; cerca de uma por dia.
   - *Uma change por requisito (cerca de quinze):* PRs menores, com o custo fixo do ciclo multiplicado.
   - *Por camada (motor, depois API, depois telas):* menos ciclos, mas nada utilizável até o fim e integração concentrada no último momento.
-- **Decisão:** as treze changes da tabela 9.1, na ordem indicada (eram onze; em 2026-11-12 o relatório por time ganhou change própria, separada das dependências, e entrou a change da validação).
+- **Decisão:** as treze changes da tabela 9.1, na ordem indicada (eram onze; em 2026-11-12 o relatório por time ganhou change própria, separada das dependências, e entrou a change da validação); em 2026-11-16 a change 5 foi dividida em 5 (back-end) e 5b (telas), por prazo e para PRs revisáveis, sem renumerar as demais).
 - **Justificativa da ordem:**
   - a **fundação** vem primeiro, com o CI, para todas as changes seguintes já serem verificadas automaticamente;
   - a **autenticação** vem cedo porque todos os endpoints dependem dela;
