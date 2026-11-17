@@ -13,7 +13,7 @@ Hoje o motor trata toda demanda como independente: uma demanda só espera pela d
 - **API:** o agregado da demanda ganha `prerequisiteIds` (lista de ids) no corpo de `POST` e `PUT` e na resposta. Nova tabela `DemandDependencies` com chave composta e `CHECK` contra autodependência. Ciclo responde `409` com `code` `dependency-cycle` e mensagem em português com os títulos do ciclo; a exclusão de uma demanda que é pré-requisito de outra responde `409` com `demand-has-dependents`. O recálculo continua na mesma transação da escrita.
 - **API:** o cronograma traz, em cada item, os pré-requisitos (id e título) e passa a devolver o motivo `PrerequisiteUnpredictable`. O cliente Angular é regenerado.
 - **Tela:** o formulário de demanda ganha a escolha dos pré-requisitos (entre as demais demandas), com o erro de ciclo mostrado em palavras; o cronograma lista os pré-requisitos de cada demanda e escreve o novo motivo em português.
-- **Documentos:** o TDD recebe os códigos `dependency-cycle` (já citado) e `demand-has-dependents` (novo) no DT-18, o motivo `PrerequisiteUnpredictable` na seção 6.3 e o campo `prerequisiteIds` no contrato (5.2). Isso é um ajuste de documento já aprovado e será proposto ao autor antes de editar.
+- **Documentos:** o TDD recebe o código `demand-has-dependents` (novo) no DT-18, o nome `prerequisiteIds` no contrato da demanda (5.3, no lugar de `prerequisiteDemandIds`) e `prerequisites` no exemplo do cronograma. `dependency-cycle`, o motivo `PrerequisiteUnpredictable` e a precedência na seção 6.3 já constavam. Ajuste de documento aprovado pelo autor em 2026-11-17.
 
 Nenhuma mudança incompatível: o campo novo é opcional e a ausência dele equivale a nenhuma dependência.
 

@@ -86,7 +86,7 @@ O laço de `ForecastEngine` que retira demandas que não terminam em cinco anos 
 
 ### D9. Documentos aprovados que esta change toca
 
-O TDD precisa de três ajustes pequenos, que **só serão feitos com aprovação do autor** (regra do CLAUDE.md §11): (1) `demand-has-dependents` na lista de códigos do DT-18; (2) `PrerequisiteUnpredictable` na seção 6.3 e na precedência; (3) `prerequisiteIds` no contrato de demanda (5.2). Nenhum DT é contrariado: o DT-23 é seguido ao pé da letra.
+O TDD recebeu, com a aprovação do autor em 2026-11-17 (regra do CLAUDE.md §11), três ajustes pequenos: (1) `demand-has-dependents` na lista de códigos do DT-18; (2) o campo `prerequisiteIds` no contrato de demanda (5.3), no lugar de `prerequisiteDemandIds`, que já constava no exemplo, para seguir o padrão de `assignedPersonIds`; (3) `prerequisites` no exemplo do cronograma (5.3). O motivo `PrerequisiteUnpredictable` e a precedência na seção 6.3 **já estavam** no TDD, e o planejamento da change dizia o contrário por não ter conferido o texto: não houve ajuste ali. Nenhum DT é contrariado: o DT-23 é seguido ao pé da letra.
 
 ## Risks / Trade-offs
 
