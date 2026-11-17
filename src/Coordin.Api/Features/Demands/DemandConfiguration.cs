@@ -85,3 +85,34 @@ public sealed class DemandAssignmentConfiguration : IEntityTypeConfiguration<Dem
             .IsRequired();
     }
 }
+
+/// <summary>Mapeamento de <see cref="DemandDependency"/> (RF-18; DT-23; design D6).</summary>
+public sealed class DemandDependencyConfiguration : IEntityTypeConfiguration<DemandDependency>
+{
+    public void Configure(EntityTypeBuilder<DemandDependency> builder)
+    {
+        builder.ToTable(
+            "DemandDependencies",
+            table => table.HasCheckConstraint(
+                "CK_DemandDependencies_NoSelfDependency",
+                "\"DemandId\" <> \"PrerequisiteDemandId\""));
+
+        builder.HasKey(dependency => new { dependency.DemandId, dependency.PrerequisiteDemandId });
+
+        // CASCADE na dependente: excluir quem espera remove as suas arestas.
+        builder.HasOne(dependency => dependency.Demand)
+            .WithMany(demand => demand.Prerequisites)
+            .HasForeignKey(dependency => dependency.DemandId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
+
+        // RESTRICT no pré-requisito: não se exclui uma demanda de que outra depende (demand-has-dependents).
+        builder.HasOne(dependency => dependency.Prerequisite)
+            .WithMany(demand => demand.Dependents)
+            .HasForeignKey(dependency => dependency.PrerequisiteDemandId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired();
+
+        builder.HasIndex(dependency => dependency.PrerequisiteDemandId);
+    }
+}

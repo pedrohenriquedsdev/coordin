@@ -229,6 +229,24 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                     b.ToTable("DemandAssignments", (string)null);
                 });
 
+            modelBuilder.Entity("Coordin.Api.Features.Demands.DemandDependency", b =>
+                {
+                    b.Property<Guid>("DemandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PrerequisiteDemandId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("DemandId", "PrerequisiteDemandId");
+
+                    b.HasIndex("PrerequisiteDemandId");
+
+                    b.ToTable("DemandDependencies", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_DemandDependencies_NoSelfDependency", "\"DemandId\" <> \"PrerequisiteDemandId\"");
+                        });
+                });
+
             modelBuilder.Entity("Coordin.Api.Features.Demands.DemandTeam", b =>
                 {
                     b.Property<Guid>("DemandId")
@@ -544,6 +562,25 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                     b.Navigation("Person");
                 });
 
+            modelBuilder.Entity("Coordin.Api.Features.Demands.DemandDependency", b =>
+                {
+                    b.HasOne("Coordin.Api.Features.Demands.Demand", "Demand")
+                        .WithMany("Prerequisites")
+                        .HasForeignKey("DemandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Coordin.Api.Features.Demands.Demand", "Prerequisite")
+                        .WithMany("Dependents")
+                        .HasForeignKey("PrerequisiteDemandId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Demand");
+
+                    b.Navigation("Prerequisite");
+                });
+
             modelBuilder.Entity("Coordin.Api.Features.Demands.DemandTeam", b =>
                 {
                     b.HasOne("Coordin.Api.Features.Demands.Demand", "Demand")
@@ -638,7 +675,11 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                 {
                     b.Navigation("Assignments");
 
+                    b.Navigation("Dependents");
+
                     b.Navigation("Forecast");
+
+                    b.Navigation("Prerequisites");
 
                     b.Navigation("Teams");
                 });

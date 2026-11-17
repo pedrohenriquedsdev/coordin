@@ -62,6 +62,11 @@ public sealed class PlanningSnapshotLoader
             .Select(assignment => new AssignmentInput(assignment.DemandId, assignment.PersonId))
             .ToListAsync(cancellationToken);
 
+        // Todas as arestas, inclusive as de demandas concluídas: o motor é quem ignora as que não importam.
+        var dependencies = await db.DemandDependencies.AsNoTracking()
+            .Select(dependency => new DependencyInput(dependency.DemandId, dependency.PrerequisiteDemandId))
+            .ToListAsync(cancellationToken);
+
         var settings = await db.PlanningSettings.AsNoTracking()
             .SingleAsync(item => item.Id == PlanningSettings.SingletonId, cancellationToken);
 
@@ -74,6 +79,6 @@ public sealed class PlanningSnapshotLoader
             assignments,
             settings.ExecutionOrderMode,
             settings.SafetyMarginPercent,
-            []); // as dependências entram na task 3.2
+            dependencies);
     }
 }
