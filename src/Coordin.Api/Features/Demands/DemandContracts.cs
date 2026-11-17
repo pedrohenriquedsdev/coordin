@@ -3,8 +3,9 @@ using System.ComponentModel.DataAnnotations;
 namespace Coordin.Api.Features.Demands;
 
 /// <summary>
-/// Corpo de <c>POST /api/demands</c> e <c>PUT /api/demands/{id}</c> (RF-04 a RF-07; DT-17). O agregado
-/// inteiro vai no corpo. Os times e as pessoas são validados pela API, porque dependem do banco.
+/// Corpo de <c>POST /api/demands</c>, <c>PUT /api/demands/{id}</c> e <c>POST /api/demands/simulate</c> (RF-04 a RF-07,
+/// RF-16; DT-17). O agregado inteiro vai no corpo. Os times e as pessoas são validados pela API, porque dependem do
+/// banco. <c>Position</c> (de 1 a n + 1) vale só para criar e simular; no <c>PUT</c> é ignorado (design D10).
 /// </summary>
 public sealed record DemandRequest(
     [property: Required(ErrorMessage = "O título da demanda é obrigatório.")]
@@ -14,7 +15,8 @@ public sealed record DemandRequest(
     DateOnly? InformedEndDate,
     List<DemandTeamRequest>? Teams,
     List<Guid>? AssignedPersonIds,
-    List<Guid>? PrerequisiteIds = null);
+    List<Guid>? PrerequisiteIds = null,
+    int? Position = null);
 
 /// <summary>Uma parte: o time e a estimativa que ele informou (nula = ainda não estimou).</summary>
 public sealed record DemandTeamRequest(Guid? TeamId, decimal? EstimatedEffortHours);
