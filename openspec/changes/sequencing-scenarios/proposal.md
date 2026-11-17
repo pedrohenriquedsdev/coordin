@@ -11,10 +11,10 @@ Há um risco medido que molda a change: uma avaliação do motor custa cerca de 
 - **Motor, avaliação e score (DT-25):** dado um snapshot e uma ordem de execução, o motor calcula o cronograma daquela ordem e o `score = Σ wᵢ × dᵢ` (menor é melhor) com a **parcela de cada demanda**, as datas atuais e do cenário, o prazo total do setor e a diferença em dias. As parcelas somam exatamente a diferença do `score`, que é a justificativa mostrada ao gestor (RF-13). Desempates conforme o DT-25.
 - **Motor, aceleração:** o plano (validação, classificação, calendário e capacidade) é preparado uma vez e reaproveitado entre as avaliações, e a simulação perde custos desnecessários. Nenhum resultado muda: um teste compara o caminho rápido com `ForecastEngine.Calculate` em centenas de planejamentos. Perfil medido antes de mexer.
 - **Motor, busca (DT-26):** busca local determinística (mover cada demanda de 1 a 3 posições, primeira melhoria, parada por número de avaliações, nunca por tempo), até 3 cenários recomendados (a melhor ordem e os dois melhores movimentos únicos) ou lista vazia quando nada melhora. O orçamento de avaliações é o maior valor que cabe em 10 s no volume do RNF-01, medido em teste; se ficar abaixo de 3.000, o DT-26 só é ajustado com a aprovação do autor.
-- **Motor, nova demanda (RF-16):** compara o cronograma sem e com uma demanda nova e informa as demandas cuja data prevista muda, em dias corridos.
-- **API:** `POST /api/scenarios/recommendations`, `POST /api/scenarios/simulate` (corpo com `executionOrder`), `POST /api/scenarios/apply` e `POST /api/scenarios/reset-to-priority`, mais `POST /api/demands/simulate` (mesmo corpo de `POST /api/demands`, sem gravar). `recommendations` e `simulate` nunca gravam nada. `apply` e `reset-to-priority` gravam a ordem de execução e o modo na **mesma transação** e recalculam as previsões, sem tocar a prioridade registrada.
+- **Motor, nova demanda (RF-16):** compara o cronograma sem e com uma demanda nova, **na posição da prioridade que o gestor escolher**, e informa as demandas cuja data prevista muda, em dias corridos. (Com a demanda no fim da fila, nenhuma demanda existente muda de data: medido em 297 planejamentos, zero. Por isso a posição é opcional, decisão do autor em 2026-11-17.)
+- **API:** `POST /api/scenarios/recommendations`, `POST /api/scenarios/simulate` (corpo com `executionOrder`), `POST /api/scenarios/apply` e `POST /api/scenarios/reset-to-priority`, mais `POST /api/demands/simulate` (mesmo corpo de `POST /api/demands`, com o `position` opcional, sem gravar). `POST /api/demands` também passa a aceitar o `position` opcional, para confirmar a inclusão exatamente onde foi simulada. `recommendations` e `simulate` nunca gravam nada. `apply` e `reset-to-priority` gravam a ordem de execução e o modo na **mesma transação** e recalculam as previsões, sem tocar a prioridade registrada.
 - **Dependências:** nenhum cenário viola uma dependência (RF-18): o motor já espera o pré-requisito em qualquer ordem, e `apply` confere de novo o resultado antes de gravar.
-- **Documentos:** o TDD 5.3 recebe o formato da resposta de `POST /api/demands/simulate`, o `reset-to-priority` já consta em 5.2, e o DT-26 só muda se a medição exigir (com aprovação do autor). Nenhuma edição será feita sem aprovação.
+- **Documentos:** o TDD 5.3 recebe o campo opcional `position` no corpo da demanda e o formato da resposta de `POST /api/demands/simulate`, o `reset-to-priority` já consta em 5.2, e o DT-26 só muda se a medição exigir (com aprovação do autor). Nenhuma edição será feita sem aprovação.
 
 Nenhuma mudança incompatível: tudo é rota nova e código novo no motor.
 
@@ -30,7 +30,9 @@ Nenhuma mudança incompatível: tudo é rota nova e código novo no motor.
 
 ### Modified Capabilities
 
-Nenhuma. As specs existentes não mudam de comportamento: `planning-settings` já diz que o modo de ordem só muda pela aprovação de um cenário, e `schedule-view` já indica `isOutOfPriorityOrder`.
+- `demand-registry`: o requisito "Ordem de prioridade única e contínua" passa a admitir o `position` opcional, e a nova demanda entra nessa posição nas duas ordens (sem `position`, continua no fim).
+
+As demais specs não mudam de comportamento: `planning-settings` já diz que o modo de ordem só muda pela aprovação de um cenário, e `schedule-view` já indica `isOutOfPriorityOrder`.
 
 ## Impact
 
