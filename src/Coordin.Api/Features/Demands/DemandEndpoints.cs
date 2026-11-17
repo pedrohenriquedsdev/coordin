@@ -13,9 +13,6 @@ namespace Coordin.Api.Features.Demands;
 /// </summary>
 public static class DemandEndpoints
 {
-    /// <summary>Folga usada para tirar os ranks da faixa final antes de gravá-los (design D7).</summary>
-    private const int RankShift = 1_000_000;
-
     public static IEndpointRouteBuilder MapDemandEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/demands").WithTags("Demands");
@@ -188,9 +185,9 @@ public static class DemandEndpoints
             await db.SaveChangesAsync(cancellationToken);
 
             // Recompacta os rankings: cada ordem continua relativa, mas sem buracos.
-            var priorityOrder = await OrderedIdsAsync(db, byPriority: true, cancellationToken);
-            var executionOrder = await OrderedIdsAsync(db, byPriority: false, cancellationToken);
-            await SetRanksAsync(db, priorityOrder, executionOrder, cancellationToken);
+            var priorityOrder = await DemandRanking.OrderedIdsAsync(db, byPriority: true, cancellationToken);
+            var executionOrder = await DemandRanking.OrderedIdsAsync(db, byPriority: false, cancellationToken);
+            await DemandRanking.SetRanksAsync(db, priorityOrder, executionOrder, cancellationToken);
 
             return Results.NoContent();
         }, cancellationToken);
@@ -221,9 +218,9 @@ public static class DemandEndpoints
                 .SingleAsync(cancellationToken);
             var executionOrder = mode == ExecutionOrderMode.FollowPriority
                 ? requested!
-                : await OrderedIdsAsync(db, byPriority: false, cancellationToken);
+                : await DemandRanking.OrderedIdsAsync(db, byPriority: false, cancellationToken);
 
-            await SetRanksAsync(db, requested!, executionOrder, cancellationToken);
+            await DemandRanking.SetRanksAsync(db, requested!, executionOrder, cancellationToken);
             return Results.NoContent();
         }, cancellationToken);
 
@@ -417,48 +414,6 @@ public static class DemandEndpoints
         foreach (var prerequisiteId in requestedPrerequisites.Where(id => !demand.Prerequisites.Any(item => item.PrerequisiteDemandId == id)))
         {
             db.DemandDependencies.Add(new DemandDependency { DemandId = demand.Id, PrerequisiteDemandId = prerequisiteId });
-        }
-    }
-
-    private static async Task<List<Guid>> OrderedIdsAsync(CoordinDbContext db, bool byPriority, CancellationToken cancellationToken)
-    {
-        var query = db.Demands.AsNoTracking();
-        var ordered = byPriority
-            ? query.OrderBy(demand => demand.PriorityRank)
-            : query.OrderBy(demand => demand.ExecutionRank);
-        return await ordered.ThenBy(demand => demand.Id).Select(demand => demand.Id).ToListAsync(cancellationToken);
-    }
-
-    /// <summary>
-    /// Grava os dois rankings em duas fases (design D7): primeiro tira todos da faixa final, para o índice
-    /// único nunca ser violado no meio da troca; depois grava os valores finais, um por demanda.
-    /// </summary>
-    private static async Task SetRanksAsync(
-        CoordinDbContext db,
-        List<Guid> priorityOrder,
-        List<Guid> executionOrder,
-        CancellationToken cancellationToken)
-    {
-        await db.Demands.ExecuteUpdateAsync(setters => setters
-            .SetProperty(demand => demand.PriorityRank, demand => demand.PriorityRank + RankShift)
-            .SetProperty(demand => demand.ExecutionRank, demand => demand.ExecutionRank + RankShift),
-            cancellationToken);
-
-        var executionRankOf = executionOrder
-            .Select((id, index) => (id, rank: index + 1))
-            .ToDictionary(item => item.id, item => item.rank);
-
-        for (var index = 0; index < priorityOrder.Count; index++)
-        {
-            var id = priorityOrder[index];
-            var priorityRank = index + 1;
-            var executionRank = executionRankOf[id];
-            await db.Demands
-                .Where(demand => demand.Id == id)
-                .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(demand => demand.PriorityRank, priorityRank)
-                    .SetProperty(demand => demand.ExecutionRank, executionRank),
-                    cancellationToken);
         }
     }
 
