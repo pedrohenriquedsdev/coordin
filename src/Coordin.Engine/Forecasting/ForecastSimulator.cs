@@ -1,5 +1,4 @@
 using Coordin.Engine.Capacity;
-using Coordin.Engine.Planning;
 
 namespace Coordin.Engine.Forecasting;
 
@@ -10,6 +9,8 @@ namespace Coordin.Engine.Forecasting;
 /// termina a última parte. Cada time trabalha só na sua parte, então adicionar um time nunca divide
 /// o prazo automaticamente (regra inviolável 4). Uma parte só é elegível quando os pré-requisitos da
 /// sua demanda já terminaram e o dia é posterior ao fim, com margem, de todos eles (RF-18; DT-23).
+/// Trabalha com índices e arrays preparados em <see cref="SimulationTables"/>, percorrendo pessoas,
+/// filas e partes sempre na mesma ordem para o resultado nunca depender da ordem das listas (RNF-02).
 /// </summary>
 internal static class ForecastSimulator
 {
@@ -25,112 +26,122 @@ internal static class ForecastSimulator
         IReadOnlySet<Guid> Unfinished,
         IReadOnlyList<ConsumedHours> Consumed);
 
-    private sealed class PartState(Guid demandId, Guid teamId, DateOnly startDate, decimal remaining, IReadOnlyList<Guid> prerequisites)
+    private sealed class PersonQueue(int person, int[] parts)
     {
-        public Guid DemandId { get; } = demandId;
+        public int Person { get; } = person;
 
-        public Guid TeamId { get; } = teamId;
-
-        public DateOnly StartDate { get; } = startDate;
-
-        public decimal Remaining { get; set; } = remaining;
-
-        /// <summary>Os pré-requisitos da demanda que ainda precisam terminar (os concluídos não entram).</summary>
-        public IReadOnlyList<Guid> Prerequisites { get; } = prerequisites;
-    }
-
-    private sealed class PersonQueue(Guid personId, List<PartState> parts)
-    {
-        public Guid PersonId { get; } = personId;
-
-        public List<PartState> Parts { get; } = parts;
+        public int[] Parts { get; } = parts;
 
         public int Head { get; set; }
     }
 
-    /// <param name="snapshot">O planejamento.</param>
-    /// <param name="included">As demandas previsíveis a simular; todas as outras ficam de fora.</param>
+    private const int Unset = -1;
+
+    /// <param name="tables">As tabelas do planejamento.</param>
+    /// <param name="included">Por índice de demanda: as previsíveis a simular; todas as outras ficam de fora.</param>
+    /// <param name="position">Por índice de demanda: a posição na ordem de execução (menor vem primeiro na fila).</param>
+    /// <param name="marginPercent">O percentual da margem de segurança (DT-22).</param>
+    /// <param name="collectConsumption">Se falso, o consumo diário nem é montado (a avaliação de cenários não o usa).</param>
     public static Outcome Run(
-        PlanningSnapshot snapshot,
-        IReadOnlySet<Guid> included,
+        SimulationTables tables,
+        bool[] included,
+        int[] position,
+        decimal marginPercent,
         WorkCalendar calendar,
-        PersonCapacityCalendar capacity)
+        bool collectConsumption)
     {
-        var demands = snapshot.Demands.Where(demand => included.Contains(demand.Id)).ToList();
-        if (demands.Count == 0)
+        var earliestStart = int.MaxValue;
+        var partsLeft = 0;
+        var openParts = new int[tables.DemandCount];
+        var remaining = new decimal[tables.PartEffort.Length];
+        for (var demand = 0; demand < tables.DemandCount; demand++)
+        {
+            if (!included[demand])
+            {
+                continue;
+            }
+
+            earliestStart = Math.Min(earliestStart, tables.StartDay[demand]);
+            partsLeft += tables.PartCount[demand];
+            openParts[demand] = tables.PartCount[demand];
+            Array.Copy(tables.PartEffort, tables.FirstPart[demand], remaining, tables.FirstPart[demand], tables.PartCount[demand]);
+        }
+
+        if (earliestStart == int.MaxValue) // nenhuma demanda para simular
         {
             return new Outcome(new Dictionary<Guid, FinishedDemand>(), new HashSet<Guid>(), []);
         }
 
-        // Só espera quem está na simulação: pré-requisito concluído está cumprido, e a classificação já
-        // tirou do jogo os dependentes de quem não tem previsão.
-        var prerequisitesByDemand = snapshot.Dependencies
-            .Where(dependency => included.Contains(dependency.PrerequisiteId))
-            .ToLookup(dependency => dependency.DemandId, dependency => dependency.PrerequisiteId);
-
-        var parts = new Dictionary<(Guid DemandId, Guid TeamId), PartState>();
-        var openParts = new Dictionary<Guid, int>();
-        foreach (var demand in demands)
-        {
-            var prerequisites = prerequisitesByDemand[demand.Id].Order().ToList();
-            foreach (var part in demand.Parts)
-            {
-                parts[(demand.Id, part.TeamId)] = new PartState(demand.Id, part.TeamId, demand.StartDate!.Value, part.EstimatedEffortHours!.Value, prerequisites);
-            }
-
-            openParts[demand.Id] = demand.Parts.Count;
-        }
-
-        var queues = BuildQueues(snapshot, demands, included, parts);
-        var firstWorked = new Dictionary<Guid, DateOnly>();
+        var queues = BuildQueues(tables, included, position);
+        var firstWorked = new int[tables.DemandCount];
+        Array.Fill(firstWorked, Unset);
+        var endWithMargin = new int[tables.DemandCount];
+        Array.Fill(endWithMargin, Unset);
         var finished = new Dictionary<Guid, FinishedDemand>();
         var consumed = new List<ConsumedHours>();
 
-        var earliestStart = demands.Min(demand => demand.StartDate!.Value);
-        var horizon = earliestStart.AddYears(5);
-        var partsLeft = parts.Count;
+        var startDate = DateOnly.FromDayNumber(earliestStart);
+        var horizon = startDate.AddYears(5).DayNumber;
 
-        for (var day = calendar.OnOrAfter(earliestStart); day <= horizon && partsLeft > 0; day = day.AddDays(1))
+        for (var day = calendar.OnOrAfter(startDate).DayNumber; day <= horizon && partsLeft > 0; day++)
         {
-            if (!calendar.IsBusinessDay(day))
+            if (!calendar.IsBusinessDay(DateOnly.FromDayNumber(day)))
             {
                 continue;
             }
 
             foreach (var queue in queues)
             {
-                var hours = capacity.CapacityOf(queue.PersonId, day);
-                SkipFinishedHead(queue);
+                var hours = tables.CapacityOf(queue.Person, day);
+                SkipFinishedHead(queue, remaining);
 
-                for (var index = queue.Head; index < queue.Parts.Count && hours > 0m; index++)
+                for (var index = queue.Head; index < queue.Parts.Length && hours > 0m; index++)
                 {
                     var part = queue.Parts[index];
-                    if (!IsEligible(part, day, finished))
+                    var demand = tables.PartDemand[part];
+                    if (!IsEligible(tables, included, remaining, endWithMargin, part, demand, day))
                     {
                         continue;
                     }
 
-                    var taken = Math.Min(hours, part.Remaining);
+                    var taken = Math.Min(hours, remaining[part]);
                     hours -= taken;
-                    part.Remaining -= taken;
-                    consumed.Add(new ConsumedHours(queue.PersonId, part.DemandId, part.TeamId, day, taken));
-                    firstWorked.TryAdd(part.DemandId, day);
+                    remaining[part] -= taken;
+                    if (collectConsumption)
+                    {
+                        consumed.Add(new ConsumedHours(tables.People[queue.Person].Id, tables.DemandIds[demand], tables.PartTeamId[part], DateOnly.FromDayNumber(day), taken));
+                    }
 
-                    if (part.Remaining == 0m)
+                    if (firstWorked[demand] == Unset)
+                    {
+                        firstWorked[demand] = day;
+                    }
+
+                    if (remaining[part] == 0m)
                     {
                         partsLeft--;
-                        if (--openParts[part.DemandId] == 0)
+                        if (--openParts[demand] == 0)
                         {
-                            var start = firstWorked[part.DemandId];
-                            var (marginDays, endWithMargin) = SafetyMargin.Apply(start, day, snapshot.SafetyMarginPercent, calendar);
-                            finished[part.DemandId] = new FinishedDemand(start, day, marginDays, endWithMargin);
+                            var start = DateOnly.FromDayNumber(firstWorked[demand]);
+                            var end = DateOnly.FromDayNumber(day);
+                            var (marginDays, withMargin) = SafetyMargin.Apply(start, end, marginPercent, calendar);
+                            endWithMargin[demand] = withMargin.DayNumber;
+                            finished[tables.DemandIds[demand]] = new FinishedDemand(start, end, marginDays, withMargin);
                         }
                     }
                 }
             }
         }
 
-        var unfinished = included.Where(id => !finished.ContainsKey(id)).ToHashSet();
+        var unfinished = new HashSet<Guid>();
+        for (var demand = 0; demand < tables.DemandCount; demand++)
+        {
+            if (included[demand] && endWithMargin[demand] == Unset)
+            {
+                unfinished.Add(tables.DemandIds[demand]);
+            }
+        }
+
         return new Outcome(finished, unfinished, consumed);
     }
 
@@ -140,50 +151,68 @@ internal static class ForecastSimulator
     /// com margem nunca é anterior ao dia em que a demanda terminou, então um dependente nunca fica
     /// elegível no mesmo dia do pré-requisito, qualquer que seja a ordem em que as pessoas são
     /// percorridas: o resultado não depende dessa ordem (RNF-02). O dia seguinte é o próximo dia útil
-    /// porque a simulação só visita dias úteis.
+    /// porque a simulação só visita dias úteis. Um pré-requisito fora da simulação (concluído) está cumprido.
     /// </summary>
-    private static bool IsEligible(PartState part, DateOnly day, Dictionary<Guid, FinishedDemand> finished) =>
-        part.Remaining > 0m
-        && part.StartDate <= day
-        && part.Prerequisites.All(id => finished.TryGetValue(id, out var prerequisite) && day > prerequisite.EndWithMargin);
-
-    private static void SkipFinishedHead(PersonQueue queue)
+    private static bool IsEligible(SimulationTables tables, bool[] included, decimal[] remaining, int[] endWithMargin, int part, int demand, int day)
     {
-        while (queue.Head < queue.Parts.Count && queue.Parts[queue.Head].Remaining == 0m)
+        if (remaining[part] <= 0m || tables.StartDay[demand] > day)
+        {
+            return false;
+        }
+
+        foreach (var prerequisite in tables.Prerequisites[demand])
+        {
+            if (included[prerequisite] && (endWithMargin[prerequisite] == Unset || day <= endWithMargin[prerequisite]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static void SkipFinishedHead(PersonQueue queue, decimal[] remaining)
+    {
+        while (queue.Head < queue.Parts.Length && remaining[queue.Parts[queue.Head]] == 0m)
         {
             queue.Head++;
         }
     }
 
-    /// <summary>Monta, uma vez, a fila de cada pessoa: as partes do time dela, na ordem de execução (DT-13).</summary>
-    private static List<PersonQueue> BuildQueues(
-        PlanningSnapshot snapshot,
-        List<DemandInput> demands,
-        IReadOnlySet<Guid> included,
-        Dictionary<(Guid DemandId, Guid TeamId), PartState> parts)
+    /// <summary>Monta, uma vez por rodada, a fila de cada pessoa: as partes do time dela, na ordem de execução (DT-13).</summary>
+    private static List<PersonQueue> BuildQueues(SimulationTables tables, bool[] included, int[] position)
     {
-        var position = demands
-            .OrderBy(demand => snapshot.OrderMode == ExecutionOrderMode.FollowPriority ? demand.PriorityRank : demand.ExecutionRank)
-            .ThenBy(demand => demand.Id)
-            .Select((demand, index) => (demand.Id, index))
-            .ToDictionary(item => item.Id, item => item.index);
-
-        var assignmentsByPerson = snapshot.Assignments
-            .Where(assignment => included.Contains(assignment.DemandId))
-            .ToLookup(assignment => assignment.PersonId);
-
         var queues = new List<PersonQueue>();
-        foreach (var person in snapshot.People.OrderBy(person => person.Id))
+        for (var person = 0; person < tables.People.Length; person++)
         {
-            var queue = assignmentsByPerson[person.Id]
-                .OrderBy(assignment => position[assignment.DemandId])
-                .Select(assignment => parts[(assignment.DemandId, person.TeamId)])
-                .ToList();
-
-            if (queue.Count > 0)
+            var demands = tables.AssignedDemands[person];
+            var parts = tables.AssignedParts[person];
+            var count = 0;
+            foreach (var demand in demands)
             {
-                queues.Add(new PersonQueue(person.Id, queue));
+                count += included[demand] ? 1 : 0;
             }
+
+            if (count == 0)
+            {
+                continue;
+            }
+
+            var keys = new int[count];
+            var queued = new int[count];
+            var next = 0;
+            for (var index = 0; index < demands.Length; index++)
+            {
+                if (included[demands[index]])
+                {
+                    keys[next] = position[demands[index]];
+                    queued[next] = parts[index];
+                    next++;
+                }
+            }
+
+            Array.Sort(keys, queued); // as posições são únicas, então a ordem é a mesma de sempre
+            queues.Add(new PersonQueue(person, queued));
         }
 
         return queues;

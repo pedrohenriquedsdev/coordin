@@ -117,3 +117,34 @@ Propostos ao autor na última task, e só editados com a aprovação dele: (1) T
 ## Open Questions
 
 - Nenhuma que mude specs, abordagem ou tasks. O valor exato de `B` sai da medição durante a implementação (D6) e, se ficar abaixo de 3.000, vira uma pergunta ao autor na última task, já prevista.
+
+## Medições
+
+Volume de referência do RNF-01: 15 times, 150 pessoas, 200 demandas (semente fixa 3), na máquina de desenvolvimento, a quente (uma execução de aquecimento e 30 a 200 repetições, em milissegundos por chamada).
+
+### 2026-11-17, antes da aceleração (task 2.2)
+
+| Região | Custo |
+|---|---|
+| `ForecastEngine.Calculate` inteiro | 18,37 ms |
+| Validação do snapshot | 0,375 ms |
+| Classificação de previsibilidade | 0,561 ms |
+| Montagem do calendário e da capacidade | 0,042 ms |
+| Consulta de capacidade de todas as pessoas em todos os 758 dias (limite superior do que o laço consulta) | 6,36 ms |
+| Ordenar as 10.307 entradas de consumo no fim do `Calculate` | 4,76 ms |
+| `CountBusinessDays` para 200 demandas (custo do score) | 0,62 ms |
+
+Leitura: o consumo diário (alocar 10 mil registros e ordená-los) e a consulta de capacidade dentro do laço respondem por cerca de metade do tempo, e a avaliação de um cenário não usa o consumo. A validação e a classificação são pequenas, mas se repetem a cada avaliação sem necessidade. O resto é o próprio laço dos dias.
+
+### 2026-11-17, durante a aceleração (task 2.4)
+
+A máquina de desenvolvimento tem ruído de 20% a 30% entre execuções (outros processos em segundo plano). As medições abaixo usam o **mínimo de 9 lotes de 20 execuções**, repetidas 2 a 3 vezes na mesma sessão, e os valores comparáveis entre si são os da mesma sessão. As medições da tabela anterior (18,4 ms o `Calculate` inteiro; 4,76 ms para ordenar o consumo) foram feitas numa sessão mais carregada: refeitas depois com o mesmo código, o `Calculate` dava 11 a 12 ms.
+
+| Passo (cada um com o `ResultGoldenTests` e a suíte do motor verdes) | Avaliação sem consumo | Com consumo | `Calculate` de uma chamada só |
+|---|---|---|---|
+| Caminho único `PreparedPlanning` (2.3), sem otimizar o laço | 7,7 a 8,4 ms | 9,1 a 11,5 ms | 10,9 a 12,0 ms |
+| (b) não montar `ConsumedHours` quando o consumo não é pedido | 3,6 a 4,6 ms | 9,3 a 11,5 ms | 10,8 a 12,2 ms |
+| (a) + (c) tabelas indexadas e capacidade por dia guardada | **2,25 a 2,40 ms** | 4,8 a 5,4 ms | 11,2 a 12,1 ms |
+| Contagem acumulada de dias úteis no score (avaliador) | menos 0,5 ms por cenário | n/a | n/a |
+
+Leituras: (1) quase todo o ganho vem de **não alocar nem ordenar o consumo diário** (cerca de 10 mil registros por rodada) e de **trocar `LINQ`/dicionários do laço por arrays com a capacidade guardada**; (2) a avaliação de cenário passou de cerca de 11 a 18 ms para cerca de **2,3 ms**; (3) o `Calculate` de uma chamada só **não melhorou**, porque a preparação (validar, classificar, montar as tabelas) e o preenchimento do cache de capacidade, que antes eram diluídos no laço, agora são pagos a cada chamada: isso não afeta a busca, que prepara uma vez, e não piora o que já existia; (4) o consumo continua custando cerca de 2,5 ms por rodada quando pedido, o que só importa para o cálculo gravado.

@@ -4,4 +4,9 @@
     <RootNamespace>Coordin.Engine</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Os testes do motor conferem o caminho preparado (PreparedPlanning) contra o cálculo completo. -->
+    <InternalsVisibleTo Include="Coordin.Engine.Tests" />
+  </ItemGroup>
+
 </Project>
