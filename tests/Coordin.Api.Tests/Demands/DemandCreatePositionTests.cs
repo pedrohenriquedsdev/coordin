@@ -62,19 +62,21 @@ public class DemandCreatePositionTests(TestingApiFactory factory) : IClassFixtur
     {
         var team = await _client.NewTeamAsync();
         var person = await _client.NewPersonAsync(team);
-        var last = await CountAsync(); // n: a última antiga ocupa o ranking n
-        var lastId = (await DemandsAsync()).EnumerateArray().Single(item => item.GetProperty("priorityRank").GetInt32() == last).GetProperty("id").GetGuid();
+        // Uma demanda própria no fim: a posição pedida é o ranking dela, então não depende do que já existe no banco.
+        var seed = await (await _client.PostAsJsonAsync("/api/demands", Body(Unique("Semente"), team, person), Ct)).Content.ReadFromJsonAsync<JsonElement>(Ct);
+        var seedId = seed.GetProperty("id").GetGuid();
+        var position = seed.GetProperty("priorityRank").GetInt32();
 
-        var response = await _client.PostAsJsonAsync("/api/demands", Body(Unique("Na penúltima"), team, person, last), Ct);
+        var response = await _client.PostAsJsonAsync("/api/demands", Body(Unique("Na posição da semente"), team, person, position), Ct);
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var id = (await response.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("id").GetGuid();
         var created = await DemandAsync(id);
-        Assert.Equal(last, created.GetProperty("priorityRank").GetInt32());
-        Assert.Equal(last, created.GetProperty("executionRank").GetInt32());
-        var moved = await DemandAsync(lastId);
-        Assert.Equal(last + 1, moved.GetProperty("priorityRank").GetInt32());
-        Assert.Equal(last + 1, moved.GetProperty("executionRank").GetInt32());
+        Assert.Equal(position, created.GetProperty("priorityRank").GetInt32());
+        Assert.Equal(position, created.GetProperty("executionRank").GetInt32());
+        var moved = await DemandAsync(seedId);
+        Assert.Equal(position + 1, moved.GetProperty("priorityRank").GetInt32());
+        Assert.Equal(position + 1, moved.GetProperty("executionRank").GetInt32());
     }
 
     [Fact]
@@ -123,7 +125,7 @@ public class DemandCreatePositionTests(TestingApiFactory factory) : IClassFixtur
     {
         var team = await _client.NewTeamAsync();
         var person = await _client.NewPersonAsync(team);
-        var body = Body(Unique("Simulada e criada"), team, person, 2);
+        var body = Body(Unique("Simulada e criada"), team, person, 1); // a posição 1 vale mesmo com o banco vazio
 
         var simulated = await (await _client.PostAsJsonAsync("/api/demands/simulate", body, Ct)).Content.ReadFromJsonAsync<JsonElement>(Ct);
         var created = await (await _client.PostAsJsonAsync("/api/demands", body, Ct)).Content.ReadFromJsonAsync<JsonElement>(Ct);
