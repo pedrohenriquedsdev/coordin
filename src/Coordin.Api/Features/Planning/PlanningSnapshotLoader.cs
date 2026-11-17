@@ -73,6 +73,7 @@ public sealed class PlanningSnapshotLoader
             demands,
             assignments,
             settings.ExecutionOrderMode,
-            settings.SafetyMarginPercent);
+            settings.SafetyMarginPercent,
+            []); // as dependências entram na task 3.2
     }
 }

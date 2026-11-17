@@ -97,7 +97,8 @@ public class ForecastRecalculatorTests(TestingApiFactory factory) : IClassFixtur
             [new DemandInput(demand.Id, demand.PriorityRank, demand.ExecutionRank, StartMonday, false, [new DemandPartInput(team.Id, 16m)])],
             [new AssignmentInput(demand.Id, person.Id)],
             ExecutionOrderMode.FollowPriority,
-            20m));
+            20m,
+            []));
         Assert.Equal(byHand.Demands.Single(forecast => forecast.DemandId == demand.Id).ForecastEndDate, stored.ForecastEndDate);
     }
 

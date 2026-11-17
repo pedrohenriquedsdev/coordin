@@ -12,6 +12,10 @@ namespace Coordin.Engine.Planning;
 /// <param name="Assignments">Quem está alocado a qual demanda (DT-12), sem percentual.</param>
 /// <param name="OrderMode">Qual ranking forma a fila de execução (DT-13).</param>
 /// <param name="SafetyMarginPercent">Percentual da margem de segurança, sempre maior ou igual a zero (DT-22).</param>
+/// <param name="Dependencies">
+/// Quem só pode começar depois de quem (RF-18; DT-23), uma aresta por pré-requisito, sem ciclos.
+/// Lista vazia quando não há dependências.
+/// </param>
 public sealed record PlanningSnapshot(
     IReadOnlyList<TeamInput> Teams,
     IReadOnlyList<PersonInput> People,
@@ -20,7 +24,15 @@ public sealed record PlanningSnapshot(
     IReadOnlyList<DemandInput> Demands,
     IReadOnlyList<AssignmentInput> Assignments,
     ExecutionOrderMode OrderMode,
-    decimal SafetyMarginPercent);
+    decimal SafetyMarginPercent,
+    IReadOnlyList<DependencyInput> Dependencies);
+
+/// <summary>
+/// Uma dependência entre demandas inteiras (RF-18): <see cref="DemandId"/> só pode começar depois do
+/// fim previsto, com a margem, de <see cref="PrerequisiteId"/>, mesmo que a data de início registrada
+/// seja anterior.
+/// </summary>
+public sealed record DependencyInput(Guid DemandId, Guid PrerequisiteId);
 
 /// <summary>Um time do setor.</summary>
 public sealed record TeamInput(Guid Id);
