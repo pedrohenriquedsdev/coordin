@@ -17,6 +17,13 @@
     </div>
   }
   @default {
+    @if (store.schedule(); as schedule) {
+      <app-reset-to-priority
+        [mode]="schedule.executionOrderMode"
+        (done)="store.refreshAfterChange()"
+      />
+    }
+
     @if (store.message(); as text) {
       <p role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">{{ text }}</p>
     }

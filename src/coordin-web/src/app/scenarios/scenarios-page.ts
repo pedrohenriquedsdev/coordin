@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { moveInList, MoveDirection } from './scenario-view';
+import { ResetToPriority } from './reset-to-priority';
 import { ScenarioCard } from './scenario-card';
 import { Scenario } from './scenarios';
 import { ScenariosStore } from './scenarios.store';
@@ -14,7 +15,7 @@ const APPLIED_TEXT = 'Ordem de execução alterada. A prioridade registrada não
  */
 @Component({
   selector: 'app-scenarios-page',
-  imports: [ScenarioCard],
+  imports: [ScenarioCard, ResetToPriority],
   providers: [ScenariosStore],
   templateUrl: './scenarios-page.html',
 })

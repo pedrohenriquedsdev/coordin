@@ -4,7 +4,6 @@ import { ApiConfiguration } from '../api/api-configuration';
 import { getSchedule } from '../api/fn/schedule/get-schedule';
 import { applyScenario } from '../api/fn/scenarios/apply-scenario';
 import { getScenarioRecommendations } from '../api/fn/scenarios/get-scenario-recommendations';
-import { resetToPriority } from '../api/fn/scenarios/reset-to-priority';
 import { simulateScenario } from '../api/fn/scenarios/simulate-scenario';
 import { messageFor } from '../core/problems/messages';
 import { readProblem } from '../core/problems/problem';
@@ -122,8 +121,8 @@ export class ScenariosStore {
       body: { executionOrder: [...scenario.executionOrder] },
     }).subscribe({
       next: (response) => {
+        this.refreshAfterChange();
         this.lastApplied.set(mapScenario(response.body));
-        this.afterChange();
       },
       error: (error: unknown) => {
         this.busy.set('idle');
@@ -132,26 +131,14 @@ export class ScenariosStore {
     });
   }
 
-  /** Volta a ordem de execução para a ordem de prioridade (RF-15). Só é chamado depois da confirmação da tela. */
-  resetToPriority(): void {
-    this.busy.set('applying');
-    this.message.set(null);
-    resetToPriority(this.http, this.root).subscribe({
-      next: () => {
-        this.lastApplied.set(null);
-        this.afterChange();
-      },
-      error: (error: unknown) => {
-        this.busy.set('idle');
-        this.message.set(messageFor(readProblem(error), 'Não foi possível voltar à prioridade.'));
-      },
-    });
-  }
-
-  /** Depois de mudar a ordem, os cenários da tela deixam de valer: somem e o cronograma é recarregado. */
-  private afterChange(): void {
+  /**
+   * Depois de mudar a ordem de execução (aprovação ou volta à prioridade), os cenários da tela deixam de valer:
+   * somem, a última aprovação é esquecida e o cronograma é recarregado.
+   */
+  refreshAfterChange(): void {
     this.recommendations.set([]);
     this.simulation.set(null);
+    this.lastApplied.set(null);
     this.searched.set(false);
     this.busy.set('idle');
     this.load();

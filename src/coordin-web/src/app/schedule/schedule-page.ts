@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { formatCalendarDate } from '../core/dates/calendar-date';
 import { deviationLabel, prerequisitesLabel, unpredictableReasonLabel } from '../planning/labels';
 import { ScheduleItem } from '../planning/planning';
+import { ResetToPriority } from '../scenarios/reset-to-priority';
 import { ScheduleStore } from './schedule.store';
 
 /**
@@ -11,7 +12,7 @@ import { ScheduleStore } from './schedule.store';
  */
 @Component({
   selector: 'app-schedule-page',
-  imports: [RouterLink],
+  imports: [RouterLink, ResetToPriority],
   providers: [ScheduleStore],
   templateUrl: './schedule-page.html',
 })

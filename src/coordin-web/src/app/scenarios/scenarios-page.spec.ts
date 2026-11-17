@@ -185,4 +185,29 @@ describe('ScenariosPage', () => {
 
     expect(element().textContent).toContain('A prioridade registrada não mudou.');
   });
+
+  it('shows the warning in the custom mode, and the scenarios are cleared after going back to priority', async () => {
+    fixture.detectChanges();
+    http
+      .expectOne({ method: 'GET', url: '/api/schedule' })
+      .flush({ executionOrderMode: 'Custom', items: [item('a', 'Alfa')] });
+    await settle();
+
+    const find = (label: string) =>
+      [...element().querySelectorAll('button')].find((b) => b.textContent?.trim() === label);
+    expect(element().textContent).toContain('A ordem de execução difere da ordem de prioridade.');
+
+    find('Voltar à ordem de prioridade')?.click();
+    await settle();
+    find('Confirmar')?.click();
+    http
+      .expectOne({ method: 'POST', url: '/api/scenarios/reset-to-priority' })
+      .flush('', { status: 204, statusText: 'No Content' });
+    await settle();
+    await answerSchedule([item('a', 'Alfa')]);
+
+    expect(element().textContent).not.toContain(
+      'A ordem de execução difere da ordem de prioridade.',
+    );
+  });
 });
