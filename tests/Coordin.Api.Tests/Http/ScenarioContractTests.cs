@@ -39,13 +39,37 @@ public class ScenarioContractTests(DevelopmentApiFactory factory) : IClassFixtur
         }
         Assert.Equal(ExpectedOperations.Length, found.Count);
         Assert.All(found.Values, tag => Assert.Equal("Scenarios", tag));
+        Assert.Equal("Demands", FindTag(document, "SimulateDemand"));
 
         var schemas = document.GetProperty("components").GetProperty("schemas");
+        var simulation = schemas.GetProperty("DemandSimulationResponse").GetProperty("properties");
+        foreach (var field in new[] { "isPredictable", "forecastEndDate", "position", "changes", "sectorEndDate", "sectorDeltaDays" })
+        {
+            Assert.True(simulation.TryGetProperty(field, out _), $"Falta o campo {field} em DemandSimulationResponse.");
+        }
+        Assert.True(schemas.GetProperty("DemandRequest").GetProperty("properties").TryGetProperty("position", out _), "Falta o campo position em DemandRequest.");
+
         var scenario = schemas.GetProperty("ScenarioResponse").GetProperty("properties");
         foreach (var field in new[] { "executionOrder", "items", "score", "sectorEndDate", "sectorDeltaDays", "isComparable" })
         {
             Assert.True(scenario.TryGetProperty(field, out _), $"Falta o campo {field} em ScenarioResponse.");
         }
+    }
+
+    private static string? FindTag(JsonElement document, string operationId)
+    {
+        foreach (var path in document.GetProperty("paths").EnumerateObject())
+        {
+            foreach (var operation in path.Value.EnumerateObject())
+            {
+                if (operation.Value.GetProperty("operationId").GetString() == operationId)
+                {
+                    return operation.Value.GetProperty("tags")[0].GetString();
+                }
+            }
+        }
+
+        return null;
     }
 
     [Fact]
@@ -58,6 +82,7 @@ public class ScenarioContractTests(DevelopmentApiFactory factory) : IClassFixtur
             ("POST", "/api/scenarios/simulate"),
             ("POST", "/api/scenarios/apply"),
             ("POST", "/api/scenarios/reset-to-priority"),
+            ("POST", "/api/demands/simulate"),
         };
 
         foreach (var (method, path) in routes)
