@@ -96,7 +96,7 @@ Extrai-se de `DemandEndpoints` para um auxiliar compartilhado (`DemandRanking`, 
 
 ### D12. Documentos aprovados que esta change toca
 
-Propostos ao autor na última task, e só editados com a aprovação dele: (1) TDD 5.3, o formato da resposta de `POST /api/demands/simulate`, o campo `isComparable` do cenário, e as respostas de `apply` (cenário aplicado) e `reset-to-priority` (`204`); (2) DT-18, o código `scenario-violates-dependencies`; (3) DT-26, o valor do orçamento de avaliações medido e a correção da justificativa, que dizia "milissegundos" por avaliação (medido: cerca de 18 ms antes da aceleração). O PRD não muda. Nenhum DT é contrariado: o DT-25 e o DT-26 são seguidos à risca, com o orçamento por medição que o próprio DT-26 prevê.
+Propostos ao autor na última task, e só editados com a aprovação dele: (1) TDD 5.3, o formato da resposta de `POST /api/demands/simulate`, o campo `isComparable` do cenário, e as respostas de `apply` (cenário aplicado) e `reset-to-priority` (`204`); (2) DT-18, o código `scenario-violates-dependencies`; (3) DT-26, o valor do orçamento de avaliações medido e a correção da justificativa, que dizia "milissegundos" por avaliação (medido: cerca de 18 ms antes da aceleração). (4) a linha "Testes .NET (com cobertura)" do TDD 8.6, para excluir a categoria `Performance`, já que o teste de desempenho do RNF-01 não roda sob a instrumentação da cobertura e o CI ganhou, com a aprovação do autor em 2026-11-17, um passo separado para essa categoria. O PRD não muda. Nenhum DT é contrariado: o DT-25 e o DT-26 são seguidos à risca, com o orçamento por medição que o próprio DT-26 prevê.
 
 ## Risks / Trade-offs
 
@@ -148,3 +148,20 @@ A máquina de desenvolvimento tem ruído de 20% a 30% entre execuções (outros 
 | Contagem acumulada de dias úteis no score (avaliador) | menos 0,5 ms por cenário | n/a | n/a |
 
 Leituras: (1) quase todo o ganho vem de **não alocar nem ordenar o consumo diário** (cerca de 10 mil registros por rodada) e de **trocar `LINQ`/dicionários do laço por arrays com a capacidade guardada**; (2) a avaliação de cenário passou de cerca de 11 a 18 ms para cerca de **2,3 ms**; (3) o `Calculate` de uma chamada só **não melhorou**, porque a preparação (validar, classificar, montar as tabelas) e o preenchimento do cache de capacidade, que antes eram diluídos no laço, agora são pagos a cada chamada: isso não afeta a busca, que prepara uma vez, e não piora o que já existia; (4) o consumo continua custando cerca de 2,5 ms por rodada quando pedido, o que só importa para o cálculo gravado.
+
+### 2026-11-17, orçamento da busca (task 3.4)
+
+Planejamento de referência do RNF-01 (15 times, 150 pessoas, 200 demandas, com vários times por demanda e cerca de um quarto das demandas com dependência; `ReferencePlanning` nos testes), na ordem de prioridade, a quente. Cada avaliação dentro da busca custa de 3,0 a 4,6 ms (a simulação sozinha custa cerca de 2,3 ms; o resto é compor a ordem, a chave de memoização e o score).
+
+| Orçamento (avaliações distintas) | Tempo da recomendação | Melhor `score.delta` | Cenários |
+|---|---|---|---|
+| 200 | 0,6 s | −7.672 | 3 |
+| 400 | 1,3 s | −12.099 | 3 |
+| 800 | 3,7 s | −19.462 | 3 |
+| 1.000 (três execuções) | 3,6 s, 4,0 s e 4,3 s | −25.165 (o mesmo nas três) | 3 |
+| 1.600 | 6,5 s | −32.806 | 3 |
+| 3.000 (o valor do DT-26) | **12,9 s** | −43.722 | 3 |
+
+**Decisão:** `ScenarioSearch.EvaluationBudget = 1000`. Cumpre o RNF-01 (menos de 10 s) com folga de 2,4× para o CI, que pode ser mais lento que a máquina de desenvolvimento; 1.200 chegaria a cerca de 5 s, sem essa folga. O teste `ScenarioSearchPerformanceTests` trava o limite de 10 s e passou três vezes seguidas, com o mesmo resultado em toda execução.
+
+**Diferença em relação ao TDD (a propor ao autor na task 7.2, sem editar antes):** o DT-26 prevê até **3.000 avaliações** e justifica com "custo da ordem de milissegundos" por avaliação. Medido, cada avaliação custa cerca de 4 ms depois de acelerar o motor (cerca de 11 a 18 ms antes), e 3.000 levariam 12,9 s. O próprio DT-26 diz que o limite exato "é confirmado por um teste de desempenho com o volume do RNF-01", então o valor passa a **1.000**, e a justificativa precisa trocar "milissegundos" pelo custo medido. A qualidade da busca com menos avaliações é menor (o melhor delta cresce com o orçamento: −25.165 com 1.000 contra −43.722 com 3.000 neste planejamento), o que é o preço de cumprir o RNF-01; o gestor ainda pode simular qualquer sequência (RF-14).

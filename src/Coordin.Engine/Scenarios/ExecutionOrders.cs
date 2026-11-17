@@ -1,3 +1,4 @@
+using Coordin.Engine.Forecasting;
 using Coordin.Engine.Planning;
 
 namespace Coordin.Engine.Scenarios;
@@ -56,5 +57,47 @@ public static class ExecutionOrders
             OrderMode = ExecutionOrderMode.Custom,
             Demands = [.. snapshot.Demands.Select(demand => demand with { ExecutionRank = positionOf[demand.Id] })],
         };
+    }
+
+    /// <summary>
+    /// Os ids das demandas que a busca pode mover, na ordem atual: as abertas e previsíveis. As concluídas e
+    /// as não previsíveis não consomem capacidade nem entram no score, então mudar a posição delas não
+    /// muda resultado nenhum (RF-10; regra inviolável 5).
+    /// </summary>
+    public static IReadOnlyList<Guid> Movable(PlanningSnapshot snapshot, IReadOnlyList<Guid> currentOrder)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+        ArgumentNullException.ThrowIfNull(currentOrder);
+
+        var classification = PredictabilityClassifier.Classify(snapshot);
+        return [.. currentOrder.Where(id => classification[id].Status == DemandStatus.Predictable)];
+    }
+
+    /// <summary>
+    /// A ordem completa em que cada demanda que não é movível fica na <b>mesma posição absoluta</b> que tem
+    /// em <paramref name="currentOrder"/>, e as posições das movíveis são preenchidas, em sequência, com
+    /// <paramref name="movableOrder"/> (design D5).
+    /// </summary>
+    /// <exception cref="ArgumentException">A lista movível não tem exatamente as demandas movíveis da ordem atual.</exception>
+    public static IReadOnlyList<Guid> Compose(IReadOnlyList<Guid> currentOrder, IReadOnlyList<Guid> movableOrder)
+    {
+        ArgumentNullException.ThrowIfNull(currentOrder);
+        ArgumentNullException.ThrowIfNull(movableOrder);
+
+        var movable = movableOrder.ToHashSet();
+        var slots = currentOrder.Count(movable.Contains);
+        if (movable.Count != movableOrder.Count || slots != movableOrder.Count)
+        {
+            throw new ArgumentException("A lista movível precisa ter as demandas movíveis da ordem atual, uma única vez cada.", nameof(movableOrder));
+        }
+
+        var composed = new Guid[currentOrder.Count];
+        var next = 0;
+        for (var index = 0; index < currentOrder.Count; index++)
+        {
+            composed[index] = movable.Contains(currentOrder[index]) ? movableOrder[next++] : currentOrder[index];
+        }
+
+        return composed;
     }
 }
