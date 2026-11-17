@@ -56,7 +56,7 @@ Cada pessoa em `assignedPersonIds` SHALL pertencer a um dos times da demanda; ca
 - **THEN** a resposta é `409` com `code` `person-not-in-demand-teams` e nada é gravado
 
 ### Requirement: Ordem de prioridade única e contínua
-Cada demanda SHALL ter um `priorityRank` único, contínuo a partir de 1. A nova demanda SHALL entrar no fim da ordem de prioridade e no fim da ordem de execução (RF-04; DT-13).
+Cada demanda SHALL ter um `priorityRank` único, contínuo a partir de 1. A nova demanda SHALL entrar no fim da ordem de prioridade e no fim da ordem de execução, a menos que o corpo traga `position` (de 1 a `n + 1`, com `n` o número de demandas): então SHALL entrar nessa posição nas duas ordens, e as demandas dessa posição em diante SHALL descer uma posição (RF-04, RF-16; DT-13).
 
 #### Scenario: Novas demandas entram no fim
 - **WHEN** o gestor cadastra três demandas em sequência
@@ -65,6 +65,14 @@ Cada demanda SHALL ter um `priorityRank` único, contínuo a partir de 1. A nova
 #### Scenario: Cadastros simultâneos
 - **WHEN** 10 demandas são cadastradas ao mesmo tempo
 - **THEN** os rankings resultantes são exatamente 1 a 10, sem repetição e sem falha
+
+#### Scenario: Nova demanda na posição escolhida
+- **WHEN** há três demandas e o gestor cadastra outra com `position` 2
+- **THEN** a nova recebe `priorityRank` 2 e `executionRank` 2, e as duas últimas antigas passam a 3 e 4 nas duas ordens
+
+#### Scenario: Posição fora do intervalo
+- **WHEN** o `position` é 0 ou maior que `n + 1`
+- **THEN** a resposta é `400` com o erro no campo `position` e nada é gravado
 
 ### Requirement: Reordenar a prioridade
 `PUT /api/demands/priority-order` SHALL receber a lista completa dos ids das demandas na nova ordem e gravar os `priorityRank` correspondentes. A lista SHALL conter todas as demandas, sem repetição e sem ids desconhecidos (RF-04).
