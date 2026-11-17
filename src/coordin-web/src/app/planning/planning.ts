@@ -1,6 +1,7 @@
 import { DemandResponse } from '../api/models/demand-response';
 import { ScheduleResponse } from '../api/models/schedule-response';
 import { ScheduleItemResponse } from '../api/models/schedule-item-response';
+import { DemandSimulationResponse } from '../api/models/demand-simulation-response';
 
 /** Uma parte do cronograma: o time, com a estimativa que ele informou (nula = ainda não estimou). */
 export interface ScheduleTeam {
@@ -136,5 +137,48 @@ export function mapDemand(response: DemandResponse): Demand {
     })),
     assignedPersonIds: [...response.assignedPersonIds],
     prerequisiteIds: [...response.prerequisiteIds],
+  };
+}
+
+/** Uma demanda existente que muda de data se a nova entrar (RF-16). As datas são de calendário (texto). */
+export interface DemandChange {
+  readonly demandId: string;
+  readonly title: string;
+  readonly currentForecastEndDate: string;
+  readonly newForecastEndDate: string;
+  readonly deltaDays: number;
+}
+
+/** O impacto de uma nova demanda, simulado sem gravar nada (RF-16). */
+export interface DemandSimulation {
+  readonly isPredictable: boolean;
+  readonly unpredictableReason: string | null;
+  readonly forecastStartDate: string | null;
+  readonly endDateWithoutMargin: string | null;
+  readonly forecastEndDate: string | null;
+  readonly position: number;
+  readonly sectorEndDate: string | null;
+  readonly sectorDeltaDays: number;
+  readonly changes: readonly DemandChange[];
+}
+
+/** Converte a resposta de `POST /api/demands/simulate` para o modelo da tela: os números viram `number`. */
+export function mapDemandSimulation(response: DemandSimulationResponse): DemandSimulation {
+  return {
+    isPredictable: response.isPredictable,
+    unpredictableReason: response.unpredictableReason,
+    forecastStartDate: response.forecastStartDate,
+    endDateWithoutMargin: response.endDateWithoutMargin,
+    forecastEndDate: response.forecastEndDate,
+    position: Number(response.position),
+    sectorEndDate: response.sectorEndDate,
+    sectorDeltaDays: Number(response.sectorDeltaDays),
+    changes: response.changes.map((change) => ({
+      demandId: change.demandId,
+      title: change.title,
+      currentForecastEndDate: change.currentForecastEndDate,
+      newForecastEndDate: change.newForecastEndDate,
+      deltaDays: Number(change.deltaDays),
+    })),
   };
 }
