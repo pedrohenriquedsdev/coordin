@@ -242,4 +242,35 @@ describe('SchedulePage', () => {
     expect(table).toContain('11/12/2026');
     expect(table).toContain('Depende de: Pagamentos');
   });
+
+  it('shows the warning in the custom mode, and goes back to priority only after confirming', async () => {
+    fixture.detectChanges();
+    request().flush({
+      executionOrderMode: 'Custom',
+      items: [item({ executionRank: 2, isOutOfPriorityOrder: true })],
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const find = (label: string) =>
+      [...element().querySelectorAll('button')].find((b) => b.textContent?.trim() === label);
+    expect(element().textContent).toContain('A ordem de execução difere da ordem de prioridade.');
+
+    find('Voltar à ordem de prioridade')?.click();
+    fixture.detectChanges();
+    http.expectNone('/api/scenarios/reset-to-priority');
+
+    find('Confirmar')?.click();
+    http
+      .expectOne({ method: 'POST', url: '/api/scenarios/reset-to-priority' })
+      .flush('', { status: 204, statusText: 'No Content' });
+    await fixture.whenStable();
+    request().flush({ executionOrderMode: 'FollowPriority', items: [item()] });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(element().textContent).not.toContain(
+      'A ordem de execução difere da ordem de prioridade.',
+    );
+  });
 });

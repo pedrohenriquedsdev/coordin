@@ -127,6 +127,7 @@ describe('App', () => {
       expect(anchors.map((a) => a.textContent?.trim())).toEqual([
         'Cronograma',
         'Demandas',
+        'Cenários',
         'Relatório por time',
         'Times e pessoas',
         'Calendário',
@@ -135,6 +136,7 @@ describe('App', () => {
       expect(anchors.map((a) => a.getAttribute('href'))).toEqual([
         '/',
         '/demands',
+        '/scenarios',
         '/reports/teams',
         '/teams',
         '/calendar',
@@ -147,7 +149,7 @@ describe('App', () => {
       await TestBed.inject(Router).navigateByUrl('/calendar');
       await fixture.whenStable();
 
-      const [, , , teams, calendar] = links(element(fixture));
+      const [, , , , teams, calendar] = links(element(fixture));
       expect(calendar.getAttribute('aria-current')).toBe('page');
       expect(teams.hasAttribute('aria-current')).toBe(false);
     });
@@ -166,12 +168,12 @@ describe('App', () => {
       await TestBed.inject(Router).navigateByUrl('/');
       await fixture.whenStable();
 
-      links(element(fixture))[3].click();
+      links(element(fixture))[4].click();
       await fixture.whenStable();
       expect(TestBed.inject(Router).url).toBe('/teams');
       expect(element(fixture).querySelector('main')?.textContent).toContain('Times (');
 
-      links(element(fixture))[4].click();
+      links(element(fixture))[5].click();
       await fixture.whenStable();
       expect(TestBed.inject(Router).url).toBe('/calendar');
       expect(element(fixture).querySelector('main')?.textContent).toContain('Calendário');

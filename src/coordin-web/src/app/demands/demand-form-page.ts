@@ -4,12 +4,19 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { DemandRequest } from '../api/models/demand-request';
 import { messageFor } from '../core/problems/messages';
 import { readProblem } from '../core/problems/problem';
-import { Demand } from '../planning/planning';
+import { formatCalendarDate } from '../core/dates/calendar-date';
+import { deviationLabel, unpredictableReasonLabel } from '../planning/labels';
+import { Demand, DemandSimulation } from '../planning/planning';
+import { parsePosition } from './demand-position';
 import { DemandFormStore } from './demand-form.store';
 
 /** Texto do esforço inválido (RF-06): zero, negativo ou com mais de duas casas. */
 const EFFORT_INVALID = 'O esforço deve ser maior que zero, com no máximo 2 casas decimais.';
 const TITLE_REQUIRED = 'Informe o título da demanda.';
+const SIMULATE_FAILED = 'Não foi possível simular o impacto.';
+
+/** Texto da posição fora do intervalo: de 1 até o número de demandas mais uma (o fim da fila). */
+const positionInvalid = (max: number): string => `A posição deve ser um número de 1 a ${max}.`;
 const TITLE_TOO_LONG = 'O título deve ter no máximo 200 caracteres.';
 
 /** Lê um esforço digitado em horas: `''` é "ainda sem estimativa" (`null`); senão, precisa ser > 0 com até 2 casas. */
@@ -50,6 +57,7 @@ export class DemandFormPage {
     title: ['', Validators.required],
     startDate: [''],
     informedEndDate: [''],
+    position: [''],
   });
 
   /** Times marcados, com o texto das horas de cada um (`''` = sem estimativa). */
@@ -61,6 +69,14 @@ export class DemandFormPage {
   protected readonly message = signal<string | null>(null);
   protected readonly effortError = signal<string | null>(null);
   protected readonly saving = signal(false);
+  /** A simulação mais recente, com a "fotografia" do formulário no instante em que foi pedida. */
+  protected readonly simulation = signal<{ result: DemandSimulation; snapshot: string } | null>(
+    null,
+  );
+  protected readonly simulating = signal(false);
+
+  /** A posição mais alta aceita: uma a mais que o número de demandas, que é o fim da fila (RF-16). */
+  protected readonly maxPosition = computed(() => this.store.candidates().length + 1);
 
   /** As demandas que podem ser pré-requisito: todas, menos esta (uma demanda não depende de si mesma). */
   protected readonly candidates = computed(() =>
@@ -138,23 +154,27 @@ export class DemandFormPage {
     return this.selected()[teamId] ?? '';
   }
 
-  protected save(): void {
+  /**
+   * Lê e valida o formulário e monta o corpo da demanda. Devolve `null` e mostra a mensagem quando algo está
+   * errado. "Salvar" e "Simular impacto" usam este mesmo método, para que o que se simula seja o que se cria.
+   */
+  private buildBody(): DemandRequest | null {
     this.message.set(null);
     this.effortError.set(null);
     if (this.form.controls.title.invalid) {
       this.message.set(TITLE_REQUIRED);
-      return;
+      return null;
     }
 
     const title = this.form.controls.title.value.trim();
     if (title === '') {
       this.message.set(TITLE_REQUIRED);
-      return;
+      return null;
     }
 
     if (title.length > 200) {
       this.message.set(TITLE_TOO_LONG);
-      return;
+      return null;
     }
 
     const teams: DemandRequest['teams'] = [];
@@ -162,13 +182,19 @@ export class DemandFormPage {
       const effort = parseEffort(text);
       if (!effort.valid) {
         this.effortError.set(EFFORT_INVALID);
-        return;
+        return null;
       }
 
       teams.push({ teamId, estimatedEffortHours: effort.value });
     }
 
-    const { startDate, informedEndDate } = this.form.getRawValue();
+    const { startDate, informedEndDate, position } = this.form.getRawValue();
+    const parsed = parsePosition(position, this.maxPosition());
+    if (!parsed.valid) {
+      this.message.set(positionInvalid(this.maxPosition()));
+      return null;
+    }
+
     const body: DemandRequest = {
       title,
       startDate: startDate === '' ? null : startDate,
@@ -177,6 +203,18 @@ export class DemandFormPage {
       assignedPersonIds: this.assignedPersonIds(),
       prerequisiteIds: this.prerequisiteIds(),
     };
+    if (parsed.value !== null) {
+      body.position = parsed.value;
+    }
+
+    return body;
+  }
+
+  protected save(): void {
+    const body = this.buildBody();
+    if (body === null) {
+      return;
+    }
 
     this.saving.set(true);
     this.store.save(body, this.demandId).subscribe({
@@ -191,6 +229,59 @@ export class DemandFormPage {
     });
   }
 
+  /** Pede o impacto da nova demanda (RF-16). Não grava nada: só mostra o resultado na tela. */
+  protected simulate(): void {
+    const body = this.buildBody();
+    if (body === null) {
+      return;
+    }
+
+    const snapshot = this.snapshot();
+    this.simulating.set(true);
+    this.store.simulate(body).subscribe({
+      next: (result) => {
+        this.simulating.set(false);
+        this.simulation.set({ result, snapshot });
+      },
+      error: (error: unknown) => {
+        this.simulating.set(false);
+        this.message.set(messageFor(readProblem(error), SIMULATE_FAILED));
+      },
+    });
+  }
+
+  protected discardSimulation(): void {
+    this.simulation.set(null);
+  }
+
+  /** Verdadeiro quando algum campo mudou depois da simulação: o resultado já não vale para o que será salvo. */
+  protected isStale(): boolean {
+    const simulated = this.simulation();
+    return simulated !== null && simulated.snapshot !== this.snapshot();
+  }
+
+  /** Tudo do formulário de que a simulação depende. Se qualquer parte mudar, o resultado fica velho. */
+  private snapshot(): string {
+    return JSON.stringify({
+      form: this.form.getRawValue(),
+      selected: this.selected(),
+      assigned: this.assignedPersonIds(),
+      prerequisites: this.prerequisiteIds(),
+    });
+  }
+
+  protected dateOf(value: string | null): string {
+    return value ? formatCalendarDate(value) : '—';
+  }
+
+  protected deltaOf(days: number): string {
+    return deviationLabel(days);
+  }
+
+  protected reasonOf(reason: string | null): string {
+    return unpredictableReasonLabel(reason);
+  }
+
   private fill(demand: Demand): void {
     if (demand.completedOn !== null) {
       this.locked.set(true);
@@ -201,6 +292,7 @@ export class DemandFormPage {
       title: demand.title,
       startDate: demand.startDate ?? '',
       informedEndDate: demand.informedEndDate ?? '',
+      position: '',
     });
     this.selected.set(
       Object.fromEntries(

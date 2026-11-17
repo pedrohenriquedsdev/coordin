@@ -3,13 +3,14 @@ import { inject, Injectable, signal } from '@angular/core';
 import { catchError, EMPTY, forkJoin, map, Observable, of, switchMap, tap } from 'rxjs';
 import { ApiConfiguration } from '../api/api-configuration';
 import { createDemand } from '../api/fn/demands/create-demand';
+import { simulateDemand } from '../api/fn/demands/simulate-demand';
 import { getDemand } from '../api/fn/demands/get-demand';
 import { getDemands } from '../api/fn/demands/get-demands';
 import { updateDemand } from '../api/fn/demands/update-demand';
 import { getPeople } from '../api/fn/people/get-people';
 import { getTeams } from '../api/fn/teams/get-teams';
 import { DemandRequest } from '../api/models/demand-request';
-import { Demand, mapDemand } from '../planning/planning';
+import { Demand, DemandSimulation, mapDemand, mapDemandSimulation } from '../planning/planning';
 import { Person, Team } from '../teams/teams.store';
 
 export type FormStatus = 'loading' | 'ready' | 'failed' | 'missing';
@@ -74,6 +75,13 @@ export class DemandFormStore {
         ? createDemand(this.http, this.root, { body })
         : updateDemand(this.http, this.root, { id, body });
     return call.pipe(map(() => undefined));
+  }
+
+  /** Simula o impacto de uma nova demanda (RF-16). A API calcula sem gravar nada. */
+  simulate(body: DemandRequest): Observable<DemandSimulation> {
+    return simulateDemand(this.http, this.root, { body }).pipe(
+      map((response) => mapDemandSimulation(response.body)),
+    );
   }
 
   private fetchDemand(id: string): Observable<Demand> {

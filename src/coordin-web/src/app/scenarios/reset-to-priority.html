@@ -1,0 +1,45 @@
+@if (mode() === 'Custom') {
+  <section
+    aria-label="Ordem de execução fora da prioridade"
+    class="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+  >
+    <p>A ordem de execução difere da ordem de prioridade.</p>
+
+    @if (message(); as text) {
+      <p role="alert" class="mt-2 font-medium text-red-800">{{ text }}</p>
+    }
+
+    @if (confirming()) {
+      <p class="mt-2">
+        As previsões passam a seguir a ordem de prioridade. A prioridade registrada não muda.
+      </p>
+      <div class="mt-2 flex flex-wrap gap-2">
+        <button
+          type="button"
+          (click)="confirm()"
+          [disabled]="busy()"
+          class="rounded-md bg-slate-900 px-3 py-1.5 font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+        >
+          Confirmar
+        </button>
+        <button
+          type="button"
+          (click)="cancel()"
+          [disabled]="busy()"
+          class="rounded-md border border-slate-300 bg-white px-3 py-1.5 font-medium hover:bg-slate-100 disabled:opacity-50"
+        >
+          Cancelar
+        </button>
+      </div>
+    } @else {
+      <button
+        type="button"
+        (click)="ask()"
+        [disabled]="busy()"
+        class="mt-2 rounded-md border border-amber-400 bg-white px-3 py-1.5 font-medium hover:bg-amber-100 disabled:opacity-50"
+      >
+        Voltar à ordem de prioridade
+      </button>
+    }
+  </section>
+}

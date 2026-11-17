@@ -385,6 +385,182 @@ describe('DemandFormPage', () => {
       expect(navigate).toHaveBeenCalledWith('/demands');
     });
   });
+
+  describe('Posição e simulação de impacto (RF-16)', () => {
+    const SIMULATION = {
+      isPredictable: true,
+      unpredictableReason: null,
+      forecastStartDate: '2026-12-01',
+      endDateWithoutMargin: '2026-12-08',
+      forecastEndDate: '2026-12-10',
+      position: '1',
+      sectorEndDate: '2026-12-20',
+      sectorDeltaDays: '2',
+      changes: [
+        {
+          demandId: 'd2',
+          title: 'Relatórios',
+          currentForecastEndDate: '2026-12-10',
+          newForecastEndDate: '2026-12-12',
+          deltaDays: '2',
+        },
+      ],
+    };
+
+    /** Preenche o básico (título e um time com 80 horas) e deixa o formulário pronto para simular. */
+    const fillBasics = (): void => {
+      field('demand-title').value = 'Novo checkout';
+      field('demand-title').dispatchEvent(new Event('input'));
+      checkTeam('t1', true);
+      field('hours-t1').value = '80';
+      field('hours-t1').dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+    };
+
+    const BODY = {
+      title: 'Novo checkout',
+      startDate: null,
+      informedEndDate: null,
+      teams: [{ teamId: 't1', estimatedEffortHours: 80 }],
+      assignedPersonIds: [],
+      prerequisiteIds: [],
+    };
+
+    const simulate = async (response: object = SIMULATION): Promise<TestRequest> => {
+      button('Simular impacto')?.click();
+      const pending = request('POST', '/api/demands/simulate');
+      pending.flush(response);
+      await fixture.whenStable();
+      fixture.detectChanges();
+      return pending;
+    };
+
+    it('sends the position with the demand when it is filled', async () => {
+      await open();
+      fillBasics();
+      field('demand-position').value = '1';
+      field('demand-position').dispatchEvent(new Event('input'));
+
+      button('Salvar demanda')?.click();
+      const create = request('POST', '/api/demands');
+      expect(create.request.body).toEqual({ ...BODY, position: 1 });
+      create.flush({ id: 'd9' }, { status: 201, statusText: 'Created' });
+      await fixture.whenStable();
+    });
+
+    it('refuses a position above the end of the queue, without calling the API', async () => {
+      await open();
+      fillBasics();
+      field('demand-position').value = '2';
+      field('demand-position').dispatchEvent(new Event('input'));
+
+      button('Salvar demanda')?.click();
+      fixture.detectChanges();
+
+      expect(element().textContent).toContain('A posição deve ser um número de 1 a 1.');
+      http.expectNone('/api/demands');
+    });
+
+    it('simulates the impact without saving, and shows the moved demands', async () => {
+      await open();
+      fillBasics();
+      field('demand-position').value = '1';
+      field('demand-position').dispatchEvent(new Event('input'));
+
+      const pending = await simulate();
+
+      expect(pending.request.body).toEqual({ ...BODY, position: 1 });
+      expect(element().textContent).toContain('Impacto da nova demanda');
+      expect(element().textContent).toContain('Posição usada: 1');
+      expect(element().textContent).toContain('Relatórios');
+      expect(element().textContent).toContain('Descartar simulação');
+      http.expectNone('/api/demands');
+    });
+
+    it('says that no existing demand moves when the list of changes is empty', async () => {
+      await open();
+      fillBasics();
+
+      await simulate({ ...SIMULATION, changes: [] });
+
+      expect(element().textContent).toContain('Nenhuma demanda existente muda de data.');
+    });
+
+    it('shows the reason in words when the new demand is not predictable', async () => {
+      await open();
+      fillBasics();
+
+      await simulate({
+        ...SIMULATION,
+        isPredictable: false,
+        unpredictableReason: 'MissingEstimate',
+        forecastEndDate: null,
+      });
+
+      expect(element().textContent).toContain('Falta a estimativa de algum time');
+    });
+
+    it('marks the result as out of date when a field changes after simulating', async () => {
+      await open();
+      fillBasics();
+      await simulate();
+
+      field('demand-title').value = 'Outro título';
+      field('demand-title').dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      expect(element().textContent).toContain('Os dados mudaram desde a simulação');
+      expect(element().textContent).not.toContain('Posição usada');
+    });
+
+    it('discards the simulation and keeps the form as it was', async () => {
+      await open();
+      fillBasics();
+      await simulate();
+
+      button('Descartar simulação')?.click();
+      fixture.detectChanges();
+
+      expect(element().textContent).not.toContain('Impacto da nova demanda');
+      expect(field('demand-title').value).toBe('Novo checkout');
+      http.expectNone('/api/demands');
+    });
+
+    it('keeps the form and shows the message when the simulation fails', async () => {
+      await open();
+      fillBasics();
+      button('Simular impacto')?.click();
+
+      request('POST', '/api/demands/simulate').flush('erro', { status: 500, statusText: 'Erro' });
+      fixture.detectChanges();
+
+      expect(element().textContent).toContain(
+        'Não foi possível concluir agora. Tente novamente em instantes.',
+      );
+      expect(field('demand-title').value).toBe('Novo checkout');
+    });
+
+    it('saves the same body that was simulated', async () => {
+      await open();
+      fillBasics();
+      field('demand-position').value = '1';
+      field('demand-position').dispatchEvent(new Event('input'));
+      const simulated = await simulate();
+
+      button('Salvar demanda')?.click();
+      const create = request('POST', '/api/demands');
+      expect(create.request.body).toEqual(simulated.request.body);
+      create.flush({ id: 'd9' }, { status: 201, statusText: 'Created' });
+      await fixture.whenStable();
+    });
+
+    it('does not offer the position or the simulation when editing a demand', async () => {
+      await open({ id: 'd1' });
+
+      expect(field('demand-position')).toBeNull();
+      expect(button('Simular impacto')).toBeUndefined();
+    });
+  });
 });
 
 describe('parseEffort', () => {
