@@ -51,7 +51,12 @@
                     >
                   }
                 </td>
-                <td class="px-2 py-2 font-medium">{{ item.title }}</td>
+                <td class="px-2 py-2">
+                  <span class="block font-medium">{{ item.title }}</span>
+                  @if (prerequisitesOf(item); as text) {
+                    <span class="block text-xs text-slate-600">{{ text }}</span>
+                  }
+                </td>
                 <td class="px-2 py-2">
                   @for (team of item.teams; track team.teamId) {
                     <span class="block"
@@ -104,6 +109,9 @@
           @for (item of schedule.items; track item.demandId) {
             <li class="rounded-md border border-slate-200 bg-white p-3 text-sm">
               <h3 class="font-semibold">{{ item.priorityRank }}. {{ item.title }}</h3>
+              @if (prerequisitesOf(item); as text) {
+                <p class="text-xs text-slate-600">{{ text }}</p>
+              }
               @if (item.isOutOfPriorityOrder) {
                 <p class="text-xs font-medium text-amber-800">Fora da ordem de prioridade</p>
               }

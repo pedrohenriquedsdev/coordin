@@ -23,6 +23,7 @@ public sealed class PlanningSnapshotBuilder
     private readonly List<HolidayInput> _holidays = [];
     private readonly List<DemandInput> _demands = [];
     private readonly List<AssignmentInput> _assignments = [];
+    private readonly List<DependencyInput> _dependencies = [];
     private ExecutionOrderMode _mode = ExecutionOrderMode.FollowPriority;
     private decimal _marginPercent;
     private int _nextId = 1;
@@ -71,6 +72,13 @@ public sealed class PlanningSnapshotBuilder
         return this;
     }
 
+    /// <summary>A demanda só pode começar depois do fim previsto de cada pré-requisito (RF-18).</summary>
+    public PlanningSnapshotBuilder DependsOn(Guid demandId, params Guid[] prerequisiteIds)
+    {
+        _dependencies.AddRange(prerequisiteIds.Select(prerequisiteId => new DependencyInput(demandId, prerequisiteId)));
+        return this;
+    }
+
     public PlanningSnapshotBuilder AddAbsence(Guid personId, DateOnly start, DateOnly end)
     {
         _absences.Add(new AbsenceInput(personId, start, end));
@@ -95,7 +103,7 @@ public sealed class PlanningSnapshotBuilder
         return this;
     }
 
-    public PlanningSnapshot Build() => new(_teams, _people, _absences, _holidays, _demands, _assignments, _mode, _marginPercent);
+    public PlanningSnapshot Build() => new(_teams, _people, _absences, _holidays, _demands, _assignments, _mode, _marginPercent, _dependencies);
 
     private Guid NextId() => new(_nextId++, 0, 0, [0, 0, 0, 0, 0, 0, 0, 0]);
 }

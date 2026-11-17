@@ -33,6 +33,8 @@ public class CoordinDbContext(DbContextOptions<CoordinDbContext> options)
 
     public DbSet<DemandAssignment> DemandAssignments => Set<DemandAssignment>();
 
+    public DbSet<DemandDependency> DemandDependencies => Set<DemandDependency>();
+
     public DbSet<Forecast> Forecasts => Set<Forecast>();
 
     public DbSet<PlanningSettings> PlanningSettings => Set<PlanningSettings>();

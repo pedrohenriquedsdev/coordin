@@ -12,6 +12,8 @@ export function unpredictableReasonLabel(reason: string | null): string {
       return 'Sem data de início';
     case 'NoCapacity':
       return 'Sem capacidade: falta pessoa alocada ou a capacidade é zero';
+    case 'PrerequisiteUnpredictable':
+      return 'Depende de uma demanda que não tem previsão';
     default:
       return 'Sem previsão';
   }
@@ -36,4 +38,12 @@ export function hoursLabel(value: number | null): string {
   return value === null
     ? 'sem estimativa'
     : `${value.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} h`;
+}
+
+/**
+ * A linha "Depende de: A, B" do cronograma (RF-18), ou `null` quando a demanda não tem pré-requisitos.
+ * Os títulos vêm na ordem da API, que já é a de prioridade do pré-requisito.
+ */
+export function prerequisitesLabel(titles: readonly string[]): string | null {
+  return titles.length === 0 ? null : `Depende de: ${titles.join(', ')}`;
 }

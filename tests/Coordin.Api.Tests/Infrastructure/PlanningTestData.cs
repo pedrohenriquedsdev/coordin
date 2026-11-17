@@ -15,11 +15,15 @@ public static class PlanningTestData
     /// <summary>Lê uma data de calendário no formato da API (yyyy-MM-dd), sem depender da cultura.</summary>
     public static DateOnly ParseDate(string text) => DateOnly.ParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-    /// <summary>Apaga todas as demandas (e, em cascata, partes, alocações e previsões) da classe de teste.</summary>
+    /// <summary>
+    /// Apaga todas as demandas (e, em cascata, partes, alocações e previsões). As dependências saem antes:
+    /// o banco não exclui um pré-requisito enquanto outra demanda depender dele (RESTRICT, RF-18).
+    /// </summary>
     public static async Task ClearDemandsAsync(CoordinApiFactory factory)
     {
         await using var scope = factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<CoordinDbContext>();
+        await db.DemandDependencies.ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         await db.Demands.ExecuteDeleteAsync(TestContext.Current.CancellationToken);
     }
 

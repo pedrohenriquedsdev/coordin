@@ -21,6 +21,7 @@ export type { PersonResponse } from './models/person-response';
 export type { PriorityOrderRequest } from './models/priority-order-request';
 export type { ProblemDetails } from './models/problem-details';
 export type { ReportDemandResponse } from './models/report-demand-response';
+export type { ScheduleDependencyResponse } from './models/schedule-dependency-response';
 export type { ScheduleItemResponse } from './models/schedule-item-response';
 export type { ScheduleResponse } from './models/schedule-response';
 export type { ScheduleTeamResponse } from './models/schedule-team-response';

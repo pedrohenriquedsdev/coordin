@@ -242,4 +242,108 @@ public class ScheduleEndpointsTests(TestingApiFactory factory) : IClassFixture<T
         var db = scope.ServiceProvider.GetRequiredService<CoordinDbContext>();
         await db.Demands.Where(demand => demand.Id == demandId).ExecuteUpdateAsync(setters => setters.SetProperty(demand => demand.ExecutionRank, rank), Ct);
     }
+
+    /// <summary>Corpo com <c>prerequisiteIds</c> (RF-18), uma pessoa de 8 h e início na segunda-feira de teste.</summary>
+    private static object BodyWithPrerequisites(string title, Guid team, Guid person, decimal? effort, params Guid[] prerequisites) => new
+    {
+        title,
+        startDate = PlanningTestData.StartMonday,
+        teams = new[] { new { teamId = team, estimatedEffortHours = effort } },
+        assignedPersonIds = new[] { person },
+        prerequisiteIds = prerequisites,
+    };
+
+    private static DateOnly? ForecastStart(JsonElement item) => DateOf(item, "forecastStartDate");
+
+    [Fact]
+    public async Task Item_ListsItsPrerequisitesWithTitles()
+    {
+        var team = await _client.NewTeamAsync();
+        var person = await _client.NewPersonAsync(team);
+        var a = await CreateAsync(BodyWithPrerequisites("Pré-requisito A", team, person, 8m));
+        var b = await CreateAsync(BodyWithPrerequisites("Dependente B", team, person, 8m, a));
+
+        var prerequisites = (await ItemAsync(b)).GetProperty("prerequisites");
+
+        Assert.Equal(1, prerequisites.GetArrayLength());
+        Assert.Equal(a, prerequisites[0].GetProperty("demandId").GetGuid());
+        Assert.Equal("Pré-requisito A", prerequisites[0].GetProperty("title").GetString());
+    }
+
+    [Fact]
+    public async Task Item_WithoutPrerequisites_HasAnEmptyList()
+    {
+        var team = await _client.NewTeamAsync();
+        var person = await _client.NewPersonAsync(team);
+        var id = await CreateAsync(BodyWithPrerequisites("Sozinha", team, person, 8m));
+
+        Assert.Equal(0, (await ItemAsync(id)).GetProperty("prerequisites").GetArrayLength());
+    }
+
+    [Fact]
+    public async Task Item_WhosePrerequisiteIsUnpredictable_HasThePrerequisiteReason_AndNoDates()
+    {
+        var team = await _client.NewTeamAsync();
+        var person = await _client.NewPersonAsync(team);
+        var a = await CreateAsync(BodyWithPrerequisites("Sem estimativa", team, person, null));
+        var b = await CreateAsync(BodyWithPrerequisites("Dependente", team, person, 8m, a));
+
+        var item = await ItemAsync(b);
+
+        Assert.False(item.GetProperty("isPredictable").GetBoolean());
+        Assert.Equal("PrerequisiteUnpredictable", item.GetProperty("unpredictableReason").GetString());
+        Assert.Null(DateOf(item, "forecastStartDate"));
+        Assert.Null(DateOf(item, "forecastEndDate"));
+    }
+
+    [Fact]
+    public async Task Item_WhoseStartWasPushedByThePrerequisite_ShowsTheLaterForecastStart()
+    {
+        var team = await _client.NewTeamAsync();
+        var personA = await _client.NewPersonAsync(team);
+        var personB = await _client.NewPersonAsync(team);
+        var a = await CreateAsync(BodyWithPrerequisites("A", team, personA, 16m)); // dois dias úteis
+        var b = await CreateAsync(BodyWithPrerequisites("B", team, personB, 8m, a)); // mesmo início registrado
+
+        var prerequisite = await ItemAsync(a);
+        var dependent = await ItemAsync(b);
+
+        Assert.Equal(PlanningTestData.StartMonday, DateOf(dependent, "startDate"));
+        Assert.True(ForecastStart(dependent) > DateOf(prerequisite, "forecastEndDate"));
+    }
+
+    [Fact]
+    public async Task AddingThenRemovingADependency_RecalculatesTheSchedule_InTheSameWriteResponse()
+    {
+        var team = await _client.NewTeamAsync();
+        var personA = await _client.NewPersonAsync(team);
+        var personB = await _client.NewPersonAsync(team);
+        var a = await CreateAsync(BodyWithPrerequisites("A", team, personA, 16m));
+        var b = await CreateAsync(BodyWithPrerequisites("B", team, personB, 8m));
+        Assert.Equal(PlanningTestData.StartMonday, ForecastStart(await ItemAsync(b)));
+
+        var add = await _client.PutAsJsonAsync($"/api/demands/{b}", BodyWithPrerequisites("B", team, personB, 8m, a), Ct);
+        Assert.Equal(HttpStatusCode.OK, add.StatusCode);
+        Assert.True(ForecastStart(await ItemAsync(b)) > DateOf(await ItemAsync(a), "forecastEndDate"));
+
+        var remove = await _client.PutAsJsonAsync($"/api/demands/{b}", BodyWithPrerequisites("B", team, personB, 8m), Ct);
+        Assert.Equal(HttpStatusCode.OK, remove.StatusCode);
+        Assert.Equal(PlanningTestData.StartMonday, ForecastStart(await ItemAsync(b)));
+    }
+
+    [Fact]
+    public async Task RejectedCycle_ChangesNoForecast()
+    {
+        var team = await _client.NewTeamAsync();
+        var personA = await _client.NewPersonAsync(team);
+        var personB = await _client.NewPersonAsync(team);
+        var a = await CreateAsync(BodyWithPrerequisites("A", team, personA, 16m));
+        var b = await CreateAsync(BodyWithPrerequisites("B", team, personB, 8m, a)); // B espera A
+        var before = (await ScheduleAsync()).GetProperty("items").Clone();
+
+        var response = await _client.PutAsJsonAsync($"/api/demands/{a}", BodyWithPrerequisites("A", team, personA, 16m, b), Ct);
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal(before.ToString(), (await ScheduleAsync()).GetProperty("items").ToString());
+    }
 }

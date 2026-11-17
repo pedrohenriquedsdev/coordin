@@ -32,6 +32,7 @@ function item(overrides: Record<string, unknown> = {}) {
     baselineEndDate: null,
     baselineDeviationDays: null,
     forecastDeviationDays: null,
+    prerequisites: [],
     ...overrides,
   };
 }
@@ -181,5 +182,64 @@ describe('SchedulePage', () => {
     const cards = element().querySelector('[aria-label="Cronograma em cartões"]');
     expect(cards?.querySelector('h3')?.textContent).toContain('1. Checkout');
     expect(cards?.textContent).toContain('Com margem: 10/12/2026');
+  });
+
+  it('shows the prerequisites in the table and in the cards', async () => {
+    fixture.detectChanges();
+    await answer([
+      item({
+        prerequisites: [
+          { demandId: 'd2', title: 'Pagamentos' },
+          { demandId: 'd3', title: 'Login' },
+        ],
+      }),
+    ]);
+
+    const table = element().querySelector('[aria-label="Cronograma em tabela"]')?.textContent ?? '';
+    const cards =
+      element().querySelector('[aria-label="Cronograma em cartões"]')?.textContent ?? '';
+    expect(table).toContain('Depende de: Pagamentos, Login');
+    expect(cards).toContain('Depende de: Pagamentos, Login');
+  });
+
+  it('shows no "Depende de" line for a demand without prerequisites', async () => {
+    fixture.detectChanges();
+    await answer([item()]);
+
+    expect(element().textContent).not.toContain('Depende de:');
+  });
+
+  it('shows the prerequisite reason and no invented dates', async () => {
+    fixture.detectChanges();
+    await answer([
+      item({
+        isPredictable: false,
+        unpredictableReason: 'PrerequisiteUnpredictable',
+        forecastStartDate: null,
+        endDateWithoutMargin: null,
+        forecastEndDate: null,
+        prerequisites: [{ demandId: 'd2', title: 'Pagamentos' }],
+      }),
+    ]);
+
+    const table = element().querySelector('[aria-label="Cronograma em tabela"]')?.textContent ?? '';
+    expect(table).toContain('Depende de uma demanda que não tem previsão');
+    expect(table).toContain('Depende de: Pagamentos');
+    expect(table).not.toContain('Com margem');
+  });
+
+  it('keeps the prerequisite line when the forecast start is pushed later than the registered start', async () => {
+    fixture.detectChanges();
+    await answer([
+      item({
+        startDate: '2026-12-01',
+        forecastStartDate: '2026-12-11',
+        prerequisites: [{ demandId: 'd2', title: 'Pagamentos' }],
+      }),
+    ]);
+
+    const table = element().querySelector('[aria-label="Cronograma em tabela"]')?.textContent ?? '';
+    expect(table).toContain('11/12/2026');
+    expect(table).toContain('Depende de: Pagamentos');
   });
 });

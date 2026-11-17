@@ -13,7 +13,7 @@ public enum DemandStatus
     Unpredictable,
 }
 
-/// <summary>Por que uma demanda não é previsível; quando mais de um se aplica vale o primeiro (RF-10).</summary>
+/// <summary>Por que uma demanda não é previsível; quando mais de um se aplica vale o primeiro, na ordem do enum (RF-10).</summary>
 public enum UnpredictableReason
 {
     /// <summary>Sem data de início.</summary>
@@ -24,6 +24,12 @@ public enum UnpredictableReason
 
     /// <summary>Alguma parte sem pessoa alocada, só com capacidade zero, ou que não termina em 5 anos.</summary>
     NoCapacity,
+
+    /// <summary>
+    /// Algum pré-requisito (direto ou indireto) não tem previsão, então esta demanda não tem como
+    /// começar (RF-18). Só vale quando a demanda não tem problema próprio.
+    /// </summary>
+    PrerequisiteUnpredictable,
 }
 
 /// <summary>

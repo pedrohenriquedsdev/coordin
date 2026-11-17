@@ -8,17 +8,24 @@ namespace Coordin.Engine.Forecasting;
 /// primeira parte elegível da sua fila (na ordem de execução) e a sobra vai para a próxima parte.
 /// A parte de um time termina quando o esforço restante chega a zero; a demanda termina quando
 /// termina a última parte. Cada time trabalha só na sua parte, então adicionar um time nunca divide
-/// o prazo automaticamente (regra inviolável 4).
+/// o prazo automaticamente (regra inviolável 4). Uma parte só é elegível quando os pré-requisitos da
+/// sua demanda já terminaram e o dia é posterior ao fim, com margem, de todos eles (RF-18; DT-23).
 /// </summary>
 internal static class ForecastSimulator
 {
+    /// <summary>
+    /// Como uma demanda terminou. A margem é calculada aqui, no dia em que ela termina, porque os
+    /// dependentes esperam o fim <b>com</b> margem (DT-23), e o resultado final reaproveita estes valores.
+    /// </summary>
+    internal sealed record FinishedDemand(DateOnly Start, DateOnly End, int MarginBusinessDays, DateOnly EndWithMargin);
+
     /// <summary>O resultado de uma rodada da simulação.</summary>
     internal sealed record Outcome(
-        IReadOnlyDictionary<Guid, (DateOnly Start, DateOnly End)> Finished,
+        IReadOnlyDictionary<Guid, FinishedDemand> Finished,
         IReadOnlySet<Guid> Unfinished,
         IReadOnlyList<ConsumedHours> Consumed);
 
-    private sealed class PartState(Guid demandId, Guid teamId, DateOnly startDate, decimal remaining)
+    private sealed class PartState(Guid demandId, Guid teamId, DateOnly startDate, decimal remaining, IReadOnlyList<Guid> prerequisites)
     {
         public Guid DemandId { get; } = demandId;
 
@@ -27,6 +34,9 @@ internal static class ForecastSimulator
         public DateOnly StartDate { get; } = startDate;
 
         public decimal Remaining { get; set; } = remaining;
+
+        /// <summary>Os pré-requisitos da demanda que ainda precisam terminar (os concluídos não entram).</summary>
+        public IReadOnlyList<Guid> Prerequisites { get; } = prerequisites;
     }
 
     private sealed class PersonQueue(Guid personId, List<PartState> parts)
@@ -49,16 +59,23 @@ internal static class ForecastSimulator
         var demands = snapshot.Demands.Where(demand => included.Contains(demand.Id)).ToList();
         if (demands.Count == 0)
         {
-            return new Outcome(new Dictionary<Guid, (DateOnly, DateOnly)>(), new HashSet<Guid>(), []);
+            return new Outcome(new Dictionary<Guid, FinishedDemand>(), new HashSet<Guid>(), []);
         }
+
+        // Só espera quem está na simulação: pré-requisito concluído está cumprido, e a classificação já
+        // tirou do jogo os dependentes de quem não tem previsão.
+        var prerequisitesByDemand = snapshot.Dependencies
+            .Where(dependency => included.Contains(dependency.PrerequisiteId))
+            .ToLookup(dependency => dependency.DemandId, dependency => dependency.PrerequisiteId);
 
         var parts = new Dictionary<(Guid DemandId, Guid TeamId), PartState>();
         var openParts = new Dictionary<Guid, int>();
         foreach (var demand in demands)
         {
+            var prerequisites = prerequisitesByDemand[demand.Id].Order().ToList();
             foreach (var part in demand.Parts)
             {
-                parts[(demand.Id, part.TeamId)] = new PartState(demand.Id, part.TeamId, demand.StartDate!.Value, part.EstimatedEffortHours!.Value);
+                parts[(demand.Id, part.TeamId)] = new PartState(demand.Id, part.TeamId, demand.StartDate!.Value, part.EstimatedEffortHours!.Value, prerequisites);
             }
 
             openParts[demand.Id] = demand.Parts.Count;
@@ -66,7 +83,7 @@ internal static class ForecastSimulator
 
         var queues = BuildQueues(snapshot, demands, included, parts);
         var firstWorked = new Dictionary<Guid, DateOnly>();
-        var finished = new Dictionary<Guid, (DateOnly Start, DateOnly End)>();
+        var finished = new Dictionary<Guid, FinishedDemand>();
         var consumed = new List<ConsumedHours>();
 
         var earliestStart = demands.Min(demand => demand.StartDate!.Value);
@@ -88,7 +105,7 @@ internal static class ForecastSimulator
                 for (var index = queue.Head; index < queue.Parts.Count && hours > 0m; index++)
                 {
                     var part = queue.Parts[index];
-                    if (!IsEligible(part, day))
+                    if (!IsEligible(part, day, finished))
                     {
                         continue;
                     }
@@ -104,7 +121,9 @@ internal static class ForecastSimulator
                         partsLeft--;
                         if (--openParts[part.DemandId] == 0)
                         {
-                            finished[part.DemandId] = (firstWorked[part.DemandId], day);
+                            var start = firstWorked[part.DemandId];
+                            var (marginDays, endWithMargin) = SafetyMargin.Apply(start, day, snapshot.SafetyMarginPercent, calendar);
+                            finished[part.DemandId] = new FinishedDemand(start, day, marginDays, endWithMargin);
                         }
                     }
                 }
@@ -116,11 +135,17 @@ internal static class ForecastSimulator
     }
 
     /// <summary>
-    /// Regra de elegibilidade de uma parte em um dia: já começou e ainda tem esforço. É o único lugar
-    /// onde a change de dependências acrescentará "os pré-requisitos já terminaram" (DT-23).
+    /// Regra de elegibilidade de uma parte em um dia: já começou, ainda tem esforço e os pré-requisitos
+    /// da demanda já terminaram, com o dia posterior ao fim <b>com margem</b> de cada um (DT-23). O fim
+    /// com margem nunca é anterior ao dia em que a demanda terminou, então um dependente nunca fica
+    /// elegível no mesmo dia do pré-requisito, qualquer que seja a ordem em que as pessoas são
+    /// percorridas: o resultado não depende dessa ordem (RNF-02). O dia seguinte é o próximo dia útil
+    /// porque a simulação só visita dias úteis.
     /// </summary>
-    private static bool IsEligible(PartState part, DateOnly day) =>
-        part.Remaining > 0m && part.StartDate <= day;
+    private static bool IsEligible(PartState part, DateOnly day, Dictionary<Guid, FinishedDemand> finished) =>
+        part.Remaining > 0m
+        && part.StartDate <= day
+        && part.Prerequisites.All(id => finished.TryGetValue(id, out var prerequisite) && day > prerequisite.EndWithMargin);
 
     private static void SkipFinishedHead(PersonQueue queue)
     {

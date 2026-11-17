@@ -7,7 +7,10 @@ namespace Coordin.Engine.Planning;
 /// </summary>
 public static class PlanningSnapshotValidator
 {
-    /// <exception cref="ArgumentException">Referência inexistente, repetição de <c>Id</c> ou dado incoerente.</exception>
+    /// <exception cref="ArgumentException">
+    /// Referência inexistente, repetição de <c>Id</c> ou dado incoerente, incluindo dependência entre
+    /// demandas que cita uma demanda fora do snapshot, está repetida ou forma um ciclo (RF-18).
+    /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">Capacidade negativa, esforço menor ou igual a zero ou margem negativa.</exception>
     public static void Validate(PlanningSnapshot snapshot)
     {
@@ -59,6 +62,18 @@ public static class PlanningSnapshotValidator
                 "A pessoa alocada não é de nenhum dos times da demanda.");
             Require(seenAssignments.Add((assignment.DemandId, assignment.PersonId)), "Alocação repetida.");
         }
+
+        var seenDependencies = new HashSet<(Guid, Guid)>();
+        foreach (var dependency in snapshot.Dependencies)
+        {
+            Require(demandIds.Contains(dependency.DemandId), "Dependência de uma demanda que não está no snapshot.");
+            Require(demandIds.Contains(dependency.PrerequisiteId), "Dependência de um pré-requisito que não está no snapshot.");
+            Require(seenDependencies.Add((dependency.DemandId, dependency.PrerequisiteId)), "Dependência repetida.");
+        }
+
+        Require(
+            DependencyGraph.FindCycle(demandIds, snapshot.Dependencies) is null,
+            "As dependências entre as demandas formam um ciclo.");
     }
 
     private static HashSet<Guid> UniqueIds(IEnumerable<Guid> ids, string what)

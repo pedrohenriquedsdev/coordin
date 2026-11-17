@@ -1,7 +1,7 @@
 # TDD — Coordin
 
-- **Status:** aprovado (2026-11-11); hospedagem (DT-09) decidida em 2026-11-12, com o provedor escolhido na change 7. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23. Ajuste em 2026-11-12, decorrente do PRD: RF-17 como Must no roadmap, validação por simulação no produto (RF-24, DT-37) e roadmap com 13 changes. Ajuste em 2026-11-12, na change 1: endpoint de saúde `GET /api/health` (seção 5.2)
-- **Última atualização:** 2026-11-16
+- **Status:** aprovado (2026-11-11); hospedagem (DT-09) decidida em 2026-11-12, com o provedor escolhido na change 7. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23. Ajuste em 2026-11-12, decorrente do PRD: RF-17 como Must no roadmap, validação por simulação no produto (RF-24, DT-37) e roadmap com 13 changes. Ajuste em 2026-11-12, na change 1: endpoint de saúde `GET /api/health` (seção 5.2). Ajuste em 2026-11-17, na change 8: campo `prerequisiteIds` no contrato da demanda, `prerequisites` no cronograma (seção 5.3) e código `demand-has-dependents` (DT-18)
+- **Última atualização:** 2026-11-17
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
 ---
@@ -405,12 +405,12 @@ A conta de acesso do gestor usa as tabelas padrão do ASP.NET Core Identity (`As
     { "teamId": "…", "estimatedEffortHours": null }
   ],
   "assignedPersonIds": ["…", "…"],
-  "prerequisiteDemandIds": ["…"],
+  "prerequisiteIds": ["…"],
   "estimateChangeReason": null
 }
 ```
 
-Na criação, a demanda entra no fim da ordem de prioridade (e da de execução, no modo `Custom`). `estimatedEffortHours: null` significa "time ainda não estimou".
+Na criação, a demanda entra no fim da ordem de prioridade (e da de execução, no modo `Custom`). `estimatedEffortHours: null` significa "time ainda não estimou". `prerequisiteIds` lista as demandas de que esta depende (RF-18): a lista enviada substitui a anterior, e a ausência do campo equivale a nenhum pré-requisito (nome ajustado de `prerequisiteDemandIds` na change `demand-dependencies`, para seguir o padrão de `assignedPersonIds`; a resposta da demanda devolve o mesmo campo).
 
 **Cronograma (`GET /api/schedule`).**
 
@@ -429,13 +429,14 @@ Na criação, a demanda entra no fim da ordem de prioridade (e da de execução,
       "endDateWithoutMargin": "2026-12-14",
       "forecastEndDate": "2026-12-16",
       "informedEndDate": "2026-12-20", "exceedsInformedEndDate": false,
-      "completedOn": null
+      "completedOn": null,
+      "prerequisites": [{ "demandId": "…", "title": "…" }]
     }
   ]
 }
 ```
 
-`unpredictableReason` assume um de: `MissingEstimate`, `MissingStartDate`, `NoCapacity`, `PrerequisiteUnpredictable`.
+`unpredictableReason` assume um de: `MissingEstimate`, `MissingStartDate`, `NoCapacity`, `PrerequisiteUnpredictable`. `prerequisites` traz o id e o título de cada pré-requisito da demanda, na ordem de prioridade deles, e é uma lista vazia quando não há (acréscimo da change `demand-dependencies`, para a tela mostrar "Depende de").
 
 **Cenário (recomendado ou simulado).**
 
@@ -511,7 +512,7 @@ Erros: `409 validation-current-plan-missing` (plano atual não guardado), `409 v
 - **Alternativas consideradas:**
   - *Problem Details com status adequado e uma extensão `code`:* padrão do ASP.NET Core, mensagem para o usuário em `detail`, e um código estável para o front tratar.
   - *Formato de erro próprio:* mais liberdade, menos padronização.
-- **Decisão:** `400` com `errors` por campo para validação; `404` para recurso inexistente; `409` para conflito de regra de negócio, com `code` estável, por exemplo `dependency-cycle`, `team-has-people`, `team-name-taken`, `holiday-date-taken`, `person-has-open-assignments`, `completed-demand-locked`, `person-not-in-demand-teams` (`team-name-taken` e `holiday-date-taken` acrescentados na change `capacity-registry`; `team-has-demands` acrescentado na change `demand-planning`, para o time que faz parte de demandas). `detail` em português.
+- **Decisão:** `400` com `errors` por campo para validação; `404` para recurso inexistente; `409` para conflito de regra de negócio, com `code` estável, por exemplo `dependency-cycle`, `team-has-people`, `team-name-taken`, `holiday-date-taken`, `person-has-open-assignments`, `completed-demand-locked`, `person-not-in-demand-teams` (`team-name-taken` e `holiday-date-taken` acrescentados na change `capacity-registry`; `team-has-demands` acrescentado na change `demand-planning`, para o time que faz parte de demandas; `demand-has-dependents` acrescentado na change `demand-dependencies`, para a demanda que é pré-requisito de outra e por isso não pode ser excluída). `detail` em português.
 - **Justificativa:** um formato só para tratar no front e mensagens já prontas para exibir.
 - **Atende:** RF-06, RF-18, RNF-07.
 

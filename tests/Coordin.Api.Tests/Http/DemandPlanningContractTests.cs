@@ -72,4 +72,32 @@ public class DemandPlanningContractTests(DevelopmentApiFactory factory) : IClass
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
+
+    [Fact]
+    public async Task TheDependencyFields_AreInTheContract_AndTheConflictsAreDocumented()
+    {
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/openapi/v1.json", TestContext.Current.CancellationToken);
+        var document = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
+
+        var schemas = document.GetProperty("components").GetProperty("schemas");
+        Assert.True(schemas.GetProperty("DemandRequest").GetProperty("properties").TryGetProperty("prerequisiteIds", out _));
+        Assert.True(schemas.GetProperty("DemandResponse").GetProperty("properties").TryGetProperty("prerequisiteIds", out _));
+        Assert.True(schemas.GetProperty("ScheduleItemResponse").GetProperty("properties").TryGetProperty("prerequisites", out _));
+
+        // Os 409 de dependência aparecem nas operações que podem devolvê-los.
+        var operations = new Dictionary<string, JsonElement>();
+        foreach (var path in document.GetProperty("paths").EnumerateObject())
+        {
+            foreach (var operation in path.Value.EnumerateObject())
+            {
+                operations[operation.Value.GetProperty("operationId").GetString()!] = operation.Value;
+            }
+        }
+
+        Assert.True(operations["UpdateDemand"].GetProperty("responses").TryGetProperty("409", out _));
+        Assert.True(operations["CreateDemand"].GetProperty("responses").TryGetProperty("409", out _));
+        Assert.True(operations["DeleteDemand"].GetProperty("responses").TryGetProperty("409", out _));
+    }
 }

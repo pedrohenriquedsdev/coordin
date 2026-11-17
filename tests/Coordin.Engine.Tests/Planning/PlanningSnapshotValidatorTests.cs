@@ -169,4 +169,77 @@ public class PlanningSnapshotValidatorTests
 
         Assert.Throws<ArgumentException>(() => PlanningSnapshotValidator.Validate(builder.Build()));
     }
+
+    private static (PlanningSnapshotBuilder Builder, Guid A, Guid B, Guid C) ThreeDemands()
+    {
+        var builder = new PlanningSnapshotBuilder();
+        var team = builder.AddTeam();
+        var a = builder.AddDemand(Day.Monday, [(team, 8m)]);
+        var b = builder.AddDemand(Day.Monday, [(team, 8m)]);
+        var c = builder.AddDemand(Day.Monday, [(team, 8m)]);
+        return (builder, a, b, c);
+    }
+
+    [Fact]
+    public void ValidChainOfDependencies_IsAccepted()
+    {
+        var (builder, a, b, c) = ThreeDemands();
+        builder.DependsOn(b, a).DependsOn(c, b);
+
+        PlanningSnapshotValidator.Validate(builder.Build());
+    }
+
+    [Fact]
+    public void DependencyOfAnUnknownDemand_Throws()
+    {
+        var (builder, _, b, _) = ThreeDemands();
+        builder.DependsOn(Guid.NewGuid(), b);
+
+        Assert.Throws<ArgumentException>(() => PlanningSnapshotValidator.Validate(builder.Build()));
+    }
+
+    [Fact]
+    public void DependencyOnAnUnknownPrerequisite_Throws()
+    {
+        var (builder, a, _, _) = ThreeDemands();
+        builder.DependsOn(a, Guid.NewGuid());
+
+        Assert.Throws<ArgumentException>(() => PlanningSnapshotValidator.Validate(builder.Build()));
+    }
+
+    [Fact]
+    public void RepeatedDependency_Throws()
+    {
+        var (builder, a, b, _) = ThreeDemands();
+        builder.DependsOn(b, a).DependsOn(b, a);
+
+        Assert.Throws<ArgumentException>(() => PlanningSnapshotValidator.Validate(builder.Build()));
+    }
+
+    [Fact]
+    public void DemandThatDependsOnItself_Throws()
+    {
+        var (builder, a, _, _) = ThreeDemands();
+        builder.DependsOn(a, a);
+
+        Assert.Throws<ArgumentException>(() => PlanningSnapshotValidator.Validate(builder.Build()));
+    }
+
+    [Fact]
+    public void DirectDependencyCycle_Throws()
+    {
+        var (builder, a, b, _) = ThreeDemands();
+        builder.DependsOn(a, b).DependsOn(b, a);
+
+        Assert.Throws<ArgumentException>(() => PlanningSnapshotValidator.Validate(builder.Build()));
+    }
+
+    [Fact]
+    public void IndirectDependencyCycle_Throws()
+    {
+        var (builder, a, b, c) = ThreeDemands();
+        builder.DependsOn(a, b).DependsOn(b, c).DependsOn(c, a);
+
+        Assert.Throws<ArgumentException>(() => PlanningSnapshotValidator.Validate(builder.Build()));
+    }
 }

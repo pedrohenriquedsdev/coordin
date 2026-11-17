@@ -32,5 +32,11 @@ public sealed class Demand
 
     public ICollection<DemandAssignment> Assignments { get; } = [];
 
+    /// <summary>As arestas em que esta demanda é a que espera (os pré-requisitos dela).</summary>
+    public ICollection<DemandDependency> Prerequisites { get; } = [];
+
+    /// <summary>As arestas em que esta demanda é o pré-requisito (quem espera por ela).</summary>
+    public ICollection<DemandDependency> Dependents { get; } = [];
+
     public Forecast? Forecast { get; set; }
 }

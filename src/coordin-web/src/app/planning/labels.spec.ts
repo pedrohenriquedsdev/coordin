@@ -1,11 +1,14 @@
-import { deviationLabel, unpredictableReasonLabel } from './labels';
+import { deviationLabel, prerequisitesLabel, unpredictableReasonLabel } from './labels';
 
 describe('unpredictableReasonLabel', () => {
-  it('names each of the three reasons in Portuguese', () => {
+  it('names each of the four reasons in Portuguese', () => {
     expect(unpredictableReasonLabel('MissingEstimate')).toBe('Falta a estimativa de algum time');
     expect(unpredictableReasonLabel('MissingStartDate')).toBe('Sem data de início');
     expect(unpredictableReasonLabel('NoCapacity')).toBe(
       'Sem capacidade: falta pessoa alocada ou a capacidade é zero',
+    );
+    expect(unpredictableReasonLabel('PrerequisiteUnpredictable')).toBe(
+      'Depende de uma demanda que não tem previsão',
     );
   });
 
@@ -24,5 +27,19 @@ describe('deviationLabel', () => {
     [-2, '2 dias antes'],
   ])('labels %i as "%s"', (days, expected) => {
     expect(deviationLabel(days)).toBe(expected);
+  });
+});
+
+describe('prerequisitesLabel', () => {
+  it('returns null when there are no prerequisites', () => {
+    expect(prerequisitesLabel([])).toBeNull();
+  });
+
+  it('lists one prerequisite', () => {
+    expect(prerequisitesLabel(['Pagamentos'])).toBe('Depende de: Pagamentos');
+  });
+
+  it('lists several prerequisites in the given order', () => {
+    expect(prerequisitesLabel(['A', 'B', 'C'])).toBe('Depende de: A, B, C');
   });
 });

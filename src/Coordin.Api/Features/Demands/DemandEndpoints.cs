@@ -97,6 +97,12 @@ public static class DemandEndpoints
             var lastExecution = await db.Demands.MaxAsync(demand => (int?)demand.ExecutionRank, cancellationToken) ?? 0;
 
             var demand = new Demand { PriorityRank = lastPriority + 1, ExecutionRank = lastExecution + 1 };
+            var cycle = await CycleProblemAsync(db, demand.Id, request.Title!.Trim(), request.PrerequisiteIds ?? [], cancellationToken);
+            if (cycle is not null)
+            {
+                return cycle;
+            }
+
             ApplyRequest(demand, request, db);
             db.Demands.Add(demand);
             await db.SaveChangesAsync(cancellationToken);
@@ -116,6 +122,7 @@ public static class DemandEndpoints
             var demand = await db.Demands
                 .Include(item => item.Teams)
                 .Include(item => item.Assignments)
+                .Include(item => item.Prerequisites)
                 .SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
             if (demand is null)
             {
@@ -131,6 +138,12 @@ public static class DemandEndpoints
             if (invalid is not null)
             {
                 return invalid;
+            }
+
+            var cycle = await CycleProblemAsync(db, id, request.Title!.Trim(), request.PrerequisiteIds ?? [], cancellationToken);
+            if (cycle is not null)
+            {
+                return cycle;
             }
 
             ApplyRequest(demand, request, db);
@@ -157,7 +170,20 @@ public static class DemandEndpoints
                 return ApiProblems.Conflict(DemandErrors.LockedCode, DemandErrors.LockedMessage);
             }
 
-            // As partes, alocações e previsão saem em cascata no banco (TDD 4.4).
+            // Uma demanda de que outra depende não sai: o gestor remove a dependência antes (DT-18, RF-18).
+            var dependents = await db.DemandDependencies.AsNoTracking()
+                .Where(dependency => dependency.PrerequisiteDemandId == id)
+                .OrderBy(dependency => dependency.Demand!.PriorityRank)
+                .Select(dependency => dependency.Demand!.Title)
+                .ToListAsync(cancellationToken);
+            if (dependents.Count > 0)
+            {
+                return ApiProblems.Conflict(
+                    DemandErrors.DependentsCode,
+                    $"A demanda é pré-requisito de: {string.Join(", ", dependents)}. Remova essas dependências antes de excluir.");
+            }
+
+            // As partes, alocações, dependências e previsão saem em cascata no banco (TDD 4.4).
             db.Demands.Remove(demand);
             await db.SaveChangesAsync(cancellationToken);
 
@@ -286,7 +312,59 @@ public static class DemandEndpoints
             return ApiProblems.Conflict(DemandErrors.PersonNotInTeamsCode, DemandErrors.PersonNotInTeamsMessage);
         }
 
+        // Só existência e repetição: ciclo (inclusive a autodependência) é regra do motor e responde 409 (DT-23).
+        var prerequisiteIds = request.PrerequisiteIds ?? [];
+        if (prerequisiteIds.Distinct().Count() != prerequisiteIds.Count)
+        {
+            return ApiProblems.InvalidField("prerequisiteIds", DemandErrors.PrerequisiteRepeated);
+        }
+
+        var knownPrerequisites = await db.Demands.AsNoTracking()
+            .Where(demand => prerequisiteIds.Contains(demand.Id))
+            .CountAsync(cancellationToken);
+        if (knownPrerequisites != prerequisiteIds.Count)
+        {
+            return ApiProblems.InvalidField("prerequisiteIds", DemandErrors.PrerequisiteUnknown);
+        }
+
         return null;
+    }
+
+    /// <summary>
+    /// Confere, com o motor, se as dependências pedidas para <paramref name="demandId"/> fecham um ciclo
+    /// com as já gravadas das outras demandas (DT-23). Devolve o <c>409 dependency-cycle</c> com os títulos
+    /// do caminho, ou <c>null</c>. Roda antes de qualquer escrita: nada é gravado quando há ciclo.
+    /// </summary>
+    private static async Task<IResult?> CycleProblemAsync(
+        CoordinDbContext db,
+        Guid demandId,
+        string title,
+        IReadOnlyList<Guid> prerequisiteIds,
+        CancellationToken cancellationToken)
+    {
+        var stored = await db.DemandDependencies.AsNoTracking()
+            .Where(dependency => dependency.DemandId != demandId)
+            .Select(dependency => new DependencyInput(dependency.DemandId, dependency.PrerequisiteDemandId))
+            .ToListAsync(cancellationToken);
+        var requested = prerequisiteIds.Select(prerequisiteId => new DependencyInput(demandId, prerequisiteId));
+        var allDependencies = stored.Concat(requested).ToList();
+
+        var demandIds = await db.Demands.AsNoTracking().Select(demand => demand.Id).ToListAsync(cancellationToken);
+        demandIds.Add(demandId); // a demanda nova ainda não existe no banco
+
+        var cycle = DependencyGraph.FindCycle(demandIds, allDependencies);
+        if (cycle is null)
+        {
+            return null;
+        }
+
+        var titles = await db.Demands.AsNoTracking()
+            .Where(demand => cycle.Contains(demand.Id))
+            .ToDictionaryAsync(demand => demand.Id, demand => demand.Title, cancellationToken);
+        titles[demandId] = title; // o título que o gestor acabou de digitar, ainda não gravado
+
+        var path = string.Join(" → ", cycle.Select(id => titles[id]));
+        return ApiProblems.Conflict(DemandErrors.CycleCode, $"As dependências formariam um ciclo: {path}.");
     }
 
     /// <summary>
@@ -327,6 +405,18 @@ public static class DemandEndpoints
         foreach (var personId in requestedPeople.Where(personId => !demand.Assignments.Any(item => item.PersonId == personId)))
         {
             db.DemandAssignments.Add(new DemandAssignment { DemandId = demand.Id, PersonId = personId });
+        }
+
+        // O corpo substitui o conjunto inteiro; sem o campo, a demanda fica sem pré-requisitos.
+        var requestedPrerequisites = (request.PrerequisiteIds ?? []).ToHashSet();
+        foreach (var dependency in demand.Prerequisites.Where(item => !requestedPrerequisites.Contains(item.PrerequisiteDemandId)).ToList())
+        {
+            db.DemandDependencies.Remove(dependency);
+        }
+
+        foreach (var prerequisiteId in requestedPrerequisites.Where(id => !demand.Prerequisites.Any(item => item.PrerequisiteDemandId == id)))
+        {
+            db.DemandDependencies.Add(new DemandDependency { DemandId = demand.Id, PrerequisiteDemandId = prerequisiteId });
         }
     }
 
@@ -394,6 +484,11 @@ public static class DemandEndpoints
             .Select(assignment => new { assignment.DemandId, assignment.PersonId })
             .ToListAsync(cancellationToken);
 
+        var prerequisites = await db.DemandDependencies.AsNoTracking()
+            .Where(dependency => demandIds.Contains(dependency.DemandId))
+            .Select(dependency => new { dependency.DemandId, dependency.PrerequisiteDemandId, dependency.Prerequisite!.PriorityRank })
+            .ToListAsync(cancellationToken);
+
         return demands.Select(demand => new DemandResponse(
             demand.Id,
             demand.Title,
@@ -411,6 +506,12 @@ public static class DemandEndpoints
                 .Where(assignment => assignment.DemandId == demand.Id)
                 .Select(assignment => assignment.PersonId)
                 .OrderBy(personId => personId)
+                .ToList(),
+            prerequisites
+                .Where(dependency => dependency.DemandId == demand.Id)
+                .OrderBy(dependency => dependency.PriorityRank)
+                .ThenBy(dependency => dependency.PrerequisiteDemandId)
+                .Select(dependency => dependency.PrerequisiteDemandId)
                 .ToList()))
             .ToList();
     }
