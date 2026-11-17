@@ -1,5 +1,6 @@
 using Coordin.Engine.Capacity;
 using Coordin.Engine.Planning;
+using Coordin.Engine.Scenarios;
 
 namespace Coordin.Engine.Forecasting;
 
@@ -24,10 +25,7 @@ public static class ForecastEngine
             .Select(pair => pair.Key)
             .ToHashSet();
 
-        var queueOrder = snapshot.Demands
-            .OrderBy(demand => snapshot.OrderMode == ExecutionOrderMode.FollowPriority ? demand.PriorityRank : demand.ExecutionRank)
-            .ThenBy(demand => demand.Id)
-            .ToList();
+        var queueOrder = ExecutionOrders.CurrentDemands(snapshot);
 
         var outcome = ForecastSimulator.Run(snapshot, included, calendar, capacity);
 
