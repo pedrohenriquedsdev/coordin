@@ -46,8 +46,13 @@ jobs:
 
       # Os testes de integração sobem um PostgreSQL de verdade (Testcontainers, DT-31);
       # o runner ubuntu-latest já traz o Docker.
+      # A coleta de cobertura instrumenta o código e o deixa muito mais lento: os testes de desempenho
+      # (categoria Performance) ficam fora deste passo e rodam no passo seguinte, sem cobertura.
       - name: Testes com cobertura
-        run: dotnet test Coordin.slnx --collect:"XPlat Code Coverage"
+        run: dotnet test Coordin.slnx --filter "Category!=Performance" --collect:"XPlat Code Coverage"
+
+      - name: Testes de desempenho (RNF-01)
+        run: dotnet test Coordin.slnx --no-build --filter "Category=Performance"
 
       - name: Publicar cobertura
         if: always()
