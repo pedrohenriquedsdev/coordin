@@ -23,8 +23,8 @@ Regras para todas as tasks:
 
 ## 4. Verificação final e documentos
 
-- [ ] 4.1 Rodar, numa cópia limpa, `dotnet build Coordin.slnx` (0 avisos), `dotnet format Coordin.slnx --verify-no-changes`, `dotnet test Coordin.slnx --collect:"XPlat Code Coverage"`, `openspec validate deployment --strict`, e a validação local da imagem da 2.1 e do YAML da 2.2. Informar os números reais
-- [ ] 4.2 Atualizar o `CLAUDE.md` §13 com a change 7 (resumo, verificação real e lições, incluindo o plano gratuito e a pendência do RNF-06 para a entrega final). Pausar e pedir ao autor a implantação real no Render: a criação dos serviços e o preenchimento dos segredos são dele; Claude só acompanha a verificação depois que o autor informar a URL pública
+- [x] 4.1 Rodar, numa cópia limpa, `dotnet build Coordin.slnx` (0 avisos), `dotnet format Coordin.slnx --verify-no-changes`, `dotnet test Coordin.slnx --collect:"XPlat Code Coverage"`, `openspec validate deployment --strict`, e a validação local da imagem da 2.1 e do YAML da 2.2. Informar os números reais
+- [x] 4.2 Atualizar o `CLAUDE.md` §13 com a change 7 (resumo, verificação real e lições, incluindo o plano gratuito e a pendência do RNF-06 para a entrega final). Pausar e pedir ao autor a implantação real no Render: a criação dos serviços e o preenchimento dos segredos são dele; Claude só acompanha a verificação depois que o autor informar a URL pública
 
 ## Registro de desvios (aplicação)
 
