@@ -5,6 +5,7 @@ import { DemandTeamRequest } from '../models/demand-team-request';
 export interface DemandRequest {
   assignedPersonIds: (Array<string> | null);
   informedEndDate: (string | null);
+  prerequisiteIds?: (Array<string> | null);
   startDate: (string | null);
   teams: (Array<DemandTeamRequest> | null);
   title: (string | null);

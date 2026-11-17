@@ -8,6 +8,7 @@ export interface DemandResponse {
   executionRank: (number | string);
   id: string;
   informedEndDate: (string | null);
+  prerequisiteIds: Array<string>;
   priorityRank: (number | string);
   startDate: (string | null);
   teams: Array<DemandTeamResponse>;

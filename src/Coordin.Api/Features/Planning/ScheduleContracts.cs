@@ -28,7 +28,11 @@ public sealed record ScheduleItemResponse(
     DateOnly? CompletedOn,
     DateOnly? BaselineEndDate,
     int? BaselineDeviationDays,
-    int? ForecastDeviationDays);
+    int? ForecastDeviationDays,
+    IReadOnlyList<ScheduleDependencyResponse> Prerequisites);
+
+/// <summary>Um pré-requisito da demanda: quem ela espera, com o título para a tela (RF-18).</summary>
+public sealed record ScheduleDependencyResponse(Guid DemandId, string Title);
 
 /// <summary>Uma parte do cronograma: time, nome e estimativa (nula se o time ainda não estimou).</summary>
 public sealed record ScheduleTeamResponse(Guid TeamId, string TeamName, decimal? EstimatedEffortHours);

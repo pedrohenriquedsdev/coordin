@@ -13,7 +13,8 @@ public sealed record DemandRequest(
     DateOnly? StartDate,
     DateOnly? InformedEndDate,
     List<DemandTeamRequest>? Teams,
-    List<Guid>? AssignedPersonIds);
+    List<Guid>? AssignedPersonIds,
+    List<Guid>? PrerequisiteIds = null);
 
 /// <summary>Uma parte: o time e a estimativa que ele informou (nula = ainda não estimou).</summary>
 public sealed record DemandTeamRequest(Guid? TeamId, decimal? EstimatedEffortHours);
@@ -36,7 +37,8 @@ public sealed record DemandResponse(
     DateOnly? InformedEndDate,
     DateOnly? CompletedOn,
     IReadOnlyList<DemandTeamResponse> Teams,
-    IReadOnlyList<Guid> AssignedPersonIds);
+    IReadOnlyList<Guid> AssignedPersonIds,
+    IReadOnlyList<Guid> PrerequisiteIds);
 
 /// <summary>Uma parte da demanda, com o nome do time para a tela não precisar cruzar listas.</summary>
 public sealed record DemandTeamResponse(Guid TeamId, string TeamName, decimal? EstimatedEffortHours);

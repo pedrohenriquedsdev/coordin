@@ -49,6 +49,19 @@ public static class ScheduleEndpoints
             .GroupBy(part => part.DemandId)
             .ToDictionary(group => group.Key, group => group.OrderBy(part => part.TeamName, StringComparer.Ordinal).ToList());
 
+        // Os pré-requisitos vêm em ordem de prioridade do pré-requisito, com o título para a tela (RF-18).
+        var prerequisites = (await db.DemandDependencies.AsNoTracking()
+            .Select(dependency => new DependencyRow(
+                dependency.DemandId,
+                dependency.PrerequisiteDemandId,
+                dependency.Prerequisite!.Title,
+                dependency.Prerequisite.PriorityRank))
+            .ToListAsync(cancellationToken))
+            .GroupBy(dependency => dependency.DemandId)
+            .ToDictionary(
+                group => group.Key,
+                group => group.OrderBy(dependency => dependency.PrerequisiteRank).ThenBy(dependency => dependency.PrerequisiteId).ToList());
+
         var customOrder = settings.ExecutionOrderMode == ExecutionOrderMode.Custom;
         var ordered = customOrder
             ? demands.OrderBy(demand => demand.ExecutionRank)
@@ -60,7 +73,8 @@ public static class ScheduleEndpoints
                 demand,
                 customOrder,
                 forecasts.GetValueOrDefault(demand.Id),
-                partsByDemand.GetValueOrDefault(demand.Id) ?? []))
+                partsByDemand.GetValueOrDefault(demand.Id) ?? [],
+                prerequisites.GetValueOrDefault(demand.Id) ?? []))
             .ToList();
 
         return Results.Ok(new ScheduleResponse(settings.ExecutionOrderMode, items));
@@ -70,7 +84,8 @@ public static class ScheduleEndpoints
         DemandRow demand,
         bool customOrder,
         Forecast? forecast,
-        List<PartRow> parts)
+        List<PartRow> parts,
+        List<DependencyRow> prerequisites)
     {
         var isPredictable = forecast?.IsPredictable ?? false;
         var exceeds = isPredictable
@@ -114,7 +129,8 @@ public static class ScheduleEndpoints
             demand.CompletedOn,
             forecast?.BaselineEndDate,
             baselineDeviation,
-            forecastDeviation);
+            forecastDeviation,
+            prerequisites.Select(dependency => new ScheduleDependencyResponse(dependency.PrerequisiteId, dependency.PrerequisiteTitle)).ToList());
     }
 
     /// <summary>Uma linha de demanda, como o cronograma precisa dela.</summary>
@@ -126,6 +142,9 @@ public static class ScheduleEndpoints
         DateOnly? StartDate,
         DateOnly? InformedEndDate,
         DateOnly? CompletedOn);
+
+    /// <summary>Uma dependência, com o título e o ranking do pré-requisito.</summary>
+    private sealed record DependencyRow(Guid DemandId, Guid PrerequisiteId, string PrerequisiteTitle, int PrerequisiteRank);
 
     /// <summary>Uma parte de demanda, com o nome do time.</summary>
     private sealed record PartRow(Guid DemandId, Guid TeamId, string TeamName, decimal? EstimatedEffortHours);

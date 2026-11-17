@@ -11,7 +11,10 @@ public sealed class Forecast
 
     public bool IsPredictable { get; set; }
 
-    /// <summary>Motivo quando não previsível: <c>MissingStartDate</c>, <c>MissingEstimate</c> ou <c>NoCapacity</c>.</summary>
+    /// <summary>
+    /// Motivo quando não previsível: <c>MissingStartDate</c>, <c>MissingEstimate</c>, <c>NoCapacity</c> ou
+    /// <c>PrerequisiteUnpredictable</c> (um pré-requisito não tem previsão; RF-18).
+    /// </summary>
     public string? UnpredictableReason { get; set; }
 
     public DateOnly? ForecastStartDate { get; set; }
