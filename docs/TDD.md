@@ -1,6 +1,6 @@
 # TDD — Coordin
 
-- **Status:** aprovado (2026-11-11); hospedagem (DT-09) decidida em 2026-11-12, com o provedor escolhido na change 7. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23. Ajuste em 2026-11-12, decorrente do PRD: RF-17 como Must no roadmap, validação por simulação no produto (RF-24, DT-37) e roadmap com 13 changes. Ajuste em 2026-11-12, na change 1: endpoint de saúde `GET /api/health` (seção 5.2). Ajuste em 2026-11-17, na change 8: campo `prerequisiteIds` no contrato da demanda, `prerequisites` no cronograma (seção 5.3) e código `demand-has-dependents` (DT-18)
+- **Status:** aprovado (2026-11-11); hospedagem (DT-09) decidida em 2026-11-12, com o provedor escolhido na change 7. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23. Ajuste em 2026-11-12, decorrente do PRD: RF-17 como Must no roadmap, validação por simulação no produto (RF-24, DT-37) e roadmap com 13 changes. Ajuste em 2026-11-12, na change 1: endpoint de saúde `GET /api/health` (seção 5.2). Ajuste em 2026-11-17, na change 8: campo `prerequisiteIds` no contrato da demanda, `prerequisites` no cronograma (seção 5.3) e código `demand-has-dependents` (DT-18). Ajuste em 2026-11-17, na change 9: campo `position` no corpo da demanda e resposta de `POST /api/demands/simulate` (5.3), `isComparable`, `apply` e `reset-to-priority` e correção dos itens do cenário (5.3), código `scenario-violates-dependencies` (DT-18), `n` do peso (DT-25), orçamento de 1.000 avaliações e demandas movíveis (DT-26), posição na simulação de nova demanda (6.5) e comando de testes com cobertura (8.6)
 - **Última atualização:** 2026-11-17
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -384,7 +384,7 @@ A conta de acesso do gestor usa as tabelas padrão do ASP.NET Core Identity (`As
 | Cronograma | `GET /api/schedule` (com os desvios `baselineDeviationDays` e `forecastDeviationDays` das demandas concluídas, acréscimo da change `demand-planning`) | RF-08 a RF-12, RF-15 |
 | Exportação | `GET /api/schedule/export` → `text/csv` | RF-19 |
 | Cenários | `POST /api/scenarios/recommendations` · `POST /api/scenarios/simulate` · `POST /api/scenarios/apply` · `POST /api/scenarios/reset-to-priority` | RF-13 a RF-15 |
-| Simulação de nova demanda | `POST /api/demands/simulate` (mesmo corpo do `POST /api/demands`, sem gravar) | RF-16 |
+| Simulação de nova demanda | `POST /api/demands/simulate` (mesmo corpo do `POST /api/demands`, inclusive o `position` opcional, sem gravar; formato da resposta em 5.3) | RF-16 |
 | Relatório por time | `GET /api/reports/teams?from=&to=` (datas `yyyy-MM-dd` obrigatórias; até 52 semanas; semanas completas de segunda a domingo; calculado sob demanda, sem gravar nada) | RF-17 |
 | Indicadores de precisão | `GET /api/reports/accuracy?from=&to=` | RF-23 (Could) |
 | Históricos | `GET /api/demands/{id}/estimate-history` · `GET /api/demands/{id}/forecast-history` | RF-20, RF-21 (Could) |
@@ -406,11 +406,12 @@ A conta de acesso do gestor usa as tabelas padrão do ASP.NET Core Identity (`As
   ],
   "assignedPersonIds": ["…", "…"],
   "prerequisiteIds": ["…"],
+  "position": 2,
   "estimateChangeReason": null
 }
 ```
 
-Na criação, a demanda entra no fim da ordem de prioridade (e da de execução, no modo `Custom`). `estimatedEffortHours: null` significa "time ainda não estimou". `prerequisiteIds` lista as demandas de que esta depende (RF-18): a lista enviada substitui a anterior, e a ausência do campo equivale a nenhum pré-requisito (nome ajustado de `prerequisiteDemandIds` na change `demand-dependencies`, para seguir o padrão de `assignedPersonIds`; a resposta da demanda devolve o mesmo campo).
+Na criação, a demanda entra no fim da ordem de prioridade e da de execução, a menos que o corpo traga `position`, um inteiro opcional de 1 a `n + 1` (com `n` o número de demandas): então ela entra nessa posição **nas duas ordens**, e as demandas dessa posição em diante descem uma (acréscimo da change `sequencing-scenarios`: com a demanda no fim da fila nenhuma outra muda de data, porque cada pessoa trabalha primeiro nas demandas da frente, então sem a posição o RF-16 nunca mostraria demandas deslocadas). `position` vale para criar e simular; no `PUT` é ignorado. Fora do intervalo, `400` no campo `position`. `estimatedEffortHours: null` significa "time ainda não estimou". `prerequisiteIds` lista as demandas de que esta depende (RF-18): a lista enviada substitui a anterior, e a ausência do campo equivale a nenhum pré-requisito (nome ajustado de `prerequisiteDemandIds` na change `demand-dependencies`, para seguir o padrão de `assignedPersonIds`; a resposta da demanda devolve o mesmo campo).
 
 **Cronograma (`GET /api/schedule`).**
 
@@ -451,13 +452,33 @@ Na criação, a demanda entra no fim da ordem de prioridade (e da de execução,
   ],
   "sectorEndDate": "2027-02-10",
   "sectorDeltaDays": -6,
-  "score": { "current": 15840, "scenario": 15210, "delta": -630 }
+  "score": { "current": 15840, "scenario": 15210, "delta": -630 },
+  "isComparable": true
 }
 ```
 
-`recommendations` devolve uma lista (possivelmente vazia, RF-13) desses objetos; `apply` recebe `executionOrder`, valida de novo (dependências) e grava; `simulate` recebe `executionOrder` e não grava nada.
+`recommendations` devolve uma lista (possivelmente vazia, RF-13) desses objetos; `simulate` recebe `executionOrder`, a lista com **todas** as demandas na ordem proposta, e não grava nada. `apply` recebe o mesmo corpo, valida de novo (lista completa e, no cronograma resultante, as dependências, com `409` `scenario-violates-dependencies`), grava a ordem de execução e o modo `Custom` na mesma transação e responde `200` com o cenário aplicado, calculado contra o cronograma anterior. `reset-to-priority` não tem corpo, volta o modo para `FollowPriority` e responde `204` (acréscimos da change `sequencing-scenarios`). Lista de `executionOrder` incompleta, repetida ou com id desconhecido: `400` no campo `executionOrder`.
 
-A justificativa do cenário (RF-13, DT-36) vem do motor: `score` é o critério do DT-25 no cronograma atual e no cenário; `weight` é o `wᵢ` da demanda e `scoreContributionDelta` é a diferença da sua parcela `wᵢ × dᵢ` entre o cenário e o atual (negativa quando a demanda contribui para a melhoria). A soma das `scoreContributionDelta` é igual a `score.delta`. Demandas não previsíveis não entram no `score` e têm `weight` e `scoreContributionDelta` nulos.
+A justificativa do cenário (RF-13, DT-36) vem do motor: `score` é o critério do DT-25 no cronograma atual e no cenário; `weight` é o `wᵢ` da demanda e `scoreContributionDelta` é a diferença da sua parcela `wᵢ × dᵢ` entre o cenário e o atual (negativa quando a demanda contribui para a melhoria). A soma das `scoreContributionDelta` é igual a `score.delta`. Demandas concluídas e não previsíveis **não aparecem em `items`** e não entram no `score` (correção: o texto anterior dizia que apareciam com `weight` nulo); a sua posição continua em `executionOrder`. `isComparable` é falso quando, na ordem avaliada, uma demanda previsível hoje deixaria de ser previsível (não termina em cinco anos); esse cenário nunca é recomendado.
+
+**Simulação de nova demanda (`POST /api/demands/simulate`, RF-16).** Recebe o corpo da demanda (acima) e devolve, sem gravar nada:
+
+```json
+{
+  "isPredictable": true, "unpredictableReason": null,
+  "forecastStartDate": "2026-12-01",
+  "endDateWithoutMargin": "2026-12-14",
+  "forecastEndDate": "2026-12-16",
+  "position": 1,
+  "changes": [
+    { "demandId": "…", "title": "…", "currentForecastEndDate": "…", "newForecastEndDate": "…", "deltaDays": 2 }
+  ],
+  "sectorEndDate": "2027-02-10",
+  "sectorDeltaDays": 2
+}
+```
+
+`position` é a posição usada (padrão `n + 1`). `changes` traz só as demandas **existentes** cuja `forecastEndDate` muda, com a diferença em dias corridos (positiva é atraso); uma nova demanda não previsível não desloca ninguém. A validação é a mesma de `POST /api/demands` (acréscimo da change `sequencing-scenarios`).
 
 **Validação por simulação (`POST /api/validation/evaluate`, RF-24).** Entrada e saída:
 
@@ -512,7 +533,7 @@ Erros: `409 validation-current-plan-missing` (plano atual não guardado), `409 v
 - **Alternativas consideradas:**
   - *Problem Details com status adequado e uma extensão `code`:* padrão do ASP.NET Core, mensagem para o usuário em `detail`, e um código estável para o front tratar.
   - *Formato de erro próprio:* mais liberdade, menos padronização.
-- **Decisão:** `400` com `errors` por campo para validação; `404` para recurso inexistente; `409` para conflito de regra de negócio, com `code` estável, por exemplo `dependency-cycle`, `team-has-people`, `team-name-taken`, `holiday-date-taken`, `person-has-open-assignments`, `completed-demand-locked`, `person-not-in-demand-teams` (`team-name-taken` e `holiday-date-taken` acrescentados na change `capacity-registry`; `team-has-demands` acrescentado na change `demand-planning`, para o time que faz parte de demandas; `demand-has-dependents` acrescentado na change `demand-dependencies`, para a demanda que é pré-requisito de outra e por isso não pode ser excluída). `detail` em português.
+- **Decisão:** `400` com `errors` por campo para validação; `404` para recurso inexistente; `409` para conflito de regra de negócio, com `code` estável, por exemplo `dependency-cycle`, `team-has-people`, `team-name-taken`, `holiday-date-taken`, `person-has-open-assignments`, `completed-demand-locked`, `person-not-in-demand-teams` (`team-name-taken` e `holiday-date-taken` acrescentados na change `capacity-registry`; `team-has-demands` acrescentado na change `demand-planning`, para o time que faz parte de demandas; `demand-has-dependents` acrescentado na change `demand-dependencies`, para a demanda que é pré-requisito de outra e por isso não pode ser excluída; `scenario-violates-dependencies` acrescentado na change `sequencing-scenarios`, para a aprovação de um cenário cujo cronograma violaria uma dependência, conferência final que o motor já torna inalcançável). `detail` em português.
 - **Justificativa:** um formato só para tratar no front e mensagens já prontas para exibir.
 - **Atende:** RF-06, RF-18, RNF-07.
 
@@ -634,7 +655,7 @@ Demandas não previsíveis e demandas concluídas ficam fora da simulação e n�
   - *Soma ponderada das conclusões:* antecipa o que é mais prioritário sem ignorar o prazo total.
   - *Prazo total do setor:* pode atrasar prioritárias para encaixar a capacidade.
   - *Utilização dos times:* nem sempre antecipa entregas.
-- **Decisão:** para as demandas previsíveis, `score = Σ wᵢ × dᵢ`, em que `dᵢ` é o número de dias úteis entre a menor data de início do planejamento e o `ForecastEndDate` da demanda, e `wᵢ = n − PriorityRankᵢ + 1` (a mais prioritária tem o maior peso). Menor é melhor. Empates são desfeitos, nesta ordem, pelo prazo total do setor (última `ForecastEndDate`), pelo menor número de demandas deslocadas em relação à ordem atual e pela ordem lexicográfica dos ids.
+- **Decisão:** para as demandas previsíveis, `score = Σ wᵢ × dᵢ`, em que `dᵢ` é o número de dias úteis, com as duas pontas incluídas, entre a menor data de início do planejamento (entre as demandas do score) e o `ForecastEndDate` da demanda, e `wᵢ = n − PriorityRankᵢ + 1` (a mais prioritária tem o maior peso), com `n` a **maior** prioridade registrada, para todo peso ser ao menos 1 mesmo com lacunas por demandas concluídas (esclarecimento da change `sequencing-scenarios`). O conjunto do score são as demandas previsíveis tanto no cronograma atual quanto no cenário. Menor é melhor. Empates são desfeitos, nesta ordem, pelo prazo total do setor (última `ForecastEndDate`), pelo menor número de demandas deslocadas em relação à ordem atual e pela ordem lexicográfica dos ids.
 - **Justificativa:** o peso usa a **prioridade registrada** (regra 3), então um cenário só é recomendado se compensar no conjunto, considerando o que o produto definiu como mais importante.
 - **Atende:** RF-13; regras invioláveis 2 e 3.
 
@@ -646,12 +667,12 @@ Demandas não previsíveis e demandas concluídas ficam fora da simulação e n�
   - *Algoritmo genético com semente fixa:* explora mais, mas é bem mais complexo de implementar, testar e explicar no prazo.
   - *Só trocas de vizinhos adjacentes:* simples demais; acha poucas melhorias.
 - **Decisão:** a partir da ordem de execução atual:
-  1. **vizinhança:** mover cada demanda de 1 a 3 posições para cima ou para baixo, gerada sempre na mesma ordem;
+  1. **vizinhança:** mover cada demanda de 1 a 3 posições para cima ou para baixo, gerada sempre na mesma ordem. Só as demandas **abertas e previsíveis** se movem: as concluídas e as não previsíveis ficam na mesma posição absoluta, porque não consomem capacidade nem entram no score;
   2. **primeira melhoria:** ao encontrar um vizinho com `score` menor, ele vira a ordem corrente e a varredura recomeça;
-  3. **parada:** quando nenhum vizinho melhora ou ao atingir **3.000 avaliações**. O limite é por número de avaliações, nunca por tempo de relógio, para o resultado não variar com a máquina.
+  3. **parada:** quando nenhum vizinho melhora ou ao atingir **1.000 avaliações distintas** (reavaliar uma sequência já vista não gasta orçamento). O limite é por número de avaliações, nunca por tempo de relógio, para o resultado não variar com a máquina.
   
-  Recomenda até **3 cenários**: a melhor ordem encontrada e os dois melhores movimentos únicos a partir da ordem atual, sem repetir sequências. Se nada melhorar o `score`, devolve a lista vazia (RF-13).
-- **Justificativa:** uma simulação percorre cerca de 150 pessoas × 260 dias úteis por ano, com custo da ordem de milissegundos; 3.000 avaliações cabem nos 10 s do RNF-01. O limite exato é confirmado por um teste de desempenho com o volume do RNF-01 (seção 8). Os movimentos únicos são fáceis de o gestor entender ("antecipar B em duas posições").
+  Recomenda até **3 cenários**: a melhor ordem encontrada e os dois melhores movimentos únicos a partir da ordem atual, sem repetir sequências. Se nada melhorar o `score`, devolve a lista vazia (RF-13). Um cenário em que uma demanda previsível deixaria de ser previsível não é recomendado.
+- **Justificativa:** a versão anterior previa **3.000 avaliações**, com a premissa de "custo da ordem de milissegundos" por avaliação. Medido (change `sequencing-scenarios`, 2026-11-17) com 15 times, 150 pessoas e 200 demandas, depois de acelerar o motor, cada avaliação dentro da busca custa de 3 a 4,6 ms; 3.000 avaliações levaram 12,9 s, acima dos 10 s do RNF-01, e 1.000 levam de 3,6 a 4,3 s, com folga de 2,4× para o CI. O limite exato é confirmado por um teste de desempenho com o volume do RNF-01 (seção 8), que roda sem a coleta de cobertura. O custo é uma busca mais curta (neste planejamento, o melhor `score.delta` foi −25.165 com 1.000 avaliações e −43.722 com 3.000); o gestor ainda pode simular qualquer sequência (RF-14). Os movimentos únicos são fáceis de o gestor entender ("antecipar B em duas posições").
 - **Atende:** RF-13, RNF-01, RNF-02.
 
 #### DT-27 — Desvio em dias corridos
@@ -683,7 +704,7 @@ Demandas não previsíveis e demandas concluídas ficam fora da simulação e n�
 
 ### 6.5 Simulação de nova demanda (RF-16)
 
-O motor calcula duas vezes, com o snapshot atual e com o snapshot acrescido da nova demanda, e compara as previsões demanda a demanda. A diferença em dias corridos de cada `ForecastEndDate` é o impacto exibido.
+O motor calcula duas vezes, com o snapshot atual e com o snapshot acrescido da nova demanda, e compara as previsões demanda a demanda. A diferença em dias corridos de cada `ForecastEndDate` é o impacto exibido. A nova demanda entra na posição pedida (`position`, padrão o fim) das ordens de prioridade e de execução, e as demais descem uma; com ela no fim da fila nenhuma demanda existente muda de data, porque cada pessoa trabalha primeiro nas demandas da frente (verificado em 297 planejamentos gerados), então a posição é o que dá sentido ao impacto. Uma demanda existente que passaria a não previsível (estouro do horizonte de cinco anos) não entra na lista de mudanças. Confirmar a inclusão é o `POST /api/demands` com o mesmo corpo, que cria a demanda na mesma posição e produz as mesmas datas (acréscimo da change `sequencing-scenarios`).
 
 ### 6.6 Avaliação da validação por simulação (RF-24, DT-37)
 
@@ -843,7 +864,7 @@ Um teste da categoria `Performance` gera, com semente fixa, um planejamento com 
 |---|---|
 | Build .NET | `dotnet build Coordin.slnx` |
 | Formatação .NET | `dotnet format Coordin.slnx --verify-no-changes` |
-| Testes .NET (com cobertura) | `dotnet test Coordin.slnx --collect:"XPlat Code Coverage"` |
+| Testes .NET (com cobertura) | `dotnet test Coordin.slnx --filter "Category!=Performance" --collect:"XPlat Code Coverage"` (a coleta de cobertura instrumenta o código e deixa os testes de desempenho mais de dez vezes mais lentos, então eles ficam de fora deste passo; ajuste da change `sequencing-scenarios`, e o CI roda a categoria no passo seguinte) |
 | Só desempenho | `dotnet test Coordin.slnx --filter "Category=Performance"` |
 | Front: dependências | `npm ci` (em `src/coordin-web`) |
 | Front: lint | `npm run lint` |
