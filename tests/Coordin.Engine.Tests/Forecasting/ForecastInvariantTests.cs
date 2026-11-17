@@ -48,10 +48,65 @@ public class ForecastInvariantTests
         Assert.Contains(forecasts, f => f.Reason == UnpredictableReason.MissingStartDate);
         Assert.Contains(forecasts, f => f.Reason == UnpredictableReason.MissingEstimate);
         Assert.Contains(forecasts, f => f.Reason == UnpredictableReason.NoCapacity);
+        Assert.Contains(forecasts, f => f.Reason == UnpredictableReason.PrerequisiteUnpredictable);
+        Assert.Contains(results, c => c.Snapshot.Dependencies.Count > 0);
         Assert.Contains(results, c => c.Snapshot.Absences.Count > 0);
         Assert.Contains(results, c => c.Snapshot.Holidays.Count > 0);
         Assert.Contains(results, c => c.Snapshot.Demands.Any(d => d.Parts.Count > 1));
         Assert.Contains(results, c => c.Snapshot.OrderMode == ExecutionOrderMode.Custom);
+    }
+
+    [Fact]
+    public void Dependents_StartAfterThePrerequisiteEndsWithMargin()
+    {
+        var checkedEdges = 0;
+        foreach (var (seed, snapshot, result) in Cases())
+        {
+            var forecasts = result.Demands.ToDictionary(f => f.DemandId);
+            foreach (var dependency in snapshot.Dependencies)
+            {
+                var dependent = forecasts[dependency.DemandId];
+                var prerequisite = forecasts[dependency.PrerequisiteId];
+                if (dependent.Status != DemandStatus.Predictable || prerequisite.Status != DemandStatus.Predictable)
+                {
+                    continue;
+                }
+
+                Assert.True(
+                    dependent.ForecastStartDate > prerequisite.ForecastEndDate,
+                    $"A dependente começou antes do fim do pré-requisito na semente {seed}.");
+                checkedEdges++;
+            }
+        }
+
+        Assert.True(checkedEdges > 50, $"Poucas dependências verificadas: {checkedEdges}.");
+    }
+
+    [Fact]
+    public void PrerequisiteUnpredictable_HappensExactlyWhenAnOpenPrerequisiteHasNoForecast()
+    {
+        foreach (var (seed, snapshot, result) in Cases())
+        {
+            var forecasts = result.Demands.ToDictionary(f => f.DemandId);
+            foreach (var forecast in result.Demands.Where(f => f.Status != DemandStatus.Completed))
+            {
+                var blockedPrerequisites = snapshot.Dependencies
+                    .Where(d => d.DemandId == forecast.DemandId)
+                    .Select(d => forecasts[d.PrerequisiteId])
+                    .Where(p => p.Status == DemandStatus.Unpredictable)
+                    .ToList();
+
+                if (forecast.Status == DemandStatus.Predictable)
+                {
+                    Assert.True(blockedPrerequisites.Count == 0, $"Previsível com pré-requisito sem previsão na semente {seed}.");
+                }
+
+                if (forecast.Reason == UnpredictableReason.PrerequisiteUnpredictable)
+                {
+                    Assert.True(blockedPrerequisites.Count > 0, $"Motivo de pré-requisito sem pré-requisito sem previsão na semente {seed}.");
+                }
+            }
+        }
     }
 
     [Fact]

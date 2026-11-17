@@ -131,4 +131,122 @@ public class PredictabilityClassifierTests
 
         Assert.Equal(new Classification(DemandStatus.Predictable, null), ClassifyOnly(demand));
     }
+
+    /// <summary>Uma demanda com todos os dados, que sozinha seria previsível.</summary>
+    private Guid AddCompleteDemand(Guid team, Guid person, DateOnly? start = null, bool completed = false)
+    {
+        var demand = _builder.AddDemand(start ?? Day.Monday, [(team, 8m)], completed: completed);
+        _builder.Assign(demand, person);
+        return demand;
+    }
+
+    [Fact]
+    public void Classify_PrerequisiteWithoutEstimate_MakesTheDependentPrerequisiteUnpredictable()
+    {
+        var team = _builder.AddTeam();
+        var person = _builder.AddPerson(team, 8m);
+        var a = _builder.AddDemand(Day.Monday, [(team, null)]);
+        var b = AddCompleteDemand(team, person);
+        _builder.DependsOn(b, a);
+
+        Assert.Equal(UnpredictableReason.MissingEstimate, ClassifyOnly(a).Reason);
+        Assert.Equal(new Classification(DemandStatus.Unpredictable, UnpredictableReason.PrerequisiteUnpredictable), ClassifyOnly(b));
+    }
+
+    [Fact]
+    public void Classify_UnpredictableChain_PropagatesToEveryDependent()
+    {
+        var team = _builder.AddTeam();
+        var person = _builder.AddPerson(team, 8m);
+        var a = _builder.AddDemand(null, [(team, 8m)]);
+        var b = AddCompleteDemand(team, person);
+        var c = AddCompleteDemand(team, person);
+        _builder.DependsOn(b, a).DependsOn(c, b);
+
+        Assert.Equal(UnpredictableReason.PrerequisiteUnpredictable, ClassifyOnly(b).Reason);
+        Assert.Equal(UnpredictableReason.PrerequisiteUnpredictable, ClassifyOnly(c).Reason);
+    }
+
+    [Fact]
+    public void Classify_OwnProblemBeatsThePrerequisiteProblem()
+    {
+        var team = _builder.AddTeam();
+        var a = _builder.AddDemand(Day.Monday, [(team, null)]);
+        var b = _builder.AddDemand(null, [(team, 8m)]);
+        _builder.DependsOn(b, a);
+
+        Assert.Equal(UnpredictableReason.MissingStartDate, ClassifyOnly(b).Reason);
+    }
+
+    [Fact]
+    public void Classify_DependentOfADemandWithoutCapacity_IsPrerequisiteUnpredictable()
+    {
+        var team = _builder.AddTeam();
+        var person = _builder.AddPerson(team, 8m);
+        var a = _builder.AddDemand(Day.Monday, [(team, 8m)]); // sem ninguém alocado
+        var b = AddCompleteDemand(team, person);
+        _builder.DependsOn(b, a);
+
+        Assert.Equal(UnpredictableReason.NoCapacity, ClassifyOnly(a).Reason);
+        Assert.Equal(UnpredictableReason.PrerequisiteUnpredictable, ClassifyOnly(b).Reason);
+    }
+
+    [Fact]
+    public void Classify_CompletedPrerequisite_NeverBlocks()
+    {
+        var team = _builder.AddTeam();
+        var person = _builder.AddPerson(team, 8m);
+        var a = _builder.AddDemand(null, [(team, null)], completed: true);
+        var b = AddCompleteDemand(team, person);
+        _builder.DependsOn(b, a);
+
+        Assert.Equal(new Classification(DemandStatus.Predictable, null), ClassifyOnly(b));
+    }
+
+    [Fact]
+    public void Classify_PrerequisiteFilledIn_UnblocksTheDependent()
+    {
+        var team = _builder.AddTeam();
+        var person = _builder.AddPerson(team, 8m);
+        var a = AddCompleteDemand(team, person);
+        var b = AddCompleteDemand(team, person);
+        _builder.DependsOn(b, a);
+
+        Assert.Equal(new Classification(DemandStatus.Predictable, null), ClassifyOnly(a));
+        Assert.Equal(new Classification(DemandStatus.Predictable, null), ClassifyOnly(b));
+    }
+
+    [Fact]
+    public void Classify_CompletedDependent_StaysCompleted_EvenWithAnUnpredictablePrerequisite()
+    {
+        var team = _builder.AddTeam();
+        var a = _builder.AddDemand(null, [(team, null)]);
+        var b = _builder.AddDemand(Day.Monday, [(team, 8m)], completed: true);
+        _builder.DependsOn(b, a);
+
+        Assert.Equal(DemandStatus.Completed, ClassifyOnly(b).Status);
+    }
+
+    [Fact]
+    public void Classify_WithACycle_Throws()
+    {
+        var team = _builder.AddTeam();
+        var person = _builder.AddPerson(team, 8m);
+        var a = AddCompleteDemand(team, person);
+        var b = AddCompleteDemand(team, person);
+        _builder.DependsOn(a, b).DependsOn(b, a);
+
+        Assert.Throws<ArgumentException>(() => ClassifyOnly(a));
+    }
+
+    [Fact]
+    public void Classify_UnknownPrerequisite_Throws()
+    {
+        var team = _builder.AddTeam();
+        var person = _builder.AddPerson(team, 8m);
+        var a = AddCompleteDemand(team, person);
+        _builder.DependsOn(a, Guid.NewGuid());
+
+        Assert.Throws<ArgumentException>(() => ClassifyOnly(a));
+    }
 }

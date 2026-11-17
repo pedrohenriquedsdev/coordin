@@ -6,7 +6,9 @@ namespace Coordin.Engine.Tests.Planning;
 /// Gerador de planejamentos de semente fixa (DT-34): a mesma semente gera sempre o mesmo snapshot.
 /// O <see cref="Random"/> vive só nos testes; o motor continua sem aleatoriedade (RNF-02).
 /// Mistura de propósito casos difíceis: demandas sem data, sem estimativa, sem pessoa, pessoas com
-/// capacidade zero, ausências, feriados, vários times na mesma demanda e rankings em ordem aleatória.
+/// capacidade zero, ausências, feriados, vários times na mesma demanda, rankings em ordem aleatória
+/// e dependências entre demandas. As dependências só apontam para demandas sorteadas antes, então nunca
+/// formam ciclo. Elas usam um sorteio à parte, para não mudar o resto do planejamento de cada semente.
 /// </summary>
 public static class RandomPlanningGenerator
 {
@@ -24,6 +26,8 @@ public static class RandomPlanningGenerator
                 .Select(_ => builder.AddPerson(team, DailyHoursOptions[random.Next(DailyHoursOptions.Length)]))
                 .ToList());
 
+        var dependencyRandom = new Random(seed * 31 + 7);
+        var demandIds = new List<Guid>();
         var demandCount = random.Next(0, 13);
         var priorityRanks = Enumerable.Range(1, demandCount).OrderBy(_ => random.Next()).ToList();
         var executionRanks = Enumerable.Range(1, demandCount).OrderBy(_ => random.Next()).ToList();
@@ -37,6 +41,8 @@ public static class RandomPlanningGenerator
                 .ToArray();
 
             var demand = builder.AddDemand(start, parts, priorityRanks[index], executionRanks[index], completed: random.Next(12) == 0);
+            AddDependencies(builder, demand, demandIds, dependencyRandom);
+            demandIds.Add(demand);
             foreach (var team in partTeams)
             {
                 var chosen = peopleByTeam[team].Where(_ => random.Next(10) != 0).ToArray();
@@ -65,6 +71,18 @@ public static class RandomPlanningGenerator
             .Build();
     }
 
+    /// <summary>Cerca de um terço das demandas dependem de uma ou duas das sorteadas antes (nunca de si mesmas).</summary>
+    private static void AddDependencies(PlanningSnapshotBuilder builder, Guid demand, List<Guid> earlier, Random random)
+    {
+        if (earlier.Count == 0 || random.Next(3) != 0)
+        {
+            return;
+        }
+
+        var prerequisites = earlier.OrderBy(_ => random.Next()).Take(random.Next(1, 3)).ToArray();
+        builder.DependsOn(demand, prerequisites);
+    }
+
     /// <summary>O mesmo planejamento com todas as listas em outra ordem (para testar o determinismo).</summary>
     public static PlanningSnapshot Shuffled(PlanningSnapshot snapshot, int seed)
     {
@@ -76,6 +94,7 @@ public static class RandomPlanningGenerator
             Absences = Shuffle(snapshot.Absences, random),
             Holidays = Shuffle(snapshot.Holidays, random),
             Assignments = Shuffle(snapshot.Assignments, random),
+            Dependencies = Shuffle(snapshot.Dependencies, random),
             Demands = Shuffle(snapshot.Demands.Select(demand => demand with { Parts = Shuffle(demand.Parts, random) }).ToList(), random),
         };
     }
