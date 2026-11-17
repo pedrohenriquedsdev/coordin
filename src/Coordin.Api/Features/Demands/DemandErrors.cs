@@ -22,5 +22,6 @@ public static class DemandErrors
 
     public const string PrerequisiteUnknown = "Uma das demandas que a demanda depende não existe.";
     public const string PrerequisiteRepeated = "Uma demanda não pode aparecer duas vezes como pré-requisito.";
+    public const string PositionOutOfRange = "A posição deve estar entre 1 e o número de demandas mais 1.";
     public const string ReorderInvalid = "A lista precisa conter todas as demandas, uma única vez cada.";
 }

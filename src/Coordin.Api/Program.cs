@@ -53,6 +53,7 @@ app.MapHolidayEndpoints();
 app.MapDemandEndpoints();
 app.MapScheduleEndpoints();
 app.MapScenarioEndpoints();
+app.MapDemandSimulationEndpoints();
 app.MapReportEndpoints();
 app.MapSettingsEndpoints();
 app.MapTestOnlyEndpoints();

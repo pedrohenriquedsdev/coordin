@@ -83,7 +83,7 @@ public static class DemandEndpoints
         CancellationToken cancellationToken) =>
         PlanningTransaction.RunAsync(db, recalculator, async () =>
         {
-            var invalid = await ValidateAsync(request, db, cancellationToken);
+            var invalid = await ValidateNewDemandAsync(request, db, cancellationToken);
             if (invalid is not null)
             {
                 return invalid;
@@ -103,6 +103,12 @@ public static class DemandEndpoints
             ApplyRequest(demand, request, db);
             db.Demands.Add(demand);
             await db.SaveChangesAsync(cancellationToken);
+
+            // Com posição, a demanda entra ali nas duas ordens e as demais descem (design D10). Sem posição, fica no fim.
+            if (request.Position is { } position && position < await db.Demands.CountAsync(cancellationToken))
+            {
+                await PlaceAsync(db, demand.Id, position, cancellationToken);
+            }
 
             var response = (await ReadAsync(db, demand.Id, cancellationToken)).Single();
             return Results.Created($"/api/demands/{demand.Id}", response);
@@ -256,6 +262,36 @@ public static class DemandEndpoints
         }, cancellationToken);
 
     /// <summary>Valida o corpo contra o banco. Devolve a resposta de erro, ou <c>null</c> se estiver tudo certo.</summary>
+    /// <summary>
+    /// Valida o corpo de uma demanda nova, para criar ou simular: as mesmas regras de sempre, mais a posição,
+    /// que tem de estar entre 1 e o número de demandas mais 1 (design D10).
+    /// </summary>
+    internal static async Task<IResult?> ValidateNewDemandAsync(DemandRequest request, CoordinDbContext db, CancellationToken cancellationToken)
+    {
+        var invalid = await ValidateAsync(request, db, cancellationToken);
+        if (invalid is not null || request.Position is null)
+        {
+            return invalid;
+        }
+
+        var count = await db.Demands.CountAsync(cancellationToken);
+        return request.Position is >= 1 && request.Position <= count + 1
+            ? null
+            : ApiProblems.InvalidField("position", DemandErrors.PositionOutOfRange);
+    }
+
+    /// <summary>Move a demanda para a posição (de 1 em diante) nas duas ordens e regrava os rankings em duas fases.</summary>
+    private static async Task PlaceAsync(CoordinDbContext db, Guid id, int position, CancellationToken cancellationToken)
+    {
+        var priority = await DemandRanking.OrderedIdsAsync(db, byPriority: true, cancellationToken);
+        var execution = await DemandRanking.OrderedIdsAsync(db, byPriority: false, cancellationToken);
+        priority.Remove(id);
+        priority.Insert(position - 1, id);
+        execution.Remove(id);
+        execution.Insert(position - 1, id);
+        await DemandRanking.SetRanksAsync(db, priority, execution, cancellationToken);
+    }
+
     private static async Task<IResult?> ValidateAsync(DemandRequest request, CoordinDbContext db, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Title))
