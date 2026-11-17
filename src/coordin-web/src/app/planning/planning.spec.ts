@@ -30,6 +30,7 @@ describe('mapSchedule', () => {
           baselineEndDate: null,
           baselineDeviationDays: null,
           forecastDeviationDays: '-2',
+          prerequisites: [],
         },
       ],
     };
@@ -56,6 +57,7 @@ describe('mapSchedule', () => {
           executionRank: 1,
           teams: [],
           totalEstimatedEffortHours: 0,
+          prerequisites: [],
         },
         {
           demandId: 'b',
@@ -64,6 +66,7 @@ describe('mapSchedule', () => {
           executionRank: 2,
           teams: [],
           totalEstimatedEffortHours: 0,
+          prerequisites: [],
         },
       ],
     } as unknown as ScheduleResponse;
@@ -84,6 +87,7 @@ describe('mapDemand', () => {
       completedOn: null,
       teams: [{ teamId: 't1', teamName: 'Web', estimatedEffortHours: 40 }],
       assignedPersonIds: ['p1'],
+      prerequisiteIds: [],
     };
 
     const demand = mapDemand(response);

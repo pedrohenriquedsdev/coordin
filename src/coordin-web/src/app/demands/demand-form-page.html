@@ -129,6 +129,35 @@
           </ul>
         </fieldset>
 
+        <fieldset>
+          <legend class="text-sm font-medium text-slate-700">Depende de</legend>
+          <p class="mt-1 text-xs text-slate-600">
+            Esta demanda só começa depois que as marcadas terminarem.
+          </p>
+          @if (candidates().length === 0) {
+            <p class="mt-1 text-sm text-slate-600">Não há outras demandas para escolher.</p>
+          }
+          <ul class="mt-2 space-y-1">
+            @for (candidate of candidates(); track candidate.id) {
+              <li>
+                <label class="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    [checked]="isPrerequisite(candidate.id)"
+                    (change)="togglePrerequisite(candidate.id, $any($event.target).checked)"
+                  />
+                  <span>
+                    {{ candidate.title }}
+                    @if (candidate.completedOn !== null) {
+                      <span class="text-slate-600">(concluída)</span>
+                    }
+                  </span>
+                </label>
+              </li>
+            }
+          </ul>
+        </fieldset>
+
         <div class="flex gap-2">
           <button
             type="submit"

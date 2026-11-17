@@ -9,6 +9,12 @@ export interface ScheduleTeam {
   readonly estimatedEffortHours: number | null;
 }
 
+/** Um pré-requisito da demanda no cronograma: o id e o título, para a linha "Depende de" (RF-18). */
+export interface SchedulePrerequisite {
+  readonly demandId: string;
+  readonly title: string;
+}
+
 /**
  * Uma demanda no cronograma. As datas são datas de calendário (`yyyy-MM-dd`, texto). Os desvios são em
  * dias corridos, positivos quando houve atraso (DT-27), e só existem para demandas concluídas.
@@ -33,6 +39,7 @@ export interface ScheduleItem {
   readonly baselineEndDate: string | null;
   readonly baselineDeviationDays: number | null;
   readonly forecastDeviationDays: number | null;
+  readonly prerequisites: readonly SchedulePrerequisite[];
 }
 
 /** O cronograma inteiro, na ordem de execução. */
@@ -59,6 +66,8 @@ export interface Demand {
   readonly completedOn: string | null;
   readonly teams: readonly DemandTeam[];
   readonly assignedPersonIds: readonly string[];
+  /** Os ids das demandas de que esta depende (RF-18): ela só começa depois que elas terminarem. */
+  readonly prerequisiteIds: readonly string[];
 }
 
 /** Os números da API chegam como `number | string` no cliente gerado; aqui viram `number`, e `null` continua `null`. */
@@ -95,6 +104,10 @@ function mapScheduleItem(item: ScheduleItemResponse): ScheduleItem {
     baselineEndDate: item.baselineEndDate,
     baselineDeviationDays: toNullableNumber(item.baselineDeviationDays),
     forecastDeviationDays: toNullableNumber(item.forecastDeviationDays),
+    prerequisites: item.prerequisites.map((prerequisite) => ({
+      demandId: prerequisite.demandId,
+      title: prerequisite.title,
+    })),
   };
 }
 
@@ -122,5 +135,6 @@ export function mapDemand(response: DemandResponse): Demand {
       estimatedEffortHours: toNullableNumber(team.estimatedEffortHours),
     })),
     assignedPersonIds: [...response.assignedPersonIds],
+    prerequisiteIds: [...response.prerequisiteIds],
   };
 }

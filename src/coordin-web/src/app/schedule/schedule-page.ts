@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { formatCalendarDate } from '../core/dates/calendar-date';
-import { deviationLabel, unpredictableReasonLabel } from '../planning/labels';
+import { deviationLabel, prerequisitesLabel, unpredictableReasonLabel } from '../planning/labels';
 import { ScheduleItem } from '../planning/planning';
 import { ScheduleStore } from './schedule.store';
 
@@ -32,6 +32,11 @@ export class SchedulePage {
     return value === null
       ? 'sem estimativa'
       : `${value.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} h`;
+  }
+
+  /** A linha "Depende de: A, B" (RF-18), ou `null` quando a demanda não depende de nenhuma. */
+  protected prerequisitesOf(item: ScheduleItem): string | null {
+    return prerequisitesLabel(item.prerequisites.map((prerequisite) => prerequisite.title));
   }
 
   protected reasonOf(item: ScheduleItem): string {

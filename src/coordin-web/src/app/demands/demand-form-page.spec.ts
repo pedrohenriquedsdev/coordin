@@ -35,6 +35,7 @@ function demand(overrides: Record<string, unknown> = {}) {
     completedOn: null,
     teams: [{ teamId: 't1', teamName: 'Web', estimatedEffortHours: '40' }],
     assignedPersonIds: ['p1'],
+    prerequisiteIds: [],
     ...overrides,
   };
 }
@@ -75,14 +76,22 @@ describe('DemandFormPage', () => {
     http.expectOne((req) => req.method === method && req.url === url);
 
   /** Abre a tela: responde os times e as pessoas e, na edição, a demanda. */
-  async function open(params: Record<string, string> = {}, existing?: unknown): Promise<void> {
+  async function open(
+    params: Record<string, string> = {},
+    existing?: unknown,
+    others: unknown[] = [],
+  ): Promise<void> {
     routeParams = params;
     fixture = TestBed.createComponent(DemandFormPage);
-    // A tela pede os times e as pessoas primeiro; a demanda vem depois, na edição.
+    // A tela pede os times, as pessoas e as demandas (para "Depende de") primeiro; a demanda vem depois, na edição.
     request('GET', '/api/teams').flush(TEAMS);
     request('GET', '/api/people').flush(PEOPLE);
     if (params['id']) {
-      request('GET', `/api/demands/${params['id']}`).flush(existing ?? demand());
+      const self = existing ?? demand();
+      request('GET', '/api/demands').flush([self, ...others]);
+      request('GET', `/api/demands/${params['id']}`).flush(self);
+    } else {
+      request('GET', '/api/demands').flush(others);
     }
     fixture.detectChanges();
     await fixture.whenStable();
@@ -136,6 +145,7 @@ describe('DemandFormPage', () => {
       informedEndDate: null,
       teams: [{ teamId: 't1', estimatedEffortHours: 80 }],
       assignedPersonIds: ['p1'],
+      prerequisiteIds: [],
     });
     create.flush({ id: 'd9' }, { status: 201, statusText: 'Created' });
     await fixture.whenStable();
@@ -261,12 +271,119 @@ describe('DemandFormPage', () => {
     fixture = TestBed.createComponent(DemandFormPage);
     request('GET', '/api/teams').flush(TEAMS);
     request('GET', '/api/people').flush(PEOPLE);
+    request('GET', '/api/demands').flush([]);
     request('GET', '/api/demands/nada').flush(null, { status: 404, statusText: 'Not Found' });
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
 
     expect(element().textContent).toContain('Demanda não encontrada.');
+  });
+
+  describe('Depende de (pré-requisitos)', () => {
+    const other = (id: string, title: string, completedOn: string | null = null) =>
+      demand({ id, title, completedOn, teams: [], assignedPersonIds: [] });
+
+    const prerequisiteBox = (title: string): HTMLInputElement =>
+      [...element().querySelectorAll<HTMLInputElement>('input[type="checkbox"]')].find((input) =>
+        input.closest('li')?.textContent?.trim().startsWith(title),
+      )!;
+
+    it('sends the chosen prerequisites with the demand', async () => {
+      await open({}, undefined, [other('d2', 'Pagamentos'), other('d3', 'Login')]);
+      field('demand-title').value = 'Novo checkout';
+      field('demand-title').dispatchEvent(new Event('input'));
+      checkTeam('t1', true);
+      field('hours-t1').value = '8';
+      field('hours-t1').dispatchEvent(new Event('input'));
+      prerequisiteBox('Pagamentos').checked = true;
+      prerequisiteBox('Pagamentos').dispatchEvent(new Event('change'));
+      prerequisiteBox('Login').checked = true;
+      prerequisiteBox('Login').dispatchEvent(new Event('change'));
+
+      button('Salvar demanda')?.click();
+
+      expect(request('POST', '/api/demands').request.body.prerequisiteIds).toEqual(['d2', 'd3']);
+    });
+
+    it('shows the current prerequisites checked and never offers the demand itself', async () => {
+      await open({ id: 'd1' }, demand({ prerequisiteIds: ['d2'] }), [other('d2', 'Pagamentos')]);
+
+      expect(prerequisiteBox('Pagamentos').checked).toBe(true);
+      const labels = [...element().querySelectorAll('li label')].map((label) =>
+        label.textContent?.trim(),
+      );
+      expect(labels.some((text) => text?.startsWith('Checkout'))).toBe(false);
+    });
+
+    it('says that there is no other demand, without blocking the save', async () => {
+      await open();
+
+      expect(element().textContent).toContain('Não há outras demandas para escolher.');
+      expect(button('Salvar demanda')?.disabled).toBe(false);
+    });
+
+    it('marks a completed candidate as completed', async () => {
+      await open({}, undefined, [other('d2', 'Pagamentos', '2026-12-05')]);
+
+      expect(prerequisiteBox('Pagamentos').closest('li')?.textContent).toContain('(concluída)');
+    });
+
+    it('shows the cycle message and keeps the fields and the checks', async () => {
+      const navigate = vi.spyOn(router, 'navigateByUrl');
+      await open({}, undefined, [other('d2', 'Pagamentos')]);
+      field('demand-title').value = 'Novo checkout';
+      field('demand-title').dispatchEvent(new Event('input'));
+      checkTeam('t1', true);
+      field('hours-t1').value = '8';
+      field('hours-t1').dispatchEvent(new Event('input'));
+      prerequisiteBox('Pagamentos').checked = true;
+      prerequisiteBox('Pagamentos').dispatchEvent(new Event('change'));
+
+      button('Salvar demanda')?.click();
+      request('POST', '/api/demands').flush(
+        {
+          detail: 'As dependências formariam um ciclo: Novo checkout → Pagamentos → Novo checkout.',
+          code: 'dependency-cycle',
+        },
+        { status: 409, statusText: 'Conflict' },
+      );
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(element().textContent).toContain('As dependências formariam um ciclo');
+      expect(navigate).not.toHaveBeenCalled();
+      expect(field('demand-title').value).toBe('Novo checkout');
+      expect(prerequisiteBox('Pagamentos').checked).toBe(true);
+    });
+
+    it('saves again without the prerequisite that closed the cycle', async () => {
+      const navigate = vi.spyOn(router, 'navigateByUrl');
+      await open({}, undefined, [other('d2', 'Pagamentos')]);
+      field('demand-title').value = 'Novo checkout';
+      field('demand-title').dispatchEvent(new Event('input'));
+      checkTeam('t1', true);
+      field('hours-t1').value = '8';
+      field('hours-t1').dispatchEvent(new Event('input'));
+      prerequisiteBox('Pagamentos').checked = true;
+      prerequisiteBox('Pagamentos').dispatchEvent(new Event('change'));
+      button('Salvar demanda')?.click();
+      request('POST', '/api/demands').flush(
+        { detail: 'ciclo', code: 'dependency-cycle' },
+        { status: 409, statusText: 'Conflict' },
+      );
+      await fixture.whenStable();
+
+      prerequisiteBox('Pagamentos').checked = false;
+      prerequisiteBox('Pagamentos').dispatchEvent(new Event('change'));
+      button('Salvar demanda')?.click();
+      const retry = request('POST', '/api/demands');
+      expect(retry.request.body.prerequisiteIds).toEqual([]);
+      retry.flush({ id: 'd9' }, { status: 201, statusText: 'Created' });
+      await fixture.whenStable();
+
+      expect(navigate).toHaveBeenCalledWith('/demands');
+    });
   });
 });
 

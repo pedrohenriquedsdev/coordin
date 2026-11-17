@@ -23,6 +23,7 @@ function demand(id: string, title: string, rank: number, completedOn: string | n
     completedOn,
     teams: [{ teamId: 't1', teamName: 'Web', estimatedEffortHours: '40' }],
     assignedPersonIds: [],
+    prerequisiteIds: [],
   };
 }
 
@@ -48,6 +49,7 @@ function item(demandId: string, overrides: Record<string, unknown> = {}) {
     baselineEndDate: null,
     baselineDeviationDays: null,
     forecastDeviationDays: null,
+    prerequisites: [],
     ...overrides,
   };
 }
@@ -245,6 +247,7 @@ describe('DemandsPage', () => {
           completedOn: '2026-12-16',
           baselineDeviationDays: 6,
           forecastDeviationDays: 2,
+          prerequisites: [],
         }),
       ],
     );

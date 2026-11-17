@@ -4,6 +4,7 @@ import { catchError, EMPTY, forkJoin, map, Observable, of, switchMap, tap } from
 import { ApiConfiguration } from '../api/api-configuration';
 import { createDemand } from '../api/fn/demands/create-demand';
 import { getDemand } from '../api/fn/demands/get-demand';
+import { getDemands } from '../api/fn/demands/get-demands';
 import { updateDemand } from '../api/fn/demands/update-demand';
 import { getPeople } from '../api/fn/people/get-people';
 import { getTeams } from '../api/fn/teams/get-teams';
@@ -25,13 +26,20 @@ export class DemandFormStore {
 
   readonly teams = signal<Team[]>([]);
   readonly people = signal<Person[]>([]);
+  /** Todas as demandas, para escolher os pré-requisitos (a própria é tirada pela tela). */
+  readonly candidates = signal<Demand[]>([]);
   readonly status = signal<FormStatus>('loading');
 
-  /** Carrega times e pessoas e, se houver id, a demanda. Um 404 marca a demanda como não encontrada. */
+  /** Carrega times, pessoas, as demandas e, se houver id, a demanda. Um 404 marca a demanda como não encontrada. */
   load(id: string | null): Observable<Demand | null> {
     this.status.set('loading');
-    return forkJoin([getTeams(this.http, this.root), getPeople(this.http, this.root)]).pipe(
-      tap(([teams, people]) => {
+    return forkJoin([
+      getTeams(this.http, this.root),
+      getPeople(this.http, this.root),
+      getDemands(this.http, this.root),
+    ]).pipe(
+      tap(([teams, people, demands]) => {
+        this.candidates.set(demands.body.map(mapDemand));
         this.teams.set(
           teams.body.map((team) => ({
             id: team.id,

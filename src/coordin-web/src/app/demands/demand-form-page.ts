@@ -55,10 +55,17 @@ export class DemandFormPage {
   /** Times marcados, com o texto das horas de cada um (`''` = sem estimativa). */
   protected readonly selected = signal<Record<string, string>>({});
   protected readonly assignedPersonIds = signal<string[]>([]);
+  /** Os pré-requisitos marcados em "Depende de" (RF-18). */
+  protected readonly prerequisiteIds = signal<string[]>([]);
   protected readonly locked = signal(false);
   protected readonly message = signal<string | null>(null);
   protected readonly effortError = signal<string | null>(null);
   protected readonly saving = signal(false);
+
+  /** As demandas que podem ser pré-requisito: todas, menos esta (uma demanda não depende de si mesma). */
+  protected readonly candidates = computed(() =>
+    this.store.candidates().filter((demand) => demand.id !== this.demandId),
+  );
 
   /** As pessoas dos times marcados, na ordem da lista de pessoas. */
   protected readonly offeredPeople = computed(() =>
@@ -111,6 +118,16 @@ export class DemandFormPage {
     this.effortError.set(null);
   }
 
+  protected isPrerequisite(demandId: string): boolean {
+    return this.prerequisiteIds().includes(demandId);
+  }
+
+  protected togglePrerequisite(demandId: string, checked: boolean): void {
+    this.prerequisiteIds.update((ids) =>
+      checked ? [...ids, demandId] : ids.filter((id) => id !== demandId),
+    );
+  }
+
   protected togglePerson(personId: string, checked: boolean): void {
     this.assignedPersonIds.update((ids) =>
       checked ? [...ids, personId] : ids.filter((id) => id !== personId),
@@ -158,6 +175,7 @@ export class DemandFormPage {
       informedEndDate: informedEndDate === '' ? null : informedEndDate,
       teams,
       assignedPersonIds: this.assignedPersonIds(),
+      prerequisiteIds: this.prerequisiteIds(),
     };
 
     this.saving.set(true);
@@ -193,5 +211,6 @@ export class DemandFormPage {
       ),
     );
     this.assignedPersonIds.set([...demand.assignedPersonIds]);
+    this.prerequisiteIds.set([...demand.prerequisiteIds]);
   }
 }
