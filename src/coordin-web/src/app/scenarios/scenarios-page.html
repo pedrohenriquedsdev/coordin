@@ -1,0 +1,141 @@
+<h2 class="text-lg font-semibold">Cenários</h2>
+
+@switch (store.status()) {
+  @case ('loading') {
+    <p class="mt-3 text-slate-600">Carregando…</p>
+  }
+  @case ('failed') {
+    <div role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">
+      <p>Não foi possível carregar a tela de cenários.</p>
+      <button
+        type="button"
+        (click)="store.load()"
+        class="mt-2 rounded-md border border-red-300 px-3 py-1 font-medium hover:bg-red-100"
+      >
+        Tentar de novo
+      </button>
+    </div>
+  }
+  @default {
+    @if (store.message(); as text) {
+      <p role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">{{ text }}</p>
+    }
+
+    @if (store.lastApplied()) {
+      <p role="status" class="mt-3 rounded-md bg-emerald-50 p-3 text-sm text-emerald-900">
+        {{ appliedText }}
+      </p>
+    }
+
+    <!-- Recomendações (RF-13): só buscam quando a pessoa pede. -->
+    <section class="mt-6" aria-labelledby="recommendations-heading">
+      <div class="flex flex-wrap items-center gap-3">
+        <h3 id="recommendations-heading" class="text-base font-semibold">Recomendações</h3>
+        <button
+          type="button"
+          (click)="store.recommend()"
+          [disabled]="busy()"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-50"
+        >
+          @if (store.busy() === 'searching') {
+            Calculando…
+          } @else {
+            Buscar recomendações
+          }
+        </button>
+      </div>
+
+      @if (store.searched() && store.recommendations().length === 0) {
+        <p class="mt-3 text-slate-600">Nenhuma alternativa melhora o resultado atual.</p>
+      }
+
+      <div class="mt-3 space-y-4">
+        @for (scenario of store.recommendations(); track $index) {
+          <app-scenario-card
+            [scenario]="scenario"
+            [title]="'Cenário recomendado ' + ($index + 1)"
+            [canApprove]="!busy()"
+            (approve)="approve($event)"
+            (reject)="reject($event)"
+          />
+        }
+      </div>
+    </section>
+
+    <!-- Ordem própria (RF-14): só as demandas abertas, com Subir e Descer. -->
+    <section class="mt-8" aria-labelledby="own-order-heading">
+      <h3 id="own-order-heading" class="text-base font-semibold">Simular uma ordem própria</h3>
+
+      @if (openItems().length === 0) {
+        <p class="mt-3 text-slate-600">Não há demandas abertas para reordenar.</p>
+      } @else {
+        <ol class="mt-3 space-y-2">
+          @for (id of editedOrder(); track id; let first = $first; let last = $last) {
+            <li
+              class="flex items-center justify-between gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+            >
+              <span>{{ $index + 1 }}. {{ titleOf(id) }}</span>
+              <span class="flex gap-1">
+                @if (!first) {
+                  <button
+                    type="button"
+                    (click)="move(id, 'up')"
+                    [disabled]="busy()"
+                    class="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium hover:bg-slate-100 disabled:opacity-50"
+                  >
+                    Subir
+                  </button>
+                }
+                @if (!last) {
+                  <button
+                    type="button"
+                    (click)="move(id, 'down')"
+                    [disabled]="busy()"
+                    class="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium hover:bg-slate-100 disabled:opacity-50"
+                  >
+                    Descer
+                  </button>
+                }
+              </span>
+            </li>
+          }
+        </ol>
+
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            (click)="simulate()"
+            [disabled]="busy()"
+            class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+          >
+            @if (store.busy() === 'simulating') {
+              Simulando…
+            } @else {
+              Simular
+            }
+          </button>
+          <button
+            type="button"
+            (click)="restore()"
+            [disabled]="busy()"
+            class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-50"
+          >
+            Restaurar a ordem atual
+          </button>
+        </div>
+      }
+
+      @if (store.simulation(); as simulated) {
+        <div class="mt-4">
+          <app-scenario-card
+            [scenario]="simulated"
+            [title]="'Ordem simulada'"
+            [canApprove]="!busy()"
+            (approve)="approve($event)"
+            (reject)="reject($event)"
+          />
+        </div>
+      }
+    </section>
+  }
+}
