@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
@@ -177,6 +177,59 @@ describe('App', () => {
       await fixture.whenStable();
       expect(TestBed.inject(Router).url).toBe('/calendar');
       expect(element(fixture).querySelector('main')?.textContent).toContain('Calendário');
+    });
+  });
+
+  describe('validation area', () => {
+    const validationLink = (root: HTMLElement) =>
+      [...root.querySelectorAll('header nav a')].find(
+        (link) => link.textContent?.trim() === 'Validação',
+      );
+
+    it('shows the Validação link when the status responds', async () => {
+      const fixture = TestBed.createComponent(App);
+      const http = TestBed.inject(HttpTestingController);
+      fixture.detectChanges();
+      TestBed.flushEffects();
+
+      http
+        .expectOne((req) => req.url === '/api/validation/status')
+        .flush({
+          demandCount: 0,
+          baselineCount: 0,
+          currentPlanCaptured: false,
+          currentPlanCapturedAt: null,
+        });
+      fixture.detectChanges();
+
+      expect(validationLink(element(fixture))).toBeDefined();
+      http.verify();
+    });
+
+    it('hides the Validação link when the API answers 404', async () => {
+      const fixture = TestBed.createComponent(App);
+      const http = TestBed.inject(HttpTestingController);
+      fixture.detectChanges();
+      TestBed.flushEffects();
+
+      http
+        .expectOne((req) => req.url === '/api/validation/status')
+        .flush(null, { status: 404, statusText: 'Not Found' });
+      fixture.detectChanges();
+
+      expect(validationLink(element(fixture))).toBeUndefined();
+      http.verify();
+    });
+
+    it('does not check the status before there is a session', async () => {
+      authenticated.set(false);
+      const fixture = TestBed.createComponent(App);
+      const http = TestBed.inject(HttpTestingController);
+      fixture.detectChanges();
+      TestBed.flushEffects();
+
+      http.expectNone((req) => req.url === '/api/validation/status');
+      http.verify();
     });
   });
 });

@@ -1,0 +1,31 @@
+<h2 class="text-lg font-semibold">Validação por simulação</h2>
+
+@switch (store.load()) {
+  @case ('loading') {
+    <p class="mt-3 text-slate-600">Carregando…</p>
+  }
+  @case ('unavailable') {
+    <p class="mt-3 rounded-md bg-slate-100 p-3 text-sm text-slate-700">
+      A validação não está disponível neste ambiente.
+    </p>
+  }
+  @case ('failed') {
+    <div role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">
+      <p>Não foi possível carregar a validação.</p>
+      <button
+        type="button"
+        (click)="store.refresh()"
+        class="mt-2 rounded-md border border-red-300 px-3 py-1 font-medium hover:bg-red-100"
+      >
+        Tentar de novo
+      </button>
+    </div>
+  }
+  @default {
+    @if (store.step(); as step) {
+      <p class="mt-3 text-sm text-slate-600">
+        Etapa atual: <strong class="text-slate-900">{{ stepLabel(step) }}</strong>
+      </p>
+    }
+  }
+}

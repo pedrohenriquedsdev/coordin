@@ -9,6 +9,7 @@ import { ScenariosPage } from './scenarios/scenarios-page';
 import { SettingsPage } from './settings/settings-page';
 import { Login } from './login/login';
 import { TeamsPage } from './teams/teams-page';
+import { ValidationPage } from './validation/validation-page';
 
 export const routes: Routes = [
   // Pública: a única rota que não exige sessão. Quem já tem sessão é levado à página inicial.
@@ -27,6 +28,7 @@ export const routes: Routes = [
       { path: 'scenarios', component: ScenariosPage },
       { path: 'reports/teams', component: TeamReportPage },
       { path: 'settings', component: SettingsPage },
+      { path: 'validation', component: ValidationPage },
       { path: 'teams', component: TeamsPage },
       { path: 'calendar', component: CalendarPage },
     ],

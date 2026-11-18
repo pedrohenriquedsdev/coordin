@@ -5,10 +5,10 @@
 
 ## 2. Estado do assistente e visibilidade
 
-- [ ] 2.1 Criar o store da validação com sinais: status do servidor, etapa atual derivada do status, parâmetros e datas digitados na memória, e estados de carregamento e falha (design, decisões 1 e 5)
-- [ ] 2.2 Testes do store: etapa derivada do status em cada combinação (conjunto não carregado, linha de base incompleta, plano guardado), e dados digitados preservados após falha (spec: estados de carregamento e falha)
-- [ ] 2.3 Mostrar o item "Validação" no menu da casca só quando o status responde com sucesso, e a mensagem de indisponibilidade na rota quando a API responde 404 (spec: visibilidade condicionada; design, decisão 2)
-- [ ] 2.4 Testes da casca: item aparece com sucesso, some com 404 e a rota mostra a mensagem de indisponibilidade
+- [x] 2.1 Criar o store da validação com sinais: status do servidor, etapa atual derivada do status, parâmetros e datas digitados na memória, e estados de carregamento e falha (design, decisões 1 e 5)
+- [x] 2.2 Testes do store: etapa derivada do status em cada combinação (conjunto não carregado, linha de base incompleta, plano guardado), e dados digitados preservados após falha (spec: estados de carregamento e falha)
+- [x] 2.3 Mostrar o item "Validação" no menu da casca só quando o status responde com sucesso, e a mensagem de indisponibilidade na rota quando a API responde 404 (spec: visibilidade condicionada; design, decisão 2)
+- [x] 2.4 Testes da casca: item aparece com sucesso, some com 404 e a rota mostra a mensagem de indisponibilidade
 
 ## 3. Etapas do assistente
 
