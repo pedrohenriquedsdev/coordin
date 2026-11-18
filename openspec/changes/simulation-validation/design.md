@@ -29,7 +29,7 @@ Entrada: `ValidationInput(PlanningSnapshot CurrentProcess, PlanningSnapshot With
 
 ### D2. Fator por demanda com SplitMix64 e hash estável do id
 
-`u` = (próximo valor do SplitMix64 `>> 11`) × 2⁻⁵³, em [0, 1). O estado inicial é `seed XOR hash64(demandId)`, com o hash FNV-1a de 64 bits sobre os 16 bytes do `Guid` em ordem fixa (`ToByteArray(bigEndian: true)`). O fator é `min + (max − min) × u`, arredondado a 6 casas; o esforço de cada parte é `esforço × fator`, arredondado a 2 casas (`MidpointRounding.AwayFromZero`), e nunca fica abaixo de 0,01. Não usa `System.Random` (a sequência para uma semente não é garantida entre versões do .NET). **Alternativa:** `Random(seed)`. Descartada pelo motivo acima.
+`u` = (próximo valor do SplitMix64 `>> 11`) × 2⁻⁵³, em [0, 1). O estado inicial é `seed XOR hash64(demandId)`, com o hash FNV-1a de 64 bits sobre os 16 bytes do `Guid` em ordem fixa (`ToByteArray(bigEndian: true)`). O fator é `min + (max − min) × u`, **sem arredondamento** (arredondar poderia encostar no limite superior, que é exclusivo); o esforço de cada parte é `esforço × fator`, arredondado a 2 casas (`MidpointRounding.AwayFromZero`), e nunca fica abaixo de 0,01 (ajuste da implementação do grupo 1). Não usa `System.Random` (a sequência para uma semente não é garantida entre versões do .NET). **Alternativa:** `Random(seed)`. Descartada pelo motivo acima.
 
 ### D3. Realizado simulado com margem zero
 
