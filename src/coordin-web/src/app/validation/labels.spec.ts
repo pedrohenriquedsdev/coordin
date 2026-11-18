@@ -3,7 +3,6 @@ import {
   deviationChartSeries,
   effortRangeError,
   efficiencyChartSeries,
-  efficiencyTableRows,
   priorityCheckSummary,
   priorityRows,
   seedError,
@@ -119,43 +118,12 @@ describe('toNumber', () => {
   });
 });
 
-describe('efficiencyChartSeries and efficiencyTableRows', () => {
+describe('efficiencyChartSeries', () => {
   it('plots idle hours and overloaded periods for both plannings, reading text decimals as numbers', () => {
     const series = efficiencyChartSeries(sampleResult());
     expect(series.labels).toEqual(['Ociosidade (horas)', 'Sobrecargas (períodos)']);
     expect(series.currentProcess).toEqual([412.5, 9]);
     expect(series.withCoordin).toEqual([296, 4]);
-  });
-
-  it('shows every efficiency metric in the table, with the same values as the chart', () => {
-    const rows = efficiencyTableRows(sampleResult());
-    const idle = rows.find((row) => row.label === 'Ociosidade (horas)');
-    const overloaded = rows.find((row) => row.label === 'Sobrecargas (períodos)');
-    expect(idle).toEqual({
-      label: 'Ociosidade (horas)',
-      currentProcess: '412.5',
-      withCoordin: '296',
-    });
-    expect(overloaded).toEqual({
-      label: 'Sobrecargas (períodos)',
-      currentProcess: '9',
-      withCoordin: '4',
-    });
-    expect(rows.map((row) => row.label)).toEqual([
-      'Ociosidade (horas)',
-      'Dispersão da ocupação (pontos)',
-      'Sobrecargas (períodos)',
-      'Prazo do setor',
-    ]);
-  });
-
-  it('shows a dash for a sector end date that is missing', () => {
-    const prazo = efficiencyTableRows(sampleResult()).find((row) => row.label === 'Prazo do setor');
-    expect(prazo).toEqual({
-      label: 'Prazo do setor',
-      currentProcess: '2027-03-12',
-      withCoordin: '—',
-    });
   });
 });
 

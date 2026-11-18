@@ -21,11 +21,11 @@
 
 ## 4. Resultado em gráficos e tabelas
 
-- [ ] 4.1 Gráfico e tabela de eficiência dos dois planejamentos (ociosidade, sobrecargas e prazo do setor; dispersão e prazo do setor como valores isolados), usando `ChartComponent` (spec: resultado em gráfico acompanhado de tabela)
-- [ ] 4.2 Gráfico e tabela de desvios: média com sinal e absoluta, e tabela por demanda com as duas previsões, a data real simulada e os dois desvios
-- [ ] 4.3 Tabela da checagem das 5 demandas mais prioritárias, com a contagem das que pioram e destaque nas linhas
-- [ ] 4.4 Layout em 360 px: tabela por demanda vira cartões, sem rolagem horizontal da página (RNF-03)
-- [ ] 4.5 Testes de componentes do resultado: os valores do gráfico e da tabela são iguais, e a apresentação de cada seção aparece com os dados do `ValidationResult`
+- [x] 4.1 Gráfico e tabela de eficiência dos dois planejamentos (ociosidade, sobrecargas e prazo do setor; dispersão e prazo do setor como valores isolados), usando `ChartComponent` (spec: resultado em gráfico acompanhado de tabela)
+- [x] 4.2 Gráfico e tabela de desvios: média com sinal e absoluta, e tabela por demanda com as duas previsões, a data real simulada e os dois desvios
+- [x] 4.3 Tabela da checagem das 5 demandas mais prioritárias, com a contagem das que pioram e destaque nas linhas
+- [x] 4.4 Layout em 360 px: tabela por demanda vira cartões, sem rolagem horizontal da página (RNF-03)
+- [x] 4.5 Testes de componentes do resultado: os valores do gráfico e da tabela são iguais, e a apresentação de cada seção aparece com os dados do `ValidationResult`
 
 ## 5. Verificação
 

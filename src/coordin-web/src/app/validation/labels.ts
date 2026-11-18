@@ -59,13 +59,6 @@ export function toNumber(value: number | string): number {
   return typeof value === 'number' ? value : Number(value);
 }
 
-/** Uma linha de tabela de eficiência: a mesma informação do gráfico, nos dois planejamentos. */
-export interface EfficiencyRow {
-  label: string;
-  currentProcess: string;
-  withCoordin: string;
-}
-
 /**
  * Séries do gráfico de eficiência: só ociosidade (horas) e sobrecargas (períodos), que têm a mesma unidade de
  * contagem. Dispersão e prazo do setor não cabem na mesma escala e ficam só na tabela.
@@ -82,34 +75,6 @@ export function efficiencyChartSeries(result: ValidationResult): {
     currentProcess: [toNumber(current.idleHours), toNumber(current.overloadedPeriods)],
     withCoordin: [toNumber(withCoordin.idleHours), toNumber(withCoordin.overloadedPeriods)],
   };
-}
-
-/** Tabela de eficiência com todas as métricas, na mesma ordem e com os mesmos valores do gráfico. */
-export function efficiencyTableRows(result: ValidationResult): EfficiencyRow[] {
-  const current = result.efficiency.currentProcess;
-  const withCoordin = result.efficiency.withCoordin;
-  return [
-    {
-      label: 'Ociosidade (horas)',
-      currentProcess: String(toNumber(current.idleHours)),
-      withCoordin: String(toNumber(withCoordin.idleHours)),
-    },
-    {
-      label: 'Dispersão da ocupação (pontos)',
-      currentProcess: String(toNumber(current.occupancySpreadPoints)),
-      withCoordin: String(toNumber(withCoordin.occupancySpreadPoints)),
-    },
-    {
-      label: 'Sobrecargas (períodos)',
-      currentProcess: String(toNumber(current.overloadedPeriods)),
-      withCoordin: String(toNumber(withCoordin.overloadedPeriods)),
-    },
-    {
-      label: 'Prazo do setor',
-      currentProcess: current.sectorEndDate ?? '—',
-      withCoordin: withCoordin.sectorEndDate ?? '—',
-    },
-  ];
 }
 
 /** Séries do gráfico de desvios: a média com sinal e a absoluta, para a linha de base e para o Coordin. */

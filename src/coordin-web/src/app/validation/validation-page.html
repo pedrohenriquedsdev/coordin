@@ -162,7 +162,7 @@
             </form>
 
             @if (store.result(); as result) {
-              <p class="mt-4 text-sm text-slate-800">{{ priorityCheckSummary(result) }}</p>
+              <app-validation-result [result]="result" [titles]="titles()" />
             }
           }
         }

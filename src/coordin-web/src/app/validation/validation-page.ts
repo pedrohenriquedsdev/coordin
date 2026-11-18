@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
-import { Component, effect, inject, untracked } from '@angular/core';
-import { priorityCheckSummary } from './labels';
+import { Component, computed, effect, inject, untracked } from '@angular/core';
 import { stepLabel } from './wizard-step';
+import { ValidationResultView } from './validation-result';
 import { ValidationStore } from './validation.store';
 
 /**
@@ -10,7 +10,7 @@ import { ValidationStore } from './validation.store';
  */
 @Component({
   selector: 'app-validation-page',
-  imports: [DatePipe],
+  imports: [DatePipe, ValidationResultView],
   providers: [ValidationStore],
   templateUrl: './validation-page.html',
 })
@@ -18,7 +18,10 @@ export class ValidationPage {
   protected readonly store = inject(ValidationStore);
 
   protected readonly stepLabel = stepLabel;
-  protected readonly priorityCheckSummary = priorityCheckSummary;
+  /** Os títulos das demandas do conjunto, para o resultado mostrar nomes em vez de identificadores. */
+  protected readonly titles = computed(
+    () => new Map(this.store.baseline().map((item) => [item.demandId, item.title])),
+  );
 
   constructor() {
     this.store.refresh();

@@ -1,0 +1,148 @@
+<div class="mt-4 space-y-6">
+  <p class="text-sm text-slate-600">Período comparado: {{ period() }}</p>
+
+  <section aria-labelledby="efficiency-title" class="space-y-3">
+    <h4 id="efficiency-title" class="text-sm font-semibold text-slate-900">
+      Eficiência dos dois planejamentos
+    </h4>
+    <app-chart
+      [configuration]="efficiencyChart()"
+      label="Eficiência: ociosidade e sobrecargas dos dois planejamentos"
+    />
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-left text-sm">
+        <thead class="border-b border-slate-200 text-slate-600">
+          <tr>
+            <th scope="col" class="py-2 pr-3 font-medium">Métrica</th>
+            <th scope="col" class="py-2 pr-3 font-medium">Planejamento atual</th>
+            <th scope="col" class="py-2 font-medium">Com o Coordin</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of efficiencyRows(); track row.label) {
+            <tr class="border-b border-slate-100">
+              <th scope="row" class="py-2 pr-3 font-normal text-slate-800">{{ row.label }}</th>
+              <td class="py-2 pr-3">{{ row.currentProcess }}</td>
+              <td class="py-2">{{ row.withCoordin }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="deviation-title" class="space-y-3">
+    <h4 id="deviation-title" class="text-sm font-semibold text-slate-900">
+      Desvios das datas (dias corridos)
+    </h4>
+    <app-chart [configuration]="deviationChart()" label="Desvios médios: linha de base e Coordin" />
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-left text-sm">
+        <thead class="border-b border-slate-200 text-slate-600">
+          <tr>
+            <th scope="col" class="py-2 pr-3 font-medium">Previsão</th>
+            <th scope="col" class="py-2 pr-3 font-medium">Média com sinal</th>
+            <th scope="col" class="py-2 font-medium">Média absoluta</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of averages(); track row.label) {
+            <tr class="border-b border-slate-100">
+              <th scope="row" class="py-2 pr-3 font-normal text-slate-800">{{ row.label }}</th>
+              <td class="py-2 pr-3">{{ row.signed }}</td>
+              <td class="py-2">{{ row.absolute }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- A partir de 640 px, uma tabela; abaixo disso, um cartão por demanda (sem rolagem horizontal). -->
+    <div class="hidden overflow-x-auto sm:block">
+      <table class="min-w-full text-left text-sm">
+        <caption class="sr-only">
+          Desvio de cada demanda, na linha de base e no Coordin
+        </caption>
+        <thead class="border-b border-slate-200 text-slate-600">
+          <tr>
+            <th scope="col" class="py-2 pr-3 font-medium">Demanda</th>
+            <th scope="col" class="py-2 pr-3 font-medium">Linha de base</th>
+            <th scope="col" class="py-2 pr-3 font-medium">Previsão do Coordin</th>
+            <th scope="col" class="py-2 pr-3 font-medium">Data real simulada</th>
+            <th scope="col" class="py-2 pr-3 font-medium">Desvio da linha de base</th>
+            <th scope="col" class="py-2 font-medium">Desvio do Coordin</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of deviations(); track row.demandId) {
+            <tr class="border-b border-slate-100">
+              <th scope="row" class="py-2 pr-3 font-normal text-slate-800">{{ row.title }}</th>
+              <td class="py-2 pr-3">{{ row.baselineDate }}</td>
+              <td class="py-2 pr-3">{{ row.coordinForecastEndDate }}</td>
+              <td class="py-2 pr-3">{{ row.simulatedActualEndDate }}</td>
+              <td class="py-2 pr-3">{{ row.baselineText }}</td>
+              <td class="py-2">{{ row.coordinText }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="space-y-2 sm:hidden">
+      @for (row of deviations(); track row.demandId) {
+        <li class="rounded-md border border-slate-200 bg-white p-3 text-sm">
+          <p class="font-medium text-slate-900">{{ row.title }}</p>
+          <dl class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1">
+            <dt class="text-slate-500">Linha de base</dt>
+            <dd>{{ row.baselineDate }}</dd>
+            <dt class="text-slate-500">Previsão do Coordin</dt>
+            <dd>{{ row.coordinForecastEndDate }}</dd>
+            <dt class="text-slate-500">Data real simulada</dt>
+            <dd>{{ row.simulatedActualEndDate }}</dd>
+            <dt class="text-slate-500">Desvio da linha de base</dt>
+            <dd>{{ row.baselineText }}</dd>
+            <dt class="text-slate-500">Desvio do Coordin</dt>
+            <dd>{{ row.coordinText }}</dd>
+          </dl>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section aria-labelledby="priority-title" class="space-y-3">
+    <h4 id="priority-title" class="text-sm font-semibold text-slate-900">
+      Demandas mais prioritárias
+    </h4>
+    <p class="text-sm text-slate-800">{{ prioritySummary() }}</p>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-left text-sm">
+        <thead class="border-b border-slate-200 text-slate-600">
+          <tr>
+            <th scope="col" class="py-2 pr-3 font-medium">Prioridade</th>
+            <th scope="col" class="py-2 pr-3 font-medium">Demanda</th>
+            <th scope="col" class="py-2 pr-3 font-medium">Previsão atual</th>
+            <th scope="col" class="py-2 pr-3 font-medium">Previsão do Coordin</th>
+            <th scope="col" class="py-2 font-medium">Diferença</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of priorities(); track row.rank) {
+            <tr class="border-b border-slate-100" [class.bg-red-50]="row.worsened">
+              <td class="py-2 pr-3">{{ row.rank }}</td>
+              <th scope="row" class="py-2 pr-3 font-normal text-slate-800">{{ row.title }}</th>
+              <td class="py-2 pr-3">{{ row.currentEnd }}</td>
+              <td class="py-2 pr-3">{{ row.coordinEnd }}</td>
+              <td
+                class="py-2"
+                [class.font-semibold]="row.worsened"
+                [class.text-red-800]="row.worsened"
+              >
+                {{ row.deltaText }}{{ row.worsened ? ' (piora)' : '' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
