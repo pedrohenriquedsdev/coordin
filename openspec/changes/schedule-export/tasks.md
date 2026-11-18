@@ -28,10 +28,10 @@ Regras para todas as tasks:
 
 ## 4. Cliente Angular regenerado e tela (RF-19; schedule-web)
 
-- [ ] 4.1 Regenerar o cliente Angular com o procedimento da change 5: exportar o OpenAPI pela fábrica de testes (não pela API de desenvolvimento), rodar `ng-openapi-gen --ignoreUnusedModels false`, restaurar `api-configuration.ts`, converter a pasta `api` para LF. Confirmar que a função de exportação devolve `Blob`. Não editar os arquivos gerados à mão.
-- [ ] 4.2 Criar em `schedule/schedule-export.ts` a função pura `fileNameFrom(contentDisposition: string | null): string` (lê o `filename` do cabeçalho; sem cabeçalho, `coordin-cronograma.csv`) e a função `downloadBlob(blob, name)` que cria a URL de objeto, dispara o `<a download>` e libera a URL. Testes com `TZ` fixo.
-- [ ] 4.3 Acrescentar em `schedule.store.ts` o método `exportCsv(): void` (usa a função gerada com `responseType: 'blob'`, o estado `exporting` (`signal<boolean>`) e a mensagem de falha em `signal<string | null>`). Teste com `HttpTestingController`: pedido à rota certa, download disparado, falha com a mensagem e `exporting` voltando a `false`.
-- [ ] 4.4 Acrescentar em `schedule-page.html` o botão "Exportar planilha" acima da lista (desabilitado enquanto `exporting()`), e a mensagem de falha em `role="alert"`. Testes em `schedule-page.spec.ts`: botão visível com o cronograma carregado, desabilitado durante o download, falha mantém o cronograma.
+- [x] 4.1 Regenerar o cliente Angular com o procedimento da change 5: exportar o OpenAPI pela fábrica de testes (não pela API de desenvolvimento), rodar `ng-openapi-gen --ignoreUnusedModels false`, restaurar `api-configuration.ts`, converter a pasta `api` para LF. Confirmar que a função de exportação devolve `Blob`. Não editar os arquivos gerados à mão.
+- [x] 4.2 Criar em `schedule/schedule-export.ts` a função pura `fileNameFrom(contentDisposition: string | null): string` (lê o `filename` do cabeçalho; sem cabeçalho, `coordin-cronograma.csv`) e a função `downloadBlob(blob, name)` que cria a URL de objeto, dispara o `<a download>` e libera a URL. Testes com `TZ` fixo.
+- [x] 4.3 Acrescentar em `schedule.store.ts` o método `exportCsv(): void` (usa a função gerada com `responseType: 'blob'`, o estado `exporting` (`signal<boolean>`) e a mensagem de falha em `signal<string | null>`). Teste com `HttpTestingController`: pedido à rota certa, download disparado, falha com a mensagem e `exporting` voltando a `false`.
+- [x] 4.4 Acrescentar em `schedule-page.html` o botão "Exportar planilha" acima da lista (desabilitado enquanto `exporting()`), e a mensagem de falha em `role="alert"`. Testes em `schedule-page.spec.ts`: botão visível com o cronograma carregado, desabilitado durante o download, falha mantém o cronograma.
 
 ## 5. Verificação final e documentos
 

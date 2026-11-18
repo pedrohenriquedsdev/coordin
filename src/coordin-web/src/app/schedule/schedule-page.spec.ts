@@ -273,4 +273,43 @@ describe('SchedulePage', () => {
       'A ordem de execução difere da ordem de prioridade.',
     );
   });
+
+  it('offers the export button, and disables it while the file downloads', async () => {
+    URL.createObjectURL = vi.fn(() => 'blob:temp');
+    URL.revokeObjectURL = vi.fn();
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+    await answer([item()]);
+
+    const button = element().querySelector<HTMLButtonElement>('#export-schedule');
+    expect(button?.textContent?.trim()).toBe('Exportar planilha');
+    expect(button?.disabled).toBe(false);
+
+    button?.click();
+    fixture.detectChanges();
+    expect(element().querySelector<HTMLButtonElement>('#export-schedule')?.disabled).toBe(true);
+
+    http.expectOne({ method: 'GET', url: '/api/schedule/export' }).flush('Prioridade;Demanda\r\n', {
+      headers: {
+        'Content-Disposition': 'attachment; filename=coordin-cronograma-2026-11-24.csv',
+      },
+    });
+    fixture.detectChanges();
+    expect(element().querySelector<HTMLButtonElement>('#export-schedule')?.disabled).toBe(false);
+    vi.restoreAllMocks();
+  });
+
+  it('shows the export failure in words and keeps the schedule on screen', async () => {
+    await answer([item()]);
+    element().querySelector<HTMLButtonElement>('#export-schedule')?.click();
+
+    http
+      .expectOne({ method: 'GET', url: '/api/schedule/export' })
+      .flush('erro', { status: 500, statusText: 'Erro' });
+    fixture.detectChanges();
+
+    expect(element().querySelector('[role="alert"]')?.textContent).toContain(
+      'Não foi possível concluir agora.',
+    );
+    expect(element().textContent).toContain('Checkout');
+  });
 });

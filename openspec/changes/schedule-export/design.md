@@ -52,7 +52,7 @@ Um `<a href="/api/schedule/export">` não envia o token, que vive só em memóri
 
 ### D7. Cliente regenerado com o procedimento da change 5
 
-O endpoint novo entra no OpenAPI, e o cliente é regenerado com o procedimento já conhecido (exportar o OpenAPI pela fábrica de testes, `ng-openapi-gen --ignoreUnusedModels false`, restaurar `api-configuration.ts`, pasta `api` em LF). A função gerada para `text/csv` devolve um `Blob`; a tela usa esse retorno.
+O endpoint novo entra no OpenAPI, e o cliente é regenerado com o procedimento já conhecido (exportar o OpenAPI pela fábrica de testes, `ng-openapi-gen --ignoreUnusedModels false`, restaurar `api-configuration.ts`, pasta `api` em LF). **Ajuste na implementação (grupo 4):** o gerador produziu uma função de **texto** (`responseType: 'text'`), e não de `Blob`, porque o OpenAPI declara o corpo como `text/csv` com tipo `byte[]`. O texto decodificado pelo navegador perde o BOM, então a tela o recoloca ao criar o `Blob` (`﻿` na frente, em `csvBlob`). O nome do arquivo continua vindo do cabeçalho `Content-Disposition`, lido com `response.headers`.
 
 ## Risks / Trade-offs
 
