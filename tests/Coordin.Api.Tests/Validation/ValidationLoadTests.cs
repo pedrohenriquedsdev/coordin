@@ -207,6 +207,7 @@ public sealed class ValidationLoadTests(ValidationEnabledApiFactory factory) : I
         await Assert.ThrowsAnyAsync<Exception>(() => PlanningTransaction.RunAsync(
             db,
             recalculator,
+            Coordin.Engine.Forecasting.ForecastChangeCause.NewDemand,
             () => ValidationDatasetLoader.ReplaceAsync(db, broken, Ct),
             Ct));
 

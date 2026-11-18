@@ -2,6 +2,7 @@ using Coordin.Api.Features.Planning;
 using Coordin.Api.Features.Teams;
 using Coordin.Api.Infrastructure.Http;
 using Coordin.Api.Infrastructure.Persistence;
+using Coordin.Engine.Forecasting;
 using Microsoft.EntityFrameworkCore;
 
 namespace Coordin.Api.Features.People;
@@ -112,7 +113,7 @@ public static class PersonEndpoints
         CoordinDbContext db,
         ForecastRecalculator recalculator,
         CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
+        PlanningTransaction.RunAsync(db, recalculator, ForecastChangeCause.Capacity, async () =>
         {
             var person = await db.People.FindAsync([id], cancellationToken);
             if (person is null)
@@ -153,7 +154,7 @@ public static class PersonEndpoints
         CoordinDbContext db,
         ForecastRecalculator recalculator,
         CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
+        PlanningTransaction.RunAsync(db, recalculator, ForecastChangeCause.Capacity, async () =>
         {
             var person = await db.People.FindAsync([id], cancellationToken);
             if (person is null)

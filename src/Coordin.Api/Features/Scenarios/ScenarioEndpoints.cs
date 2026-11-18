@@ -90,7 +90,7 @@ public static class ScenarioEndpoints
         ForecastRecalculator recalculator,
         PlanningSnapshotLoader loader,
         CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
+        PlanningTransaction.RunAsync(db, recalculator, ForecastChangeCause.ApprovedScenario, async () =>
         {
             var invalid = await ValidateOrderAsync(request.ExecutionOrder, db, cancellationToken);
             if (invalid is not null)
@@ -121,7 +121,7 @@ public static class ScenarioEndpoints
         CoordinDbContext db,
         ForecastRecalculator recalculator,
         CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
+        PlanningTransaction.RunAsync(db, recalculator, ForecastChangeCause.Allocation, async () =>
         {
             var mode = await db.PlanningSettings.AsNoTracking()
                 .Where(settings => settings.Id == PlanningSettings.SingletonId)

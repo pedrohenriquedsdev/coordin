@@ -13,6 +13,8 @@ public enum ForecastChangeCause
     Dependency,
     ApprovedScenario,
     NewDemand,
+    /// <summary>A margem de segurança mudou (configuração, DT-22); fora da lista original de RF-21, a aprovar.</summary>
+    SafetyMargin,
 }
 
 /// <summary>

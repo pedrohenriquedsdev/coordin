@@ -16,12 +16,12 @@
 
 ## 3. API: histórico e conclusão
 
-- [ ] 3.1 `ForecastRecalculator` grava `ForecastHistory` com a causa informada; `PlanningTransaction.RunAsync` recebe a causa de cada escrita, e todos os chamadores atuais são atualizados com a causa correta (design, decisão 1)
-- [ ] 3.2 Cadastro da demanda grava `EstimateHistory` quando um time muda de estimativa, com o motivo opcional, e não grava quando o valor é o mesmo (spec `demand-history`, cenários de estimativa)
-- [ ] 3.3 Conclusão aceita `actualEffortHours` opcional, valida maior que zero e grava os dois snapshots depois do recálculo, na mesma transação, com a variante pós-recálculo do `PlanningTransaction` (spec `completion-effort`; design, decisão 3)
-- [ ] 3.4 Testes de integração: primeira previsão gera o primeiro registro; mudança por dependência, por alocação e por cenário aprovado geram a causa certa; previsão que não muda não gera registro; segunda conclusão responde 409 e não muda os snapshots
-- [ ] 3.5 Endpoints `GET /api/demands/{id}/estimate-history`, `GET /api/demands/{id}/forecast-history` (ordem cronológica, 404 para demanda inexistente) e `GET /api/reports/accuracy?from=&to=` (datas obrigatórias, período invertido com erro de campo, contagem das demandas de fora) (spec `demand-history`, `accuracy-indicators`)
-- [ ] 3.6 Regenerar o cliente Angular com o OpenAPI exportado da fábrica de testes (lições da change 5: `--ignoreUnusedModels false`, restaurar `api-configuration.ts`, pasta `api` em LF)
+- [x] 3.1 `ForecastRecalculator` grava `ForecastHistory` com a causa informada; `PlanningTransaction.RunAsync` recebe a causa de cada escrita, e todos os chamadores atuais são atualizados com a causa correta (design, decisão 1)
+- [x] 3.2 Cadastro da demanda grava `EstimateHistory` quando um time muda de estimativa, com o motivo opcional, e não grava quando o valor é o mesmo (spec `demand-history`, cenários de estimativa)
+- [x] 3.3 Conclusão aceita `actualEffortHours` opcional, valida maior que zero e grava os dois snapshots depois do recálculo, na mesma transação, com a variante pós-recálculo do `PlanningTransaction` (spec `completion-effort`; design, decisão 3)
+- [x] 3.4 Testes de integração: primeira previsão gera o primeiro registro; mudança por dependência, por alocação e por cenário aprovado geram a causa certa; previsão que não muda não gera registro; segunda conclusão responde 409 e não muda os snapshots
+- [x] 3.5 Endpoints `GET /api/demands/{id}/estimate-history`, `GET /api/demands/{id}/forecast-history` (ordem cronológica, 404 para demanda inexistente) e `GET /api/reports/accuracy?from=&to=` (datas obrigatórias, período invertido com erro de campo, contagem das demandas de fora) (spec `demand-history`, `accuracy-indicators`)
+- [x] 3.6 Regenerar o cliente Angular com o OpenAPI exportado da fábrica de testes (lições da change 5: `--ignoreUnusedModels false`, restaurar `api-configuration.ts`, pasta `api` em LF)
 
 ## 4. Front: telas
 

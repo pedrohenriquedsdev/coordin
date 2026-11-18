@@ -70,7 +70,7 @@ public class DependencyRecalculationTests(TestingApiFactory factory) : IClassFix
         await db.SaveChangesAsync(Ct);
 
         var snapshot = await loader.LoadAsync(db, Ct);
-        await recalculator.RecalculateAsync(db, Ct);
+        await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
 
         Assert.Contains(snapshot.Dependencies, dependency => dependency.DemandId == b.Id && dependency.PrerequisiteId == a.Id);
         var prerequisite = await ForecastOfAsync(db, a.Id);
@@ -93,7 +93,7 @@ public class DependencyRecalculationTests(TestingApiFactory factory) : IClassFix
         db.DemandDependencies.Add(new DemandDependency { DemandId = b.Id, PrerequisiteDemandId = a.Id });
         await db.SaveChangesAsync(Ct);
 
-        await recalculator.RecalculateAsync(db, Ct);
+        await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
 
         var dependent = await ForecastOfAsync(db, b.Id);
         Assert.False(dependent.IsPredictable);

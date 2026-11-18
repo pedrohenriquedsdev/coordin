@@ -184,7 +184,7 @@ public class ScenarioApplyEndpointsTests(TestingApiFactory factory) : IClassFixt
             var db = scope.ServiceProvider.GetRequiredService<CoordinDbContext>();
             var recalculator = scope.ServiceProvider.GetRequiredService<Coordin.Api.Features.Planning.ForecastRecalculator>();
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                Coordin.Api.Features.Planning.PlanningTransaction.RunAsync(db, recalculator, async () =>
+                Coordin.Api.Features.Planning.PlanningTransaction.RunAsync(db, recalculator, Coordin.Engine.Forecasting.ForecastChangeCause.ApprovedScenario, async () =>
                 {
                     // Grava a ordem de execução invertida em duas fases, como apply faz para não bater no índice único.
                     await db.Demands.ExecuteUpdateAsync(setters => setters.SetProperty(demand => demand.ExecutionRank, demand => demand.ExecutionRank + 1000000), Ct);

@@ -3,6 +3,7 @@ using Coordin.Api.Features.Planning;
 using Coordin.Api.Features.Validation.Dataset;
 using Coordin.Api.Infrastructure.Http;
 using Coordin.Api.Infrastructure.Persistence;
+using Coordin.Engine.Forecasting;
 using Coordin.Engine.Planning;
 using Coordin.Engine.Validation;
 using Microsoft.AspNetCore.Http;
@@ -112,6 +113,7 @@ public static class ValidationEndpoints
         return await PlanningTransaction.RunAsync(
             db,
             recalculator,
+            ForecastChangeCause.NewDemand,
             () => ValidationDatasetLoader.ReplaceAsync(db, dataset, cancellationToken),
             cancellationToken);
     }

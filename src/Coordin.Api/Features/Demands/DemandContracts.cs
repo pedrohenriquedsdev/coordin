@@ -16,7 +16,9 @@ public sealed record DemandRequest(
     List<DemandTeamRequest>? Teams,
     List<Guid>? AssignedPersonIds,
     List<Guid>? PrerequisiteIds = null,
-    int? Position = null);
+    int? Position = null,
+    [property: StringLength(500, ErrorMessage = "O motivo da alteração deve ter no máximo 500 caracteres.")]
+    string? EstimateChangeReason = null);
 
 /// <summary>Uma parte: o time e a estimativa que ele informou (nula = ainda não estimou).</summary>
 public sealed record DemandTeamRequest(Guid? TeamId, decimal? EstimatedEffortHours);
@@ -27,7 +29,8 @@ public sealed record PriorityOrderRequest(List<Guid>? DemandIds);
 /// <summary>Corpo de <c>PUT /api/demands/{id}/completion</c> (RF-12).</summary>
 public sealed record CompletionRequest(
     [property: Required(ErrorMessage = "A data de conclusão é obrigatória.")]
-    DateOnly? CompletedOn);
+    DateOnly? CompletedOn,
+    decimal? ActualEffortHours = null);
 
 /// <summary>Uma demanda com seus times, estimativas e pessoas alocadas.</summary>
 public sealed record DemandResponse(
