@@ -28,6 +28,15 @@ public sealed class Demand
     /// <summary>Data real de conclusão; quando preenchida, a demanda fica travada (RF-12).</summary>
     public DateOnly? CompletedOn { get; set; }
 
+    /// <summary>Esforço real gasto na demanda como um todo, informado na conclusão (RF-22); opcional.</summary>
+    public decimal? ActualEffortHours { get; set; }
+
+    /// <summary>A data prevista vigente no momento da conclusão (RF-23); gravada uma vez, na conclusão.</summary>
+    public DateOnly? ForecastEndDateAtCompletion { get; set; }
+
+    /// <summary>A soma das estimativas dos times no momento da conclusão (RF-22); gravada uma vez, na conclusão.</summary>
+    public decimal? EstimatedEffortHoursAtCompletion { get; set; }
+
     public ICollection<DemandTeam> Teams { get; } = [];
 
     public ICollection<DemandAssignment> Assignments { get; } = [];

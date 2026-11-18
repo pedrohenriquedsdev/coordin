@@ -29,6 +29,9 @@ public class CoordinDbContext(DbContextOptions<CoordinDbContext> options)
     public DbSet<Holiday> Holidays => Set<Holiday>();
 
     public DbSet<Demand> Demands => Set<Demand>();
+    public DbSet<ForecastHistory> ForecastHistories => Set<ForecastHistory>();
+
+    public DbSet<EstimateHistory> EstimateHistories => Set<EstimateHistory>();
 
     public DbSet<DemandTeam> DemandTeams => Set<DemandTeam>();
 

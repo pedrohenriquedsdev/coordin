@@ -10,9 +10,9 @@
 
 ## 2. Banco e persistência
 
-- [ ] 2.1 Migração `AddDeliveryInsights`: tabelas `ForecastHistory` e `EstimateHistory` com chaves e `CHECK` (valor maior que zero), colunas `ActualEffortHours`, `ForecastEndDateAtCompletion` e `EstimatedEffortHoursAtCompletion` em `Demands`, e triggers de somente inclusão (design, decisão 4)
-- [ ] 2.2 Testes de integração com SQL direto: `UPDATE` em histórico recusado, `DELETE` direto recusado, exclusão da demanda com histórico passando pela cascata, `CHECK` de esforço real zero recusado (spec `demand-history`, requisito de somente inclusão)
-- [ ] 2.3 Atualizar `MigrationOnStartupTests` com a nova migration (lição da change 4)
+- [x] 2.1 Migração `AddDeliveryInsights`: tabelas `ForecastHistory` e `EstimateHistory` com chaves e `CHECK` (valor maior que zero), colunas `ActualEffortHours`, `ForecastEndDateAtCompletion` e `EstimatedEffortHoursAtCompletion` em `Demands`, e triggers de somente inclusão (design, decisão 4)
+- [x] 2.2 Testes de integração com SQL direto: `UPDATE` em histórico recusado, `DELETE` direto recusado, exclusão da demanda com histórico passando pela cascata, `CHECK` de esforço real zero recusado (spec `demand-history`, requisito de somente inclusão)
+- [x] 2.3 Atualizar `MigrationOnStartupTests` com a nova migration (lição da change 4)
 
 ## 3. API: histórico e conclusão
 

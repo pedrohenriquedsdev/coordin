@@ -20,13 +20,14 @@ public class MigrationOnStartupTests(PostgresFixture postgres)
 
         Assert.Equal(HttpStatusCode.OK, health.StatusCode);
         var applied = await AppliedMigrationsAsync(factory);
-        Assert.Equal(6, applied.Count);
+        Assert.Equal(7, applied.Count);
         Assert.EndsWith("_InitialCreate", applied[0], StringComparison.Ordinal);
         Assert.EndsWith("_AddAuthentication", applied[1], StringComparison.Ordinal);
         Assert.EndsWith("_AddCapacityRegistry", applied[2], StringComparison.Ordinal);
         Assert.EndsWith("_AddDemandPlanning", applied[3], StringComparison.Ordinal);
         Assert.EndsWith("_AddDemandDependencies", applied[4], StringComparison.Ordinal);
         Assert.EndsWith("_AddValidation", applied[5], StringComparison.Ordinal);
+        Assert.EndsWith("_AddDeliveryInsights", applied[6], StringComparison.Ordinal);
     }
 
     [Fact]
@@ -43,7 +44,7 @@ public class MigrationOnStartupTests(PostgresFixture postgres)
             var health = await client.GetAsync("/api/health", TestContext.Current.CancellationToken);
 
             Assert.Equal(HttpStatusCode.OK, health.StatusCode);
-            Assert.Equal(6, (await AppliedMigrationsAsync(factory)).Count);
+            Assert.Equal(7, (await AppliedMigrationsAsync(factory)).Count);
         }
     }
 

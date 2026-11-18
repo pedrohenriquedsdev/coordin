@@ -176,11 +176,22 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<decimal?>("ActualEffortHours")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
                     b.Property<DateOnly?>("CompletedOn")
                         .HasColumnType("date");
 
+                    b.Property<decimal?>("EstimatedEffortHoursAtCompletion")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
                     b.Property<int>("ExecutionRank")
                         .HasColumnType("integer");
+
+                    b.Property<DateOnly?>("ForecastEndDateAtCompletion")
+                        .HasColumnType("date");
 
                     b.Property<DateOnly?>("InformedEndDate")
                         .HasColumnType("date");
@@ -206,6 +217,8 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
 
                     b.ToTable("Demands", null, t =>
                         {
+                            t.HasCheckConstraint("CK_Demands_ActualEffortHours", "\"ActualEffortHours\" IS NULL OR \"ActualEffortHours\" > 0");
+
                             t.HasCheckConstraint("CK_Demands_CompletedAfterStart", "\"CompletedOn\" IS NULL OR \"StartDate\" IS NULL OR \"CompletedOn\" >= \"StartDate\"");
 
                             t.HasCheckConstraint("CK_Demands_ExecutionRank", "\"ExecutionRank\" >= 1");
@@ -266,6 +279,74 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                     b.ToTable("DemandTeams", null, t =>
                         {
                             t.HasCheckConstraint("CK_DemandTeams_EstimatedEffortHours", "\"EstimatedEffortHours\" IS NULL OR \"EstimatedEffortHours\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Demands.EstimateHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ChangedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DemandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("NewHours")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<decimal?>("PreviousHours")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DemandId", "ChangedAt");
+
+                    b.ToTable("EstimateHistory", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_EstimateHistory_Changed", "\"PreviousHours\" IS DISTINCT FROM \"NewHours\"");
+                        });
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Demands.ForecastHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Cause")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTimeOffset>("ChangedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DemandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly?>("NewEndDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("PreviousEndDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DemandId", "ChangedAt");
+
+                    b.ToTable("ForecastHistory", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ForecastHistory_Changed", "\"PreviousEndDate\" IS DISTINCT FROM \"NewEndDate\"");
                         });
                 });
 
@@ -631,6 +712,24 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                     b.Navigation("Demand");
 
                     b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Demands.EstimateHistory", b =>
+                {
+                    b.HasOne("Coordin.Api.Features.Demands.Demand", null)
+                        .WithMany()
+                        .HasForeignKey("DemandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Demands.ForecastHistory", b =>
+                {
+                    b.HasOne("Coordin.Api.Features.Demands.Demand", null)
+                        .WithMany()
+                        .HasForeignKey("DemandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Coordin.Api.Features.People.Person", b =>
