@@ -17,6 +17,9 @@ public sealed class DemandConfiguration : IEntityTypeConfiguration<Demand>
                 table.HasCheckConstraint(
                     "CK_Demands_CompletedAfterStart",
                     "\"CompletedOn\" IS NULL OR \"StartDate\" IS NULL OR \"CompletedOn\" >= \"StartDate\"");
+                table.HasCheckConstraint(
+                    "CK_Demands_ActualEffortHours",
+                    "\"ActualEffortHours\" IS NULL OR \"ActualEffortHours\" > 0");
             });
 
         builder.HasKey(demand => demand.Id);
@@ -26,6 +29,9 @@ public sealed class DemandConfiguration : IEntityTypeConfiguration<Demand>
         builder.Property(demand => demand.StartDate).HasColumnType("date");
         builder.Property(demand => demand.InformedEndDate).HasColumnType("date");
         builder.Property(demand => demand.CompletedOn).HasColumnType("date");
+        builder.Property(demand => demand.ActualEffortHours).HasPrecision(10, 2);
+        builder.Property(demand => demand.ForecastEndDateAtCompletion).HasColumnType("date");
+        builder.Property(demand => demand.EstimatedEffortHoursAtCompletion).HasPrecision(10, 2);
 
         // Índices únicos: o banco garante rankings únicos mesmo com escritas simultâneas (design D6).
         builder.HasIndex(demand => demand.PriorityRank).IsUnique();

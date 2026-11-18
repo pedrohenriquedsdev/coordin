@@ -104,6 +104,12 @@
                 >
                   Editar
                 </a>
+                <a
+                  [routerLink]="['/demands', demand.id]"
+                  class="rounded-md border border-slate-300 px-2 py-1 hover:bg-slate-100"
+                >
+                  Histórico
+                </a>
                 <button
                   type="button"
                   (click)="startComplete(demand)"
@@ -156,6 +162,20 @@
                   (input)="setCompletedOn($event)"
                   class="mt-1 rounded-md border border-slate-300 px-3 py-2"
                 />
+                <label
+                  for="actual-effort-{{ demand.id }}"
+                  class="mt-3 block font-medium text-slate-700"
+                >
+                  Esforço real em horas (opcional)
+                </label>
+                <input
+                  id="actual-effort-{{ demand.id }}"
+                  type="text"
+                  inputmode="decimal"
+                  [value]="actualEffort()"
+                  (input)="setActualEffort($event)"
+                  class="mt-1 w-40 rounded-md border border-slate-300 px-3 py-2"
+                />
                 <div class="mt-2 flex gap-2">
                   <button
                     type="button"
@@ -184,6 +204,11 @@
           <li class="rounded-md border border-slate-200 bg-white p-3 text-sm">
             <h3 class="font-semibold">{{ demand.title }}</h3>
             <p>Concluída em {{ dateOf(demand.completedOn) }}</p>
+            <p>
+              <a [routerLink]="['/demands', demand.id]" class="font-medium underline"
+                >Ver histórico</a
+              >
+            </p>
             <p class="text-slate-600">
               Contra a primeira previsão:
               {{ deviation(store.itemOf(demand.id)?.baselineDeviationDays ?? null) }}

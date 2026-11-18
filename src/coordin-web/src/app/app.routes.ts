@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { authGuard, guestGuard, unknownPageGuard } from './core/auth/auth.guard';
 import { CalendarPage } from './calendar/calendar-page';
 import { DemandFormPage } from './demands/demand-form-page';
+import { DemandHistoryPage } from './demands/demand-history-page';
+import { AccuracyPage } from './reports/accuracy-page';
 import { DemandsPage } from './demands/demands-page';
 import { TeamReportPage } from './reports/team-report-page';
 import { SchedulePage } from './schedule/schedule-page';
@@ -25,8 +27,10 @@ export const routes: Routes = [
       { path: 'demands', component: DemandsPage },
       { path: 'demands/new', component: DemandFormPage },
       { path: 'demands/:id/edit', component: DemandFormPage },
+      { path: 'demands/:id', component: DemandHistoryPage },
       { path: 'scenarios', component: ScenariosPage },
       { path: 'reports/teams', component: TeamReportPage },
+      { path: 'reports/accuracy', component: AccuracyPage },
       { path: 'settings', component: SettingsPage },
       { path: 'validation', component: ValidationPage },
       { path: 'teams', component: TeamsPage },

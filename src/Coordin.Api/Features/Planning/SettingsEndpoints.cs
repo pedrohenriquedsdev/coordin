@@ -1,4 +1,5 @@
 using Coordin.Api.Infrastructure.Persistence;
+using Coordin.Engine.Forecasting;
 using Microsoft.EntityFrameworkCore;
 
 namespace Coordin.Api.Features.Planning;
@@ -41,7 +42,7 @@ public static class SettingsEndpoints
         CoordinDbContext db,
         ForecastRecalculator recalculator,
         CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
+        PlanningTransaction.RunAsync(db, recalculator, ForecastChangeCause.SafetyMargin, async () =>
         {
             var settings = await db.PlanningSettings
                 .SingleAsync(item => item.Id == PlanningSettings.SingletonId, cancellationToken);

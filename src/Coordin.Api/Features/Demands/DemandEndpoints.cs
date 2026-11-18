@@ -1,6 +1,7 @@
 using Coordin.Api.Features.Planning;
 using Coordin.Api.Infrastructure.Http;
 using Coordin.Api.Infrastructure.Persistence;
+using Coordin.Engine.Forecasting;
 using Coordin.Engine.Planning;
 using Microsoft.EntityFrameworkCore;
 
@@ -50,6 +51,18 @@ public static class DemandEndpoints
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict);
 
+        group.MapGet("/{id:guid}/estimate-history", DemandHistoryEndpoints.GetEstimateHistoryAsync)
+            .WithName("GetEstimateHistory")
+            .WithSummary("Alterações de estimativa de uma demanda, por time, em ordem cronológica (RF-20).")
+            .Produces<List<EstimateHistoryResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapGet("/{id:guid}/forecast-history", DemandHistoryEndpoints.GetForecastHistoryAsync)
+            .WithName("GetForecastHistory")
+            .WithSummary("Mudanças da data prevista de uma demanda, com a causa, em ordem cronológica (RF-21).")
+            .Produces<List<ForecastHistoryResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
         group.MapPut("/priority-order", ReorderDemandsAsync)
             .WithName("ReorderDemands")
             .WithSummary("Define a ordem de prioridade com a lista completa dos ids das demandas.")
@@ -80,8 +93,9 @@ public static class DemandEndpoints
         DemandRequest request,
         CoordinDbContext db,
         ForecastRecalculator recalculator,
+        TimeProvider clock,
         CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
+        PlanningTransaction.RunAsync(db, recalculator, ForecastChangeCause.NewDemand, async () =>
         {
             var invalid = await ValidateNewDemandAsync(request, db, cancellationToken);
             if (invalid is not null)
@@ -100,7 +114,7 @@ public static class DemandEndpoints
                 return cycle;
             }
 
-            ApplyRequest(demand, request, db);
+            ApplyRequest(demand, request, db, clock.GetUtcNow());
             db.Demands.Add(demand);
             await db.SaveChangesAsync(cancellationToken);
 
@@ -119,48 +133,68 @@ public static class DemandEndpoints
         DemandRequest request,
         CoordinDbContext db,
         ForecastRecalculator recalculator,
-        CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
-        {
-            var demand = await db.Demands
-                .Include(item => item.Teams)
-                .Include(item => item.Assignments)
-                .Include(item => item.Prerequisites)
-                .SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
-            if (demand is null)
+        TimeProvider clock,
+        CancellationToken cancellationToken)
+    {
+        // Preenchido pela escrita, lido pelo recálculo logo depois, dentro da mesma transação.
+        RequestChanges? changes = null;
+
+        return PlanningTransaction.RunAsync(
+            db,
+            recalculator,
+            () => CauseOf(changes ?? RequestChanges.None),
+            async () =>
             {
-                return Results.NotFound();
-            }
+                var demand = await db.Demands
+                    .Include(item => item.Teams)
+                    .Include(item => item.Assignments)
+                    .Include(item => item.Prerequisites)
+                    .SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
+                if (demand is null)
+                {
+                    return Results.NotFound();
+                }
 
-            if (demand.CompletedOn is not null)
-            {
-                return ApiProblems.Conflict(DemandErrors.LockedCode, DemandErrors.LockedMessage);
-            }
+                if (demand.CompletedOn is not null)
+                {
+                    return ApiProblems.Conflict(DemandErrors.LockedCode, DemandErrors.LockedMessage);
+                }
 
-            var invalid = await ValidateAsync(request, db, cancellationToken);
-            if (invalid is not null)
-            {
-                return invalid;
-            }
+                var invalid = await ValidateAsync(request, db, cancellationToken);
+                if (invalid is not null)
+                {
+                    return invalid;
+                }
 
-            var cycle = await CycleProblemAsync(db, id, request.Title!.Trim(), request.PrerequisiteIds ?? [], cancellationToken);
-            if (cycle is not null)
-            {
-                return cycle;
-            }
+                var cycle = await CycleProblemAsync(db, id, request.Title!.Trim(), request.PrerequisiteIds ?? [], cancellationToken);
+                if (cycle is not null)
+                {
+                    return cycle;
+                }
 
-            ApplyRequest(demand, request, db);
-            await db.SaveChangesAsync(cancellationToken);
+                changes = ApplyRequest(demand, request, db, clock.GetUtcNow());
+                await db.SaveChangesAsync(cancellationToken);
 
-            return Results.Ok((await ReadAsync(db, id, cancellationToken)).Single());
-        }, cancellationToken);
+                return Results.Ok((await ReadAsync(db, id, cancellationToken)).Single());
+            },
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// A causa de uma atualização de demanda: a estimativa tem prioridade sobre a dependência, e as duas sobre a
+    /// alocação (datas de início e pessoas). Premissa aprovada na change <c>delivery-insights</c>.
+    /// </summary>
+    private static ForecastChangeCause CauseOf(RequestChanges changes) =>
+        changes.Estimates ? ForecastChangeCause.Estimate
+        : changes.Prerequisites ? ForecastChangeCause.Dependency
+        : ForecastChangeCause.Allocation;
 
     private static Task<IResult> DeleteDemandAsync(
         Guid id,
         CoordinDbContext db,
         ForecastRecalculator recalculator,
         CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
+        PlanningTransaction.RunAsync(db, recalculator, ForecastChangeCause.Allocation, async () =>
         {
             var demand = await db.Demands.SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
             if (demand is null)
@@ -203,7 +237,7 @@ public static class DemandEndpoints
         CoordinDbContext db,
         ForecastRecalculator recalculator,
         CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
+        PlanningTransaction.RunAsync(db, recalculator, ForecastChangeCause.Allocation, async () =>
         {
             var currentIds = (await db.Demands.AsNoTracking().Select(demand => demand.Id).ToListAsync(cancellationToken)).ToHashSet();
             var requested = request.DemandIds;
@@ -236,30 +270,62 @@ public static class DemandEndpoints
         CoordinDbContext db,
         ForecastRecalculator recalculator,
         CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
-        {
-            var demand = await db.Demands.SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
-            if (demand is null)
+        PlanningTransaction.RunAsync(
+            db,
+            recalculator,
+            () => ForecastChangeCause.Allocation,
+            async () =>
             {
-                return Results.NotFound();
-            }
+                var demand = await db.Demands.SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
+                if (demand is null)
+                {
+                    return Results.NotFound();
+                }
 
-            if (demand.CompletedOn is not null)
-            {
-                return ApiProblems.Conflict(DemandErrors.LockedCode, DemandErrors.LockedMessage);
-            }
+                if (demand.CompletedOn is not null)
+                {
+                    return ApiProblems.Conflict(DemandErrors.LockedCode, DemandErrors.LockedMessage);
+                }
 
-            var completedOn = request.CompletedOn!.Value;
-            if (demand.StartDate is { } start && completedOn < start)
-            {
-                return ApiProblems.InvalidField("completedOn", DemandErrors.CompletionBeforeStart);
-            }
+                var completedOn = request.CompletedOn!.Value;
+                if (demand.StartDate is { } start && completedOn < start)
+                {
+                    return ApiProblems.InvalidField("completedOn", DemandErrors.CompletionBeforeStart);
+                }
 
-            demand.CompletedOn = completedOn;
-            await db.SaveChangesAsync(cancellationToken);
+                if (request.ActualEffortHours is { } actual && actual <= 0m)
+                {
+                    return ApiProblems.InvalidField("actualEffortHours", DemandErrors.ActualEffortNotPositive);
+                }
 
-            return Results.Ok((await ReadAsync(db, id, cancellationToken)).Single());
-        }, cancellationToken);
+                demand.CompletedOn = completedOn;
+                demand.ActualEffortHours = request.ActualEffortHours;
+                await db.SaveChangesAsync(cancellationToken);
+
+                return Results.Ok((await ReadAsync(db, id, cancellationToken)).Single());
+            },
+            cancellationToken,
+            afterRecalculation: () => RecordCompletionSnapshotAsync(db, id, cancellationToken));
+
+    /// <summary>
+    /// Grava, na conclusão, a previsão e a estimativa vigentes (RF-22, RF-23). Roda depois do recálculo, dentro da
+    /// mesma transação. A previsão de uma demanda concluída fica congelada (DT-27), então o valor lido é o da conclusão.
+    /// </summary>
+    private static async Task RecordCompletionSnapshotAsync(CoordinDbContext db, Guid id, CancellationToken cancellationToken)
+    {
+        var demand = await db.Demands.Include(item => item.Teams).SingleAsync(item => item.Id == id, cancellationToken);
+        var forecast = await db.Forecasts.AsNoTracking().SingleOrDefaultAsync(row => row.DemandId == id, cancellationToken);
+
+        demand.ForecastEndDateAtCompletion = forecast?.ForecastEndDate;
+
+        var estimates = demand.Teams
+            .Where(part => part.EstimatedEffortHours is not null)
+            .Select(part => part.EstimatedEffortHours!.Value)
+            .ToList();
+        demand.EstimatedEffortHoursAtCompletion = estimates.Count == 0 ? null : estimates.Sum();
+
+        await db.SaveChangesAsync(cancellationToken);
+    }
 
     /// <summary>Valida o corpo contra o banco. Devolve a resposta de erro, ou <c>null</c> se estiver tudo certo.</summary>
     /// <summary>
@@ -404,15 +470,25 @@ public static class DemandEndpoints
     /// Copia o corpo para a demanda: dados, partes por time e alocações. As linhas que saíram do corpo
     /// são removidas, as novas são criadas e as que continuam só mudam a estimativa.
     /// </summary>
-    private static void ApplyRequest(Demand demand, DemandRequest request, CoordinDbContext db)
+    private static RequestChanges ApplyRequest(Demand demand, DemandRequest request, CoordinDbContext db, DateTimeOffset changedAt)
     {
         demand.Title = request.Title!.Trim();
         demand.StartDate = request.StartDate;
         demand.InformedEndDate = request.InformedEndDate;
 
+        var reason = string.IsNullOrWhiteSpace(request.EstimateChangeReason) ? null : request.EstimateChangeReason.Trim();
+        var estimatesChanged = false;
+
+        // Cada mudança de estimativa vira um registro (RF-20): retirar um time também conta, porque a estimativa some.
         var requestedTeams = (request.Teams ?? []).ToDictionary(part => part.TeamId!.Value, part => part.EstimatedEffortHours);
         foreach (var part in demand.Teams.Where(part => !requestedTeams.ContainsKey(part.TeamId)).ToList())
         {
+            if (part.EstimatedEffortHours is not null)
+            {
+                db.EstimateHistories.Add(EstimateChange(demand.Id, part.TeamId, part.EstimatedEffortHours, null, reason, changedAt));
+                estimatesChanged = true;
+            }
+
             db.DemandTeams.Remove(part);
         }
 
@@ -422,10 +498,17 @@ public static class DemandEndpoints
             if (existing is null)
             {
                 db.DemandTeams.Add(new DemandTeam { DemandId = demand.Id, TeamId = teamId, EstimatedEffortHours = hours });
+                if (hours is not null)
+                {
+                    db.EstimateHistories.Add(EstimateChange(demand.Id, teamId, null, hours, reason, changedAt));
+                    estimatesChanged = true;
+                }
             }
-            else
+            else if (existing.EstimatedEffortHours != hours)
             {
+                db.EstimateHistories.Add(EstimateChange(demand.Id, teamId, existing.EstimatedEffortHours, hours, reason, changedAt));
                 existing.EstimatedEffortHours = hours;
+                estimatesChanged = true;
             }
         }
 
@@ -441,17 +524,39 @@ public static class DemandEndpoints
         }
 
         // O corpo substitui o conjunto inteiro; sem o campo, a demanda fica sem pré-requisitos.
+        var prerequisitesChanged = false;
         var requestedPrerequisites = (request.PrerequisiteIds ?? []).ToHashSet();
         foreach (var dependency in demand.Prerequisites.Where(item => !requestedPrerequisites.Contains(item.PrerequisiteDemandId)).ToList())
         {
             db.DemandDependencies.Remove(dependency);
+            prerequisitesChanged = true;
         }
 
         foreach (var prerequisiteId in requestedPrerequisites.Where(id => !demand.Prerequisites.Any(item => item.PrerequisiteDemandId == id)))
         {
             db.DemandDependencies.Add(new DemandDependency { DemandId = demand.Id, PrerequisiteDemandId = prerequisiteId });
+            prerequisitesChanged = true;
         }
+
+        return new RequestChanges(estimatesChanged, prerequisitesChanged);
     }
+
+    private static EstimateHistory EstimateChange(
+        Guid demandId,
+        Guid teamId,
+        decimal? previous,
+        decimal? next,
+        string? reason,
+        DateTimeOffset changedAt) =>
+        new()
+        {
+            DemandId = demandId,
+            TeamId = teamId,
+            PreviousHours = previous,
+            NewHours = next,
+            Reason = reason,
+            ChangedAt = changedAt,
+        };
 
     /// <summary>Lê as demandas (todas, ou só uma) com as partes e as alocações, na ordem de prioridade.</summary>
     private static async Task<List<DemandResponse>> ReadAsync(CoordinDbContext db, Guid? onlyId, CancellationToken cancellationToken)
@@ -506,4 +611,10 @@ public static class DemandEndpoints
                 .ToList()))
             .ToList();
     }
+}
+
+/// <summary>O que uma escrita de demanda mudou, para escolher a causa do recálculo (RF-21).</summary>
+internal sealed record RequestChanges(bool Estimates, bool Prerequisites)
+{
+    public static readonly RequestChanges None = new(false, false);
 }

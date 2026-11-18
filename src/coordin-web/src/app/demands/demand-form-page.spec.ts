@@ -257,6 +257,39 @@ describe('DemandFormPage', () => {
     ]);
   });
 
+  it('sends the optional reason of the estimate change only when editing, and only if it was written', async () => {
+    await open(
+      { id: 'd1' },
+      demand({ teams: [{ teamId: 't1', teamName: 'Web', estimatedEffortHours: 16 }] }),
+    );
+    field('hours-t1').value = '32';
+    field('hours-t1').dispatchEvent(new Event('input'));
+    const reason = document.getElementById('demand-reason') as HTMLInputElement;
+    reason.value = '  escopo maior  ';
+    reason.dispatchEvent(new Event('input'));
+
+    button('Salvar demanda')?.click();
+
+    expect(request('PUT', '/api/demands/d1').request.body.estimateChangeReason).toBe(
+      'escopo maior',
+    );
+  });
+
+  it('does not send a reason when none was written', async () => {
+    await open(
+      { id: 'd1' },
+      demand({ teams: [{ teamId: 't1', teamName: 'Web', estimatedEffortHours: 16 }] }),
+    );
+    field('hours-t1').value = '32';
+    field('hours-t1').dispatchEvent(new Event('input'));
+
+    button('Salvar demanda')?.click();
+
+    expect(request('PUT', '/api/demands/d1').request.body).not.toHaveProperty(
+      'estimateChangeReason',
+    );
+  });
+
   it('does not offer the form for a completed demand', async () => {
     await open({ id: 'd1' }, demand({ completedOn: '2026-12-05' }));
 

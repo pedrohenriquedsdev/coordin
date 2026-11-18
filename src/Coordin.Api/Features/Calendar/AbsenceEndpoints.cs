@@ -1,5 +1,6 @@
 using Coordin.Api.Features.Planning;
 using Coordin.Api.Infrastructure.Persistence;
+using Coordin.Engine.Forecasting;
 using Microsoft.EntityFrameworkCore;
 
 namespace Coordin.Api.Features.Calendar;
@@ -88,7 +89,7 @@ public static class AbsenceEndpoints
         CoordinDbContext db,
         ForecastRecalculator recalculator,
         CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
+        PlanningTransaction.RunAsync(db, recalculator, ForecastChangeCause.Absence, async () =>
         {
             var person = await db.People.Include(item => item.Team).SingleOrDefaultAsync(item => item.Id == personId, cancellationToken);
             if (person is null)
@@ -116,7 +117,7 @@ public static class AbsenceEndpoints
         CoordinDbContext db,
         ForecastRecalculator recalculator,
         CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
+        PlanningTransaction.RunAsync(db, recalculator, ForecastChangeCause.Absence, async () =>
         {
             var absence = await db.Absences
                 .Include(item => item.Person!).ThenInclude(person => person.Team)
@@ -139,7 +140,7 @@ public static class AbsenceEndpoints
         CoordinDbContext db,
         ForecastRecalculator recalculator,
         CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
+        PlanningTransaction.RunAsync(db, recalculator, ForecastChangeCause.Absence, async () =>
         {
             var absence = await db.Absences.FindAsync([id], cancellationToken);
             if (absence is null)

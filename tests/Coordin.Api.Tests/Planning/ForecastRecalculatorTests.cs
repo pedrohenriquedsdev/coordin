@@ -79,7 +79,7 @@ public class ForecastRecalculatorTests(TestingApiFactory factory) : IClassFixtur
         var (team, person) = await AddTeamWithPersonAsync(db, 8m);
         var demand = await AddDemandAsync(db, team, person, StartMonday, 16m);
 
-        await recalculator.RecalculateAsync(db, Ct);
+        await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
 
         var stored = await ForecastOfAsync(db, demand.Id);
         Assert.True(stored.IsPredictable);
@@ -114,7 +114,7 @@ public class ForecastRecalculatorTests(TestingApiFactory factory) : IClassFixtur
         var noEstimate = await AddDemandAsync(db, team, person, StartMonday, null);
         var noCapacity = await AddDemandAsync(db, zeroTeam, zeroPerson, StartMonday, 16m);
 
-        await recalculator.RecalculateAsync(db, Ct);
+        await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
 
         var missingStart = await ForecastOfAsync(db, noStart.Id);
         Assert.False(missingStart.IsPredictable);
@@ -132,12 +132,12 @@ public class ForecastRecalculatorTests(TestingApiFactory factory) : IClassFixtur
         var recalculator = scope.ServiceProvider.GetRequiredService<ForecastRecalculator>();
         var (team, person) = await AddTeamWithPersonAsync(db, 8m);
         var demand = await AddDemandAsync(db, team, person, StartMonday, null);
-        await recalculator.RecalculateAsync(db, Ct);
+        await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
         Assert.Null((await ForecastOfAsync(db, demand.Id)).BaselineEndDate);
 
         (await db.DemandTeams.SingleAsync(part => part.DemandId == demand.Id, Ct)).EstimatedEffortHours = 16m;
         await db.SaveChangesAsync(Ct);
-        await recalculator.RecalculateAsync(db, Ct);
+        await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
 
         var stored = await ForecastOfAsync(db, demand.Id);
         Assert.True(stored.IsPredictable);
@@ -152,13 +152,13 @@ public class ForecastRecalculatorTests(TestingApiFactory factory) : IClassFixtur
         var recalculator = scope.ServiceProvider.GetRequiredService<ForecastRecalculator>();
         var (team, person) = await AddTeamWithPersonAsync(db, 8m);
         var demand = await AddDemandAsync(db, team, person, StartMonday, 16m);
-        await recalculator.RecalculateAsync(db, Ct);
+        await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
         var baseline = (await ForecastOfAsync(db, demand.Id)).BaselineEndDate;
 
         // Uma ausência na segunda empurra a execução: terça e quarta, e o fim com margem vai para quinta.
         db.Absences.Add(new Absence { PersonId = person.Id, Type = AbsenceType.Vacation, StartDate = StartMonday, EndDate = StartMonday });
         await db.SaveChangesAsync(Ct);
-        await recalculator.RecalculateAsync(db, Ct);
+        await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
 
         var stored = await ForecastOfAsync(db, demand.Id);
         Assert.Equal(new DateOnly(2026, 12, 9), stored.EndDateWithoutMargin);
@@ -174,12 +174,12 @@ public class ForecastRecalculatorTests(TestingApiFactory factory) : IClassFixtur
         var recalculator = scope.ServiceProvider.GetRequiredService<ForecastRecalculator>();
         var (team, person) = await AddTeamWithPersonAsync(db, 8m);
         var demand = await AddDemandAsync(db, team, person, StartMonday, 16m);
-        await recalculator.RecalculateAsync(db, Ct);
+        await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
         var baseline = (await ForecastOfAsync(db, demand.Id)).BaselineEndDate;
 
         (await db.DemandTeams.SingleAsync(part => part.DemandId == demand.Id, Ct)).EstimatedEffortHours = null;
         await db.SaveChangesAsync(Ct);
-        await recalculator.RecalculateAsync(db, Ct);
+        await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
 
         var stored = await ForecastOfAsync(db, demand.Id);
         Assert.False(stored.IsPredictable);
@@ -195,14 +195,14 @@ public class ForecastRecalculatorTests(TestingApiFactory factory) : IClassFixtur
         var recalculator = scope.ServiceProvider.GetRequiredService<ForecastRecalculator>();
         var (team, person) = await AddTeamWithPersonAsync(db, 8m);
         var demand = await AddDemandAsync(db, team, person, StartMonday, 16m);
-        await recalculator.RecalculateAsync(db, Ct);
+        await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
         var before = await ForecastOfAsync(db, demand.Id);
 
         var tracked = await db.Demands.SingleAsync(item => item.Id == demand.Id, Ct);
         tracked.CompletedOn = new DateOnly(2026, 12, 9);
         (await db.People.SingleAsync(item => item.Id == person.Id, Ct)).DailyCapacityHours = 1m;
         await db.SaveChangesAsync(Ct);
-        await recalculator.RecalculateAsync(db, Ct);
+        await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
 
         var after = await ForecastOfAsync(db, demand.Id);
         Assert.Equal(before.ForecastEndDate, after.ForecastEndDate);
@@ -226,7 +226,7 @@ public class ForecastRecalculatorTests(TestingApiFactory factory) : IClassFixtur
         (await db.People.SingleAsync(item => item.Id == person.Id, Ct)).TeamId = otherTeam.Id;
         await db.SaveChangesAsync(Ct);
 
-        await recalculator.RecalculateAsync(db, Ct); // não pode lançar
+        await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct); // não pode lançar
 
         // A concluída nunca foi previsível, então não ganha previsão nova.
         Assert.False(await db.Forecasts.AsNoTracking().AnyAsync(forecast => forecast.DemandId == demand.Id, Ct));
@@ -242,7 +242,7 @@ public class ForecastRecalculatorTests(TestingApiFactory factory) : IClassFixtur
             var recalculator = scope.ServiceProvider.GetRequiredService<ForecastRecalculator>();
             var (team, person) = await AddTeamWithPersonAsync(db, 8m);
             var demand = await AddDemandAsync(db, team, person, StartMonday, 16m);
-            await recalculator.RecalculateAsync(db, Ct);
+            await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
             demandId = demand.Id;
         }
 
@@ -250,7 +250,7 @@ public class ForecastRecalculatorTests(TestingApiFactory factory) : IClassFixtur
         {
             var db = scope.ServiceProvider.GetRequiredService<CoordinDbContext>();
             var recalculator = scope.ServiceProvider.GetRequiredService<ForecastRecalculator>();
-            var result = await PlanningTransaction.RunAsync(db, recalculator, async () =>
+            var result = await PlanningTransaction.RunAsync(db, recalculator, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, async () =>
             {
                 var demand = await db.Demands.SingleAsync(item => item.Id == demandId, Ct);
                 demand.StartDate = null;
@@ -278,7 +278,7 @@ public class ForecastRecalculatorTests(TestingApiFactory factory) : IClassFixtur
             var recalculator = scope.ServiceProvider.GetRequiredService<ForecastRecalculator>();
             var (team, person) = await AddTeamWithPersonAsync(db, 8m);
             var demand = await AddDemandAsync(db, team, person, StartMonday, 16m);
-            await recalculator.RecalculateAsync(db, Ct);
+            await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
             demandId = demand.Id;
         }
 
@@ -286,7 +286,7 @@ public class ForecastRecalculatorTests(TestingApiFactory factory) : IClassFixtur
         {
             var db = scope.ServiceProvider.GetRequiredService<CoordinDbContext>();
             var recalculator = scope.ServiceProvider.GetRequiredService<ForecastRecalculator>();
-            await Assert.ThrowsAsync<InvalidOperationException>(() => PlanningTransaction.RunAsync(db, recalculator, () =>
+            await Assert.ThrowsAsync<InvalidOperationException>(() => PlanningTransaction.RunAsync(db, recalculator, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, () =>
             {
                 db.Demands.Single(item => item.Id == demandId).Title = "Título que não deve ficar";
                 throw new InvalidOperationException("falha simulada");
@@ -308,7 +308,7 @@ public class ForecastRecalculatorTests(TestingApiFactory factory) : IClassFixtur
             var recalculator = scope.ServiceProvider.GetRequiredService<ForecastRecalculator>();
             var (team, person) = await AddTeamWithPersonAsync(db, 8m);
             var demand = await AddDemandAsync(db, team, person, StartMonday, 16m);
-            await recalculator.RecalculateAsync(db, Ct);
+            await recalculator.RecalculateAsync(db, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, Ct);
             demandId = demand.Id;
         }
 
@@ -316,7 +316,7 @@ public class ForecastRecalculatorTests(TestingApiFactory factory) : IClassFixtur
         {
             var db = scope.ServiceProvider.GetRequiredService<CoordinDbContext>();
             var recalculator = scope.ServiceProvider.GetRequiredService<ForecastRecalculator>();
-            var result = await PlanningTransaction.RunAsync(db, recalculator, async () =>
+            var result = await PlanningTransaction.RunAsync(db, recalculator, Coordin.Engine.Forecasting.ForecastChangeCause.Estimate, async () =>
             {
                 (await db.DemandTeams.SingleAsync(part => part.DemandId == demandId, Ct)).EstimatedEffortHours = 32m;
                 await db.SaveChangesAsync(Ct);

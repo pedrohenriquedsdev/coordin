@@ -1,6 +1,6 @@
 # TDD — Coordin
 
-- **Status:** aprovado (2026-11-11); hospedagem (DT-09) decidida em 2026-11-12, com o provedor escolhido na change 7. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23. Ajuste em 2026-11-12, decorrente do PRD: RF-17 como Must no roadmap, validação por simulação no produto (RF-24, DT-37) e roadmap com 13 changes. Ajuste em 2026-11-12, na change 1: endpoint de saúde `GET /api/health` (seção 5.2). Ajuste em 2026-11-18, na change 11 (aprovado pelo autor): contrato da avaliação com as médias absolutas, o bloco `priorityCheck` e o período (5.3); o desvio do Coordin contra o planejamento com o Coordin e a ocupação média ponderada (6.6); o invariante do fator 1 com dependências (8.2); os códigos `validation-current-plan-exists` e `validation-nothing-to-compare` (DT-18); a linha 11b do roadmap. Ajuste em 2026-11-17, na change 9b (aprovado pelo autor): a linha 9 do roadmap (9.1) foi dividida em 9 (motor e API) e 9b (telas `scenario-screens`), sem mudança de DT. Ajuste em 2026-11-17, na change 8: campo `prerequisiteIds` no contrato da demanda, `prerequisites` no cronograma (seção 5.3) e código `demand-has-dependents` (DT-18). Ajuste em 2026-11-17, na change 9: campo `position` no corpo da demanda e resposta de `POST /api/demands/simulate` (5.3), `isComparable`, `apply` e `reset-to-priority` e correção dos itens do cenário (5.3), código `scenario-violates-dependencies` (DT-18), `n` do peso (DT-25), orçamento de 1.000 avaliações e demandas movíveis (DT-26), posição na simulação de nova demanda (6.5) e comando de testes com cobertura (8.6)
+- **Status:** aprovado (2026-11-11); ajuste em 2026-11-18, na change `delivery-insights` (aprovado pelo autor): colunas `ActualEffortHours`, `ForecastEndDateAtCompletion` e `EstimatedEffortHoursAtCompletion` em `Demand`, e `ForecastHistory` e `EstimateHistory` de Could a Must nesta change (seção 4.2 e 5.2); hospedagem (DT-09) decidida em 2026-11-12, com o provedor escolhido na change 7. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23. Ajuste em 2026-11-12, decorrente do PRD: RF-17 como Must no roadmap, validação por simulação no produto (RF-24, DT-37) e roadmap com 13 changes. Ajuste em 2026-11-12, na change 1: endpoint de saúde `GET /api/health` (seção 5.2). Ajuste em 2026-11-18, na change 11 (aprovado pelo autor): contrato da avaliação com as médias absolutas, o bloco `priorityCheck` e o período (5.3); o desvio do Coordin contra o planejamento com o Coordin e a ocupação média ponderada (6.6); o invariante do fator 1 com dependências (8.2); os códigos `validation-current-plan-exists` e `validation-nothing-to-compare` (DT-18); a linha 11b do roadmap. Ajuste em 2026-11-17, na change 9b (aprovado pelo autor): a linha 9 do roadmap (9.1) foi dividida em 9 (motor e API) e 9b (telas `scenario-screens`), sem mudança de DT. Ajuste em 2026-11-17, na change 8: campo `prerequisiteIds` no contrato da demanda, `prerequisites` no cronograma (seção 5.3) e código `demand-has-dependents` (DT-18). Ajuste em 2026-11-17, na change 9: campo `position` no corpo da demanda e resposta de `POST /api/demands/simulate` (5.3), `isComparable`, `apply` e `reset-to-priority` e correção dos itens do cenário (5.3), código `scenario-violates-dependencies` (DT-18), `n` do peso (DT-25), orçamento de 1.000 avaliações e demandas movíveis (DT-26), posição na simulação de nova demanda (6.5) e comando de testes com cobertura (8.6)
 - **Última atualização:** 2026-11-17
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -256,8 +256,8 @@ erDiagram
     Person ||--o{ DemandAssignment : "trabalha em"
     Demand ||--o{ DemandDependency : "depende de"
     Demand ||--o| Forecast : "tem previsão"
-    Demand ||--o{ ForecastHistory : "histórico (Could)"
-    DemandTeam ||--o{ EstimateHistory : "histórico (Could)"
+    Demand ||--o{ ForecastHistory : "histórico"
+    DemandTeam ||--o{ EstimateHistory : "histórico"
     Demand ||--o| ValidationBaseline : "linha de base (RF-24)"
     Holiday
     PlanningSettings
@@ -274,13 +274,13 @@ Tipos: identificadores `Guid` versão 7 (`uuid`); datas de planejamento `DateOnl
 | `Person` | `Id`, `Name`, `TeamId`, `DailyCapacityHours` | Um único time (FK obrigatória); `DailyCapacityHours` entre 0 e 24 | RF-02 |
 | `Absence` | `Id`, `PersonId`, `Type` (`Vacation`, `Other`), `StartDate`, `EndDate` | `EndDate >= StartDate`; sem motivo detalhado (RNF-05) | RF-03 |
 | `Holiday` | `Id`, `Date`, `Description` (opcional) | `Date` única | RF-03 |
-| `Demand` | `Id`, `Title`, `PriorityRank`, `ExecutionRank`, `StartDate` (opcional), `InformedEndDate` (opcional), `CompletedOn` (opcional), `ActualEffortHours` (opcional, Could) | `PriorityRank` e `ExecutionRank` únicos e contínuos a partir de 1; `CompletedOn >= StartDate`; `ActualEffortHours > 0` quando informado | RF-04, RF-07, RF-12, RF-22 |
+| `Demand` | `Id`, `Title`, `PriorityRank`, `ExecutionRank`, `StartDate` (opcional), `InformedEndDate` (opcional), `CompletedOn` (opcional), `ActualEffortHours` (opcional), `ForecastEndDateAtCompletion` e `EstimatedEffortHoursAtCompletion` (gravados na conclusão) | `PriorityRank` e `ExecutionRank` únicos e contínuos a partir de 1; `CompletedOn >= StartDate`; `ActualEffortHours > 0` quando informado | RF-04, RF-07, RF-12, RF-22 |
 | `DemandTeam` | `DemandId`, `TeamId`, `EstimatedEffortHours` (opcional) | Chave (`DemandId`, `TeamId`); `EstimatedEffortHours > 0` quando informado | RF-05, RF-06 |
 | `DemandAssignment` | `DemandId`, `PersonId` | Chave (`DemandId`, `PersonId`); o time da pessoa precisa estar entre os times da demanda | RF-05 |
 | `DemandDependency` | `DemandId`, `PrerequisiteDemandId` | Chave composta; sem autodependência; ciclos rejeitados pela API usando o motor (seção 6) | RF-18 |
 | `Forecast` | `DemandId`, `IsPredictable`, `UnpredictableReason`, `ForecastStartDate`, `EndDateWithoutMargin`, `ForecastEndDate`, `BaselineEndDate`, `CalculatedAt` | Uma por demanda; `ForecastEndDate >= EndDateWithoutMargin`; `BaselineEndDate` gravada uma única vez | RF-08 a RF-12 |
-| `ForecastHistory` | `Id`, `DemandId`, `PreviousEndDate`, `NewEndDate`, `Cause`, `ChangedAt` | Somente inclusão | RF-21 (Could) |
-| `EstimateHistory` | `Id`, `DemandId`, `TeamId`, `PreviousHours`, `NewHours`, `Reason` (opcional), `ChangedAt` | Somente inclusão | RF-20 (Could) |
+| `ForecastHistory` | `Id`, `DemandId`, `PreviousEndDate`, `NewEndDate`, `Cause`, `ChangedAt` | Somente inclusão | RF-21 |
+| `EstimateHistory` | `Id`, `DemandId`, `TeamId`, `PreviousHours`, `NewHours`, `Reason` (opcional), `ChangedAt` | Somente inclusão | RF-20 |
 | `PlanningSettings` | `ExecutionOrderMode` (`FollowPriority`, `Custom`) e os parâmetros da margem de segurança (definidos na seção 6) | Registro único | RF-09, RF-15 |
 | `ValidationBaseline` | `DemandId`, `BaselineDate` | Uma por demanda; apagada com a demanda e ao carregar o conjunto | RF-24 |
 | `ValidationCurrentPlan` | `Id`, `SnapshotJson` (`jsonb`), `CapturedAt` | Registro único; gravado uma vez e só apagado ao carregar o conjunto de novo | RF-24 |
@@ -336,7 +336,7 @@ A conta de acesso do gestor usa as tabelas padrão do ASP.NET Core Identity (`As
 - **Alternativas consideradas:**
   - *Linha de base como coluna gravada uma vez e históricos em tabelas somente de inclusão:* simples de consultar e impossível de "corrigir" por engano.
   - *Versionar o planejamento inteiro a cada alteração:* reconstrói qualquer momento, mas é desproporcional ao escopo.
-- **Decisão:** `Forecast.BaselineEndDate` é gravada no primeiro cálculo em que a demanda se torna previsível e nunca é alterada. `ForecastHistory` e `EstimateHistory` (Could) só recebem inclusões; a API não expõe edição nem exclusão delas.
+- **Decisão:** `Forecast.BaselineEndDate` é gravada no primeiro cálculo em que a demanda se torna previsível e nunca é alterada. `ForecastHistory` e `EstimateHistory` só recebem inclusões; a API não expõe edição nem exclusão delas.
 - **Justificativa:** atende ao RF-12 nos Must sem depender dos Could; os históricos podem ser implementados depois sem mudar o restante do modelo.
 - **Atende:** RF-12, RF-20, RF-21, RF-23.
 
@@ -386,8 +386,8 @@ A conta de acesso do gestor usa as tabelas padrão do ASP.NET Core Identity (`As
 | Cenários | `POST /api/scenarios/recommendations` · `POST /api/scenarios/simulate` · `POST /api/scenarios/apply` · `POST /api/scenarios/reset-to-priority` | RF-13 a RF-15 |
 | Simulação de nova demanda | `POST /api/demands/simulate` (mesmo corpo do `POST /api/demands`, inclusive o `position` opcional, sem gravar; formato da resposta em 5.3) | RF-16 |
 | Relatório por time | `GET /api/reports/teams?from=&to=` (datas `yyyy-MM-dd` obrigatórias; até 52 semanas; semanas completas de segunda a domingo; calculado sob demanda, sem gravar nada) | RF-17 |
-| Indicadores de precisão | `GET /api/reports/accuracy?from=&to=` | RF-23 (Could) |
-| Históricos | `GET /api/demands/{id}/estimate-history` · `GET /api/demands/{id}/forecast-history` | RF-20, RF-21 (Could) |
+| Indicadores de precisão | `GET /api/reports/accuracy?from=&to=` | RF-23 |
+| Históricos | `GET /api/demands/{id}/estimate-history` · `GET /api/demands/{id}/forecast-history` | RF-20, RF-21 |
 | Configurações | `GET`, `PUT /api/settings` (parâmetros da margem, conforme a seção 6) | RF-09 |
 | Validação por simulação (só com `Validation__Enabled=true`, DT-37) | `GET /api/validation/status` · `POST /api/validation/dataset` (`{ "confirmReplaceAll": true }`) · `GET`, `PUT /api/validation/baseline` · `POST /api/validation/current-plan` · `POST /api/validation/evaluate` | RF-24 |
 
@@ -533,7 +533,7 @@ Erros: `409 validation-current-plan-missing` (plano atual não guardado), `409 v
 - **Alternativas consideradas:**
   - *Agregado (dados, times com estimativas, pessoas e dependências em um corpo):* uma requisição, uma transação, um recálculo; o mesmo corpo serve para simular.
   - *Sub-recursos separados (`/teams`, `/assignments`, `/dependencies`):* mais granular, mas a criação vira várias chamadas com estados intermediários inválidos e vários recálculos.
-- **Decisão:** `POST`, `PUT` e `POST /simulate` de demanda recebem o agregado completo. A alteração de estimativa de cada time gera um registro em `EstimateHistory` (Could), com `estimateChangeReason` opcional.
+- **Decisão:** `POST`, `PUT` e `POST /simulate` de demanda recebem o agregado completo. A alteração de estimativa de cada time gera um registro em `EstimateHistory`, com `estimateChangeReason` opcional.
 - **Justificativa:** atomicidade e simulação idêntica à gravação real.
 - **Atende:** RF-04 a RF-07, RF-16, RF-18, RF-20.
 

@@ -75,10 +75,16 @@ export class DemandsStore {
   }
 
   /** Registra a data real de conclusão. A data é texto `yyyy-MM-dd`, sem `Date`. */
-  complete(id: string, completedOn: string): Observable<void> {
-    return completeDemand(this.http, this.root, { id, body: { completedOn } }).pipe(
-      switchMap(() => this.fetch()),
-    );
+  /** Conclui a demanda. O esforço real é opcional; quando informado, tem de ser maior que zero (RF-22). */
+  complete(
+    id: string,
+    completedOn: string,
+    actualEffortHours: number | null = null,
+  ): Observable<void> {
+    return completeDemand(this.http, this.root, {
+      id,
+      body: { completedOn, actualEffortHours },
+    }).pipe(switchMap(() => this.fetch()));
   }
 
   private neighborIndex(list: readonly Demand[], index: number, direction: MoveDirection): number {

@@ -25,6 +25,10 @@ export type { UpdateDemand$Params as UpdateDemand$Params } from './fn/demands/up
 export { updateDemand as updateDemand } from './fn/demands/update-demand';
 export type { DeleteDemand$Params as DeleteDemand$Params } from './fn/demands/delete-demand';
 export { deleteDemand as deleteDemand } from './fn/demands/delete-demand';
+export type { GetEstimateHistory$Params as GetEstimateHistory$Params } from './fn/demands/get-estimate-history';
+export { getEstimateHistory as getEstimateHistory } from './fn/demands/get-estimate-history';
+export type { GetForecastHistory$Params as GetForecastHistory$Params } from './fn/demands/get-forecast-history';
+export { getForecastHistory as getForecastHistory } from './fn/demands/get-forecast-history';
 export type { ReorderDemands$Params as ReorderDemands$Params } from './fn/demands/reorder-demands';
 export { reorderDemands as reorderDemands } from './fn/demands/reorder-demands';
 export type { CompleteDemand$Params as CompleteDemand$Params } from './fn/demands/complete-demand';
@@ -73,6 +77,8 @@ export type { ResetToPriority$Params as ResetToPriority$Params } from './fn/scen
 export { resetToPriority as resetToPriority } from './fn/scenarios/reset-to-priority';
 export type { GetTeamReport$Params as GetTeamReport$Params } from './fn/reports/get-team-report';
 export { getTeamReport as getTeamReport } from './fn/reports/get-team-report';
+export type { GetAccuracyReport$Params as GetAccuracyReport$Params } from './fn/reports/get-accuracy-report';
+export { getAccuracyReport as getAccuracyReport } from './fn/reports/get-accuracy-report';
 export type { GetSettings$Params as GetSettings$Params } from './fn/settings/get-settings';
 export { getSettings as getSettings } from './fn/settings/get-settings';
 export type { UpdateSettings$Params as UpdateSettings$Params } from './fn/settings/update-settings';

@@ -4,6 +4,7 @@
 import { DemandTeamRequest } from '../models/demand-team-request';
 export interface DemandRequest {
   assignedPersonIds: (Array<string> | null);
+  estimateChangeReason?: (string | null);
   informedEndDate: (string | null);
   position?: (number | string | null);
   prerequisiteIds?: (Array<string> | null);

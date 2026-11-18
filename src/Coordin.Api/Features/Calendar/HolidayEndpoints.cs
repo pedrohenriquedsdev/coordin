@@ -1,6 +1,7 @@
 using Coordin.Api.Features.Planning;
 using Coordin.Api.Infrastructure.Http;
 using Coordin.Api.Infrastructure.Persistence;
+using Coordin.Engine.Forecasting;
 using Microsoft.EntityFrameworkCore;
 
 namespace Coordin.Api.Features.Calendar;
@@ -51,7 +52,7 @@ public static class HolidayEndpoints
         CoordinDbContext db,
         ForecastRecalculator recalculator,
         CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
+        PlanningTransaction.RunAsync(db, recalculator, ForecastChangeCause.Capacity, async () =>
         {
             var description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim();
             var holiday = new Holiday { Date = request.Date!.Value, Description = description };
@@ -75,7 +76,7 @@ public static class HolidayEndpoints
         CoordinDbContext db,
         ForecastRecalculator recalculator,
         CancellationToken cancellationToken) =>
-        PlanningTransaction.RunAsync(db, recalculator, async () =>
+        PlanningTransaction.RunAsync(db, recalculator, ForecastChangeCause.Capacity, async () =>
         {
             var holiday = await db.Holidays.FindAsync([id], cancellationToken);
             if (holiday is null)

@@ -71,6 +71,24 @@
           </div>
         </div>
 
+        @if (editing) {
+          <div>
+            <label for="demand-reason" class="block text-sm font-medium text-slate-700">
+              Motivo da alteração de estimativa (opcional)
+            </label>
+            <input
+              id="demand-reason"
+              type="text"
+              formControlName="estimateChangeReason"
+              maxlength="500"
+              class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2"
+            />
+            <p class="mt-1 text-xs text-slate-600">
+              Fica no histórico de estimativas, junto com a alteração.
+            </p>
+          </div>
+        }
+
         @if (!editing) {
           <div>
             <label for="demand-position" class="block text-sm font-medium text-slate-700"

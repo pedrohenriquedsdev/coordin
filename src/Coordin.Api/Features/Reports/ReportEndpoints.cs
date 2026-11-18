@@ -30,6 +30,12 @@ public static class ReportEndpoints
             .Produces<TeamReportResponse>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest);
 
+        group.MapGet("/accuracy", AccuracyEndpoints.GetAccuracyAsync)
+            .WithName("GetAccuracyReport")
+            .WithSummary("Indicadores de precisão no período de conclusão: desvio de prazo, no prazo, estimado × real, por setor e por time (RF-23).")
+            .Produces<AccuracyResponse>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
+
         return app;
     }
 

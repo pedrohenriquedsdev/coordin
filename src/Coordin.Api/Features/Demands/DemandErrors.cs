@@ -17,6 +17,7 @@ public static class DemandErrors
     public const string PersonRepeated = "Uma pessoa não pode ser alocada duas vezes na mesma demanda.";
     public const string PersonUnknown = "Uma das pessoas informadas não existe.";
     public const string CompletionBeforeStart = "A data de conclusão não pode ser anterior ao início da demanda.";
+    public const string ActualEffortNotPositive = "O esforço real, quando informado, precisa ser maior que zero.";
     public const string CycleCode = "dependency-cycle";
     public const string DependentsCode = "demand-has-dependents";
 
