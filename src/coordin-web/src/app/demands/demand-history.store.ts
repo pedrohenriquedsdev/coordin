@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { forkJoin, map } from 'rxjs';
+import { forkJoin, map, Subscription } from 'rxjs';
 import { ApiConfiguration } from '../api/api-configuration';
 import { getDemand } from '../api/fn/demands/get-demand';
 import { getEstimateHistory } from '../api/fn/demands/get-estimate-history';
@@ -29,9 +29,13 @@ export class DemandHistoryStore {
   readonly estimateRows = computed(() => estimateHistoryRows(this.estimates()));
   readonly forecastRows = computed(() => forecastHistoryRows(this.forecasts()));
 
+  /** Uma busca nova cancela a anterior, para a demanda que saiu da tela não sobrescrever a que está nela. */
+  private pending: Subscription | null = null;
+
   refresh(id: string): void {
     this.load.set('loading');
-    forkJoin({
+    this.pending?.unsubscribe();
+    this.pending = forkJoin({
       demand: getDemand(this.http, this.root, { id }).pipe(map((response) => response.body)),
       estimates: getEstimateHistory(this.http, this.root, { id }).pipe(
         map((response) => response.body),
