@@ -7,10 +7,10 @@
 
 ## 2. Cenários, documentação e verificação (segundo commit)
 
-- [ ] 2.1 Cenário de login e logout em `e2e/auth.spec.ts`, no projeto `desktop`: login correto leva ao cronograma; "Sair" leva ao login; abrir uma tela protegida depois do logout volta ao login sem mostrar dados (RNF-04; spec: login e logout)
-- [ ] 2.2 Cenário do cadastro à previsão em `e2e/planning.spec.ts`, no projeto `desktop`: cadastrar time, pessoa com capacidade e demanda com início, estimativa e pessoa alocada, por nomes únicos, e ver no cronograma uma data de fim prevista `dd/MM/aaaa` e nenhum "Sem previsão" (spec: do cadastro à previsão; design, decisões 6 e 7)
-- [ ] 2.3 Cenário do celular em `e2e/mobile.spec.ts`, no projeto `mobile`: criar a demanda pela API (`request` do Playwright), abrir o cronograma em 360 px pelo menu e confirmar que `scrollWidth` não excede `clientWidth` (RNF-03; spec: cronograma no celular)
-- [ ] 2.4 Seção no README para rodar o smoke: pré-requisitos (Docker em execução, Chrome, .NET), o comando `npx playwright test` em `src/coordin-web`, o que ele sobe e derruba, e a observação de que o smoke não roda no CI (spec: roteiro no README)
-- [ ] 2.5 Estabilidade: rodar `npx playwright test` três vezes seguidas, todas verdes, e conferir depois de cada uma que não restou container, processo da API nem arquivo de credenciais
-- [ ] 2.6 Conferir que o smoke não interfere nas verificações existentes: `npm run lint`, `npm run format:check`, `npm test` e `npm run build` (comandos do TDD 8.6) passam com a pasta `e2e/` presente, e o `npm test` não executa os cenários do Playwright
-- [ ] 2.7 Rodar `openspec validate e2e-smoke --strict`, atualizar o §13 do `CLAUDE.md` e registrar no PR a diferença entre a verificação local (o smoke) e o CI (que não o roda)
+- [x] 2.1 Cenário de login e logout em `e2e/auth.spec.ts`, no projeto `desktop`: login correto leva ao cronograma; "Sair" leva ao login; abrir uma tela protegida depois do logout volta ao login sem mostrar dados (RNF-04; spec: login e logout)
+- [x] 2.2 Cenário do cadastro à previsão em `e2e/planning.spec.ts`, no projeto `desktop`: cadastrar time, pessoa com capacidade e demanda com início, estimativa e pessoa alocada, por nomes únicos, e ver no cronograma uma data de fim prevista `dd/MM/aaaa` e nenhum "Sem previsão" (spec: do cadastro à previsão; design, decisões 6 e 7)
+- [x] 2.3 Cenário do celular em `e2e/mobile.spec.ts`, no projeto `mobile`: criar a demanda pela API (`request` do Playwright), abrir o cronograma em 360 px pelo menu e confirmar que `scrollWidth` não excede `clientWidth` (RNF-03; spec: cronograma no celular)
+- [x] 2.4 Seção no README para rodar o smoke: pré-requisitos (Docker em execução, Chrome, .NET), o comando `npx playwright test` em `src/coordin-web`, o que ele sobe e derruba, e a observação de que o smoke não roda no CI (spec: roteiro no README)
+- [x] 2.5 Estabilidade: rodar `npx playwright test` três vezes seguidas, todas verdes, e conferir depois de cada uma que não restou container, processo da API nem arquivo de credenciais
+- [x] 2.6 Conferir que o smoke não interfere nas verificações existentes: `npm run lint`, `npm run format:check`, `npm test` e `npm run build` (comandos do TDD 8.6) passam com a pasta `e2e/` presente, e o `npm test` não executa os cenários do Playwright
+- [x] 2.7 Rodar `openspec validate e2e-smoke --strict`, atualizar o §13 do `CLAUDE.md` e registrar no PR a diferença entre a verificação local (o smoke) e o CI (que não o roda)

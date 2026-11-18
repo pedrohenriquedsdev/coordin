@@ -9,7 +9,8 @@ import { defineConfig, devices } from '@playwright/test';
 
 // Sorteio da porta da API, na faixa 40000-59999, e da senha do gestor (12 caracteres ou mais).
 const apiPort = process.env.E2E_API_PORT ?? String(randomInt(40000, 60000));
-const managerPassword = process.env.E2E_MANAGER_PASSWORD ?? `Aa1-${randomBytes(12).toString('hex')}`;
+const managerPassword =
+  process.env.E2E_MANAGER_PASSWORD ?? `Aa1-${randomBytes(12).toString('hex')}`;
 
 process.env.E2E_API_PORT = apiPort;
 process.env.E2E_MANAGER_PASSWORD = managerPassword;
@@ -36,7 +37,11 @@ export default defineConfig({
     {
       name: 'desktop',
       testIgnore: /mobile\.spec\.ts/,
-      use: { ...devices['Desktop Chrome'], channel: 'chrome', viewport: { width: 1280, height: 720 } },
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+        viewport: { width: 1280, height: 720 },
+      },
     },
     {
       name: 'mobile',

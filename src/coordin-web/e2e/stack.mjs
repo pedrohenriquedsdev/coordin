@@ -27,11 +27,15 @@ function fail(message) {
 /** Confere cedo os pré-requisitos, para a falha dizer o que falta em vez de um erro obscuro do navegador. */
 function checkPrerequisites() {
   if (spawnSync('docker', ['info'], { stdio: 'ignore' }).status !== 0) {
-    fail('O Docker não está respondendo. Abra o Docker Desktop (ou inicie o serviço) e rode o smoke de novo.');
+    fail(
+      'O Docker não está respondendo. Abra o Docker Desktop (ou inicie o serviço) e rode o smoke de novo.',
+    );
   }
 
   if (spawnSync('dotnet', ['--version'], { stdio: 'ignore' }).status !== 0) {
-    fail('O .NET SDK não foi encontrado no PATH. Instale o SDK indicado no global.json e rode de novo.');
+    fail(
+      'O .NET SDK não foi encontrado no PATH. Instale o SDK indicado no global.json e rode de novo.',
+    );
   }
 
   const chromePaths = [
@@ -41,11 +45,15 @@ function checkPrerequisites() {
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   ];
   if (!chromePaths.some((path) => existsSync(path)) && !process.env.E2E_CHROME_OK) {
-    fail('O Google Chrome não foi encontrado nos caminhos padrão. Instale o Chrome, que o smoke usa no lugar de baixar um navegador.');
+    fail(
+      'O Google Chrome não foi encontrado nos caminhos padrão. Instale o Chrome, que o smoke usa no lugar de baixar um navegador.',
+    );
   }
 
   if (!apiPort || !managerEmail || !managerPassword || !jwtKey) {
-    fail('A configuração do smoke está incompleta. Rode com `npx playwright test`, que prepara as variáveis.');
+    fail(
+      'A configuração do smoke está incompleta. Rode com `npx playwright test`, que prepara as variáveis.',
+    );
   }
 }
 
@@ -75,8 +83,13 @@ async function waitFor(check, label, timeoutMs) {
 
 /** Restos de execuções anteriores (containers com este prefixo) saem antes de subir a pilha nova. */
 function removeLeftovers() {
-  const list = spawnSync('docker', ['ps', '-aq', '--filter', 'name=coordin-e2e-'], { encoding: 'utf8' });
-  const ids = list.stdout.split('\n').map((id) => id.trim()).filter(Boolean);
+  const list = spawnSync('docker', ['ps', '-aq', '--filter', 'name=coordin-e2e-'], {
+    encoding: 'utf8',
+  });
+  const ids = list.stdout
+    .split('\n')
+    .map((id) => id.trim())
+    .filter(Boolean);
   if (ids.length > 0) {
     spawnSync('docker', ['rm', '-f', ...ids], { stdio: 'ignore' });
   }
@@ -91,7 +104,9 @@ function cleanup() {
     if (process.platform === 'win32') {
       spawnSync('taskkill', ['/F', '/T', '/PID', String(api.pid)], { stdio: 'ignore' });
     } else {
-      try { process.kill(-api.pid, 'SIGTERM'); } catch {}
+      try {
+        process.kill(-api.pid, 'SIGTERM');
+      } catch {}
     }
     api = null;
   }
@@ -107,16 +122,33 @@ async function main() {
   const dbPassword = (await import('node:crypto')).randomBytes(12).toString('hex');
 
   // 1. PostgreSQL descartável, com porta livre e senha sorteada.
-  const run = spawnSync('docker', [
-    'run', '-d', '--name', containerName,
-    '-e', 'POSTGRES_USER=coordin', '-e', `POSTGRES_PASSWORD=${dbPassword}`, '-e', 'POSTGRES_DB=coordin',
-    '-p', `127.0.0.1:${dbPort}:5432`, 'postgres:18',
-  ], { encoding: 'utf8' });
+  const run = spawnSync(
+    'docker',
+    [
+      'run',
+      '-d',
+      '--name',
+      containerName,
+      '-e',
+      'POSTGRES_USER=coordin',
+      '-e',
+      `POSTGRES_PASSWORD=${dbPassword}`,
+      '-e',
+      'POSTGRES_DB=coordin',
+      '-p',
+      `127.0.0.1:${dbPort}:5432`,
+      'postgres:18',
+    ],
+    { encoding: 'utf8' },
+  );
   if (run.status !== 0) {
     fail(`Não foi possível subir o PostgreSQL descartável: ${run.stderr.trim()}`);
   }
   await waitFor(
-    () => spawnSync('docker', ['exec', containerName, 'pg_isready', '-U', 'coordin', '-d', 'coordin'], { stdio: 'ignore' }).status === 0,
+    () =>
+      spawnSync('docker', ['exec', containerName, 'pg_isready', '-U', 'coordin', '-d', 'coordin'], {
+        stdio: 'ignore',
+      }).status === 0,
     'o PostgreSQL',
     120_000,
   );
@@ -155,12 +187,24 @@ async function main() {
   });
 
   // 4. Espera a API responder; o `webServer` do Playwright também confere /api/health.
-  await waitFor(async () => (await fetch(`http://127.0.0.1:${apiPort}/api/health`)).status === 200, 'a API responder', 10 * 60_000);
-  console.log(`[e2e] Pilha no ar: API em http://127.0.0.1:${apiPort}, PostgreSQL descartável na porta ${dbPort}.`);
+  await waitFor(
+    async () => (await fetch(`http://127.0.0.1:${apiPort}/api/health`)).status === 200,
+    'a API responder',
+    10 * 60_000,
+  );
+  console.log(
+    `[e2e] Pilha no ar: API em http://127.0.0.1:${apiPort}, PostgreSQL descartável na porta ${dbPort}.`,
+  );
 }
 
-process.on('SIGINT', () => { cleanup(); process.exit(130); });
-process.on('SIGTERM', () => { cleanup(); process.exit(143); });
+process.on('SIGINT', () => {
+  cleanup();
+  process.exit(130);
+});
+process.on('SIGTERM', () => {
+  cleanup();
+  process.exit(143);
+});
 process.on('exit', cleanup);
 
 main().catch((error) => fail(error.message));
