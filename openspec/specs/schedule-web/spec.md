@@ -150,3 +150,14 @@ Quando `GET /api/schedule` devolver `executionOrderMode` igual a `Custom`, o cro
 #### Scenario: Falha ao voltar
 - **WHEN** a chamada falha
 - **THEN** a tela mostra a mensagem de falha em português, mantém o aviso e o botão e o cronograma continua como estava
+
+### Requirement: Botão de exportação no cronograma
+O cronograma SHALL mostrar o botão "Exportar planilha" acima da lista, visível para quem tem sessão, e o botão SHALL ficar desabilitado enquanto o download está em andamento (RF-19). O download usa o endpoint de exportação do cronograma (schedule-export).
+
+#### Scenario: Botão visível
+- **WHEN** o cronograma está carregado
+- **THEN** o botão "Exportar planilha" aparece e está habilitado
+
+#### Scenario: Download em andamento
+- **WHEN** o gestor aciona o botão e o arquivo ainda está sendo baixado
+- **THEN** o botão fica desabilitado até o fim do download
