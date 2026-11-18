@@ -77,3 +77,15 @@ export type { GetSettings$Params as GetSettings$Params } from './fn/settings/get
 export { getSettings as getSettings } from './fn/settings/get-settings';
 export type { UpdateSettings$Params as UpdateSettings$Params } from './fn/settings/update-settings';
 export { updateSettings as updateSettings } from './fn/settings/update-settings';
+export type { GetValidationStatus$Params as GetValidationStatus$Params } from './fn/validation/get-validation-status';
+export { getValidationStatus as getValidationStatus } from './fn/validation/get-validation-status';
+export type { LoadValidationDataset$Params as LoadValidationDataset$Params } from './fn/validation/load-validation-dataset';
+export { loadValidationDataset as loadValidationDataset } from './fn/validation/load-validation-dataset';
+export type { GetValidationBaseline$Params as GetValidationBaseline$Params } from './fn/validation/get-validation-baseline';
+export { getValidationBaseline as getValidationBaseline } from './fn/validation/get-validation-baseline';
+export type { PutValidationBaseline$Params as PutValidationBaseline$Params } from './fn/validation/put-validation-baseline';
+export { putValidationBaseline as putValidationBaseline } from './fn/validation/put-validation-baseline';
+export type { CaptureCurrentPlan$Params as CaptureCurrentPlan$Params } from './fn/validation/capture-current-plan';
+export { captureCurrentPlan as captureCurrentPlan } from './fn/validation/capture-current-plan';
+export type { EvaluateValidation$Params as EvaluateValidation$Params } from './fn/validation/evaluate-validation';
+export { evaluateValidation as evaluateValidation } from './fn/validation/evaluate-validation';

@@ -12,7 +12,11 @@ public sealed record TestDatabase(string Name, string ConnectionString);
 /// </summary>
 public sealed class PostgresFixture : IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:18").Build();
+    // O assembly inteiro compartilha este servidor: o limite padrão (100 conexões) não cabe mais em todas as
+    // classes de teste, e os pools de cada banco ficam limitados (ver CreateDatabaseAsync).
+    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:18")
+        .WithCommand("-c", "max_connections=200")
+        .Build();
 
     public ValueTask InitializeAsync() => new(_container.StartAsync());
 
@@ -24,8 +28,10 @@ public sealed class PostgresFixture : IAsyncLifetime
         var name = $"coordin_test_{Guid.NewGuid():N}";
         await ExecuteAsync($"CREATE DATABASE {name};", cancellationToken);
 
+        // Pool pequeno por banco de teste: cada factory tem o seu, e o servidor precisa caber todos.
         var connectionString = _container.GetConnectionString()
-            .Replace("Database=postgres", $"Database={name}", StringComparison.Ordinal);
+            .Replace("Database=postgres", $"Database={name}", StringComparison.Ordinal)
+            .TrimEnd(';') + ";Maximum Pool Size=10";
         return new TestDatabase(name, connectionString);
     }
 

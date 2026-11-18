@@ -24,4 +24,7 @@ public sealed class Person
     public decimal DailyCapacityHours { get; set; }
 
     public ICollection<Absence> Absences { get; } = [];
+
+    /// <summary>Só o carregamento do conjunto fictício usa: fixa o id vindo do arquivo (DT-37).</summary>
+    internal void UseId(Guid id) => Id = id;
 }
