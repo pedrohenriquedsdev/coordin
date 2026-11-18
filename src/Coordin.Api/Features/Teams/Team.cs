@@ -34,4 +34,7 @@ public sealed class Team
 
     /// <summary>A forma de comparação do nome: sem espaços nas pontas e sem diferenciar maiúsculas.</summary>
     public static string Normalize(string name) => name.Trim().ToUpperInvariant();
+
+    /// <summary>Só o carregamento do conjunto fictício usa: fixa o id vindo do arquivo (DT-37).</summary>
+    internal void UseId(Guid id) => Id = id;
 }

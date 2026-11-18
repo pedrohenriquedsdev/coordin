@@ -10,3 +10,18 @@ public sealed record ValidationStatusResponse(
     int BaselineCount,
     bool CurrentPlanCaptured,
     DateTimeOffset? CurrentPlanCapturedAt);
+
+/// <summary>O corpo do carregamento do conjunto. Sem <see cref="ConfirmReplaceAll"/> verdadeiro, nada é gravado (DT-37).</summary>
+public sealed record LoadDatasetRequest(bool ConfirmReplaceAll);
+
+/// <summary>Uma demanda com a sua linha de base (nula enquanto o gestor não informou).</summary>
+public sealed record BaselineResponse(Guid DemandId, string Title, DateOnly? BaselineDate);
+
+/// <summary>Uma data de linha de base para uma demanda.</summary>
+public sealed record BaselineItem(Guid DemandId, DateOnly BaselineDate);
+
+/// <summary>A linha de base completa: substitui a anterior (PRD 7.3, passo 2).</summary>
+public sealed record SaveBaselineRequest(IReadOnlyList<BaselineItem>? Baselines);
+
+/// <summary>O planejamento do processo atual, guardado (PRD 7.3, passo 3).</summary>
+public sealed record CurrentPlanResponse(DateTimeOffset CapturedAt);

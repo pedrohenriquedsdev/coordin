@@ -39,4 +39,7 @@ public sealed class Demand
     public ICollection<DemandDependency> Dependents { get; } = [];
 
     public Forecast? Forecast { get; set; }
+
+    /// <summary>Só o carregamento do conjunto fictício usa: fixa o id vindo do arquivo (DT-37).</summary>
+    internal void UseId(Guid id) => Id = id;
 }

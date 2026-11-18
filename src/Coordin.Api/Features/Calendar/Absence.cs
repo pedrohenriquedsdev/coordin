@@ -20,4 +20,7 @@ public sealed class Absence
 
     /// <summary>Último dia da ausência, inclusive; nunca anterior ao início.</summary>
     public DateOnly EndDate { get; set; }
+
+    /// <summary>Só o carregamento do conjunto fictício usa: fixa o id vindo do arquivo (DT-37).</summary>
+    internal void UseId(Guid id) => Id = id;
 }
