@@ -4,6 +4,7 @@ using Coordin.Api.Features.Demands;
 using Coordin.Api.Features.People;
 using Coordin.Api.Features.Planning;
 using Coordin.Api.Features.Teams;
+using Coordin.Api.Features.Validation;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,6 +39,10 @@ public class CoordinDbContext(DbContextOptions<CoordinDbContext> options)
     public DbSet<Forecast> Forecasts => Set<Forecast>();
 
     public DbSet<PlanningSettings> PlanningSettings => Set<PlanningSettings>();
+
+    public DbSet<ValidationBaseline> ValidationBaselines => Set<ValidationBaseline>();
+
+    public DbSet<ValidationCurrentPlan> ValidationCurrentPlans => Set<ValidationCurrentPlan>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

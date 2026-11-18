@@ -386,6 +386,39 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                     b.ToTable("Teams", (string)null);
                 });
 
+            modelBuilder.Entity("Coordin.Api.Features.Validation.ValidationBaseline", b =>
+                {
+                    b.Property<Guid>("DemandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("BaselineDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("DemandId");
+
+                    b.ToTable("ValidationBaselines", (string)null);
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Validation.ValidationCurrentPlan", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CapturedAt")
+                        .HasColumnType("timestamptz");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ValidationCurrentPlans", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ValidationCurrentPlans_Singleton", "\"Id\" = 1");
+                        });
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -616,6 +649,15 @@ namespace Coordin.Api.Infrastructure.Persistence.Migrations
                     b.HasOne("Coordin.Api.Features.Demands.Demand", null)
                         .WithOne("Forecast")
                         .HasForeignKey("Coordin.Api.Features.Planning.Forecast", "DemandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Coordin.Api.Features.Validation.ValidationBaseline", b =>
+                {
+                    b.HasOne("Coordin.Api.Features.Demands.Demand", null)
+                        .WithMany()
+                        .HasForeignKey("DemandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
