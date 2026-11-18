@@ -1,0 +1,172 @@
+<h2 class="text-lg font-semibold">Validação por simulação</h2>
+
+@switch (store.load()) {
+  @case ('loading') {
+    <p class="mt-3 text-slate-600">Carregando…</p>
+  }
+  @case ('unavailable') {
+    <p class="mt-3 rounded-md bg-slate-100 p-3 text-sm text-slate-700">
+      A validação não está disponível neste ambiente.
+    </p>
+  }
+  @case ('failed') {
+    <div role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">
+      <p>Não foi possível carregar a validação.</p>
+      <button
+        type="button"
+        (click)="store.refresh()"
+        class="mt-2 rounded-md border border-red-300 px-3 py-1 font-medium hover:bg-red-100"
+      >
+        Tentar de novo
+      </button>
+    </div>
+  }
+  @default {
+    @if (store.message(); as message) {
+      <p role="status" class="mt-3 rounded-md bg-slate-100 p-3 text-sm text-slate-800">
+        {{ message }}
+      </p>
+    }
+
+    @if (store.step(); as step) {
+      <section class="mt-4 rounded-md border border-slate-200 bg-white p-4">
+        <p class="text-sm text-slate-500">Etapa atual</p>
+        <h3 class="text-base font-semibold">{{ stepLabel(step) }}</h3>
+
+        @switch (step) {
+          @case ('load') {
+            <p class="mt-2 text-sm text-slate-700">
+              Carregar o conjunto fictício <strong>substitui todo o planejamento</strong>: times,
+              pessoas, demandas, previsões, linha de base e o planejamento guardado.
+            </p>
+            <form class="mt-3 space-y-3" (submit)="submit($event, () => store.loadDataset())">
+              <label class="flex items-start gap-2 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  class="mt-1"
+                  [checked]="store.confirmed()"
+                  (change)="onConfirm($event)"
+                />
+                <span>Entendo que todo o planejamento será substituído.</span>
+              </label>
+              <button
+                type="submit"
+                [disabled]="!store.confirmed() || store.busy() !== 'idle'"
+                class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+              >
+                Carregar conjunto fictício
+              </button>
+            </form>
+          }
+
+          @case ('baseline') {
+            <p class="mt-2 text-sm text-slate-700">
+              Informe a data que você comunicaria ao gestor de produto sem o sistema, para cada
+              demanda. Faltam {{ store.missingDates() }} de {{ store.baseline().length }}.
+            </p>
+            <form class="mt-3 space-y-2" (submit)="submit($event, () => store.saveBaseline())">
+              @for (item of store.baseline(); track item.demandId) {
+                <div
+                  class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 py-2"
+                >
+                  <span class="text-sm text-slate-800">{{ item.title }}</span>
+                  <input
+                    type="date"
+                    [attr.aria-label]="'Data da linha de base de ' + item.title"
+                    [value]="store.dates()[item.demandId] ?? ''"
+                    (input)="onDate(item.demandId, $event)"
+                    class="rounded-md border border-slate-300 px-2 py-1 text-sm"
+                  />
+                </div>
+              }
+              <button
+                type="submit"
+                [disabled]="store.missingDates() > 0 || store.busy() !== 'idle'"
+                class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+              >
+                Salvar linha de base
+              </button>
+            </form>
+          }
+
+          @case ('plan') {
+            <p class="mt-2 text-sm text-slate-700">
+              Guarde o planejamento do processo atual. Ele fica registrado e não muda depois.
+            </p>
+            <form class="mt-3" (submit)="submit($event, () => store.capturePlan())">
+              <button
+                type="submit"
+                [disabled]="store.busy() !== 'idle'"
+                class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+              >
+                Guardar planejamento atual
+              </button>
+            </form>
+          }
+
+          @case ('compare') {
+            @if (store.status(); as status) {
+              @if (status.currentPlanCapturedAt; as capturedAt) {
+                <p class="mt-2 text-sm text-slate-700">
+                  Planejamento guardado em
+                  {{ capturedAt | date: 'dd/MM/yyyy HH:mm' : 'America/Sao_Paulo' }}.
+                </p>
+              }
+            }
+            <p class="mt-2 text-sm text-slate-700">
+              A comparação não grava nada: ela só calcula e mostra o resultado.
+            </p>
+            <form
+              class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3"
+              (submit)="submit($event, () => store.evaluate())"
+            >
+              <label class="text-sm text-slate-700">
+                Fator mínimo do esforço
+                <input
+                  type="number"
+                  step="0.01"
+                  [value]="store.params().minEffortFactor"
+                  (input)="onNumber('minEffortFactor', $event)"
+                  class="mt-1 w-full rounded-md border border-slate-300 px-2 py-1"
+                />
+              </label>
+              <label class="text-sm text-slate-700">
+                Fator máximo do esforço
+                <input
+                  type="number"
+                  step="0.01"
+                  [value]="store.params().maxEffortFactor"
+                  (input)="onNumber('maxEffortFactor', $event)"
+                  class="mt-1 w-full rounded-md border border-slate-300 px-2 py-1"
+                />
+              </label>
+              <label class="text-sm text-slate-700">
+                Semente
+                <input
+                  type="number"
+                  step="1"
+                  [value]="store.params().seed"
+                  (input)="onNumber('seed', $event)"
+                  class="mt-1 w-full rounded-md border border-slate-300 px-2 py-1"
+                />
+              </label>
+              <div class="sm:col-span-3">
+                <button
+                  type="submit"
+                  [disabled]="store.busy() !== 'idle'"
+                  class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+                >
+                  Comparar
+                </button>
+              </div>
+            </form>
+
+            @if (store.result(); as result) {
+              <app-validation-result [result]="result" [titles]="titles()" />
+            }
+          }
+        }
+      </section>
+    }
+  }
+}
