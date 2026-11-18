@@ -14,10 +14,10 @@ Regras para todas as tasks:
 
 ## 2. Formatador CSV puro (RF-19; DT-20; RNF-07)
 
-- [ ] 2.1 Criar `Features/Planning/ScheduleCsv.cs` com `string Build(ScheduleResponse response)` (CRLF, cabeçalho em português, colunas da seção "Colunas do cronograma" da spec) e `byte[] ToBytes(string csv)` (UTF-8 com BOM `EF BB BF`). Textos de motivos e situações conforme D3 do design.
-- [ ] 2.2 Criar `Features/Planning/ScheduleCsvText.cs` (ou dentro de `ScheduleCsv`) com o escapamento RFC 4180 (`;`, aspas, CR, LF) e a neutralização de fórmulas (D4): só nos campos de texto digitado (título, nome de time, lista de dependências), com apóstrofo antes de `=`, `+`, `-`, `@` ou tabulação.
-- [ ] 2.3 Criar `tests/Coordin.Api.Tests/Planning/ScheduleCsvTests.cs` (unitário, sem servidor): cabeçalho e ordem das colunas; BOM na codificação; CRLF; campo com `;`, aspas e quebra de linha entre aspas, com o mesmo número de colunas; título `=SOMA(A1:A2)` neutralizado; desvio `-3` sem apóstrofo; hora `12,5`; datas `dd/MM/yyyy`; campo vazio (sem `null`); demanda não previsível com o motivo em português; demanda concluída com desvios; dependências em lista; lista vazia (só o cabeçalho); `Sim`/`Não` nos booleanos.
-- [ ] 2.4 Teste de texto fixo: cada motivo e situação tem o texto esperado (fixa D3, para uma divergência com o front aparecer no teste).
+- [x] 2.1 Criar `Features/Planning/ScheduleCsv.cs` com `string Build(ScheduleResponse response)` (CRLF, cabeçalho em português, colunas da seção "Colunas do cronograma" da spec) e `byte[] ToBytes(string csv)` (UTF-8 com BOM `EF BB BF`). Textos de motivos e situações conforme D3 do design.
+- [x] 2.2 Criar `Features/Planning/ScheduleCsvText.cs` (ou dentro de `ScheduleCsv`) com o escapamento RFC 4180 (`;`, aspas, CR, LF) e a neutralização de fórmulas (D4): só nos campos de texto digitado (título, nome de time, lista de dependências), com apóstrofo antes de `=`, `+`, `-`, `@` ou tabulação.
+- [x] 2.3 Criar `tests/Coordin.Api.Tests/Planning/ScheduleCsvTests.cs` (unitário, sem servidor): cabeçalho e ordem das colunas; BOM na codificação; CRLF; campo com `;`, aspas e quebra de linha entre aspas, com o mesmo número de colunas; título `=SOMA(A1:A2)` neutralizado; desvio `-3` sem apóstrofo; hora `12,5`; datas `dd/MM/yyyy`; campo vazio (sem `null`); demanda não previsível com o motivo em português; demanda concluída com desvios; dependências em lista; lista vazia (só o cabeçalho); `Sim`/`Não` nos booleanos.
+- [x] 2.4 Teste de texto fixo: cada motivo e situação tem o texto esperado (fixa D3, para uma divergência com o front aparecer no teste).
 
 ## 3. Endpoint de exportação (RF-19; RNF-04)
 
