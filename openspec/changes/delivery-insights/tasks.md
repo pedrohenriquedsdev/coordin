@@ -34,7 +34,7 @@
 
 ## 5. Verificação
 
-- [ ] 5.1 Executar os comandos do TDD 8.6 em cópia limpa: `dotnet build`, `dotnet format --verify-no-changes`, `dotnet test` com cobertura e a categoria de desempenho, e `npm ci`, `npm run lint`, `npm run format:check`, `npm test` nos fusos UTC, Tóquio e Los Angeles, e `npm run build` com código 0
-- [ ] 5.2 Cobertura do motor de cálculo medida e informada no PR (meta de 90% das linhas, sem bloquear o merge)
-- [ ] 5.3 Verificação manual no Chrome headless, com API e PostgreSQL descartáveis, credenciais temporárias e autorização do autor: concluir com e sem esforço real, ver os históricos no detalhe, filtrar indicadores por período, conferir gráfico e tabela, layout em 360 px e 1280 px, e zero violações de CSP
-- [ ] 5.4 `openspec validate delivery-insights --strict` válido
+- [x] 5.1 Executar os comandos do TDD 8.6 em cópia limpa: `dotnet build`, `dotnet format --verify-no-changes`, `dotnet test` com cobertura e a categoria de desempenho, e `npm ci`, `npm run lint`, `npm run format:check`, `npm test` nos fusos UTC, Tóquio e Los Angeles, e `npm run build` com código 0
+- [x] 5.2 Cobertura do motor de cálculo medida e informada no PR (meta de 90% das linhas, sem bloquear o merge)
+- [x] 5.3 Verificação manual no Chrome headless, com API e PostgreSQL descartáveis, credenciais temporárias e autorização do autor: concluir com e sem esforço real, ver os históricos no detalhe, filtrar indicadores por período, conferir gráfico e tabela, layout em 360 px e 1280 px, e zero violações de CSP
+- [x] 5.4 `openspec validate delivery-insights --strict` válido
