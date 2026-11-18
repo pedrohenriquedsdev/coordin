@@ -29,7 +29,7 @@
 
 ## 5. Verificação
 
-- [ ] 5.1 Executar os comandos do TDD 8.6 em cópia limpa do branch: `npm ci`, `npm run lint`, `npm run format:check`, `npm test` nos fusos UTC, `TZ=Asia/Tokyo` e `TZ=America/Los_Angeles`, e `npm run build` com código 0 (informar as vulnerabilidades do `npm audit` como informativas)
-- [ ] 5.2 Rodar `dotnet build Coordin.slnx` e `dotnet test Coordin.slnx` na mesma cópia para confirmar que nada da API ou do motor mudou
-- [ ] 5.3 Verificação manual no Chrome headless, com API e PostgreSQL descartáveis, credenciais temporárias e `Validation__Enabled=true`, autorizada pelo autor: roteiro das quatro etapas, bloqueios, comparação repetida com valores idênticos, gráficos desenhados, tabelas com os mesmos valores, zero violações de CSP, 360 px e 1280 px sem rolagem horizontal, e a área escondida com a flag desligada
-- [ ] 5.4 Rodar `openspec validate simulation-validation-screens --strict` e registrar os resultados no PR, com a diferença entre verificação local e CI
+- [x] 5.1 Executar os comandos do TDD 8.6 em cópia limpa do branch: `npm ci`, `npm run lint`, `npm run format:check`, `npm test` nos fusos UTC, `TZ=Asia/Tokyo` e `TZ=America/Los_Angeles`, e `npm run build` com código 0 (informar as vulnerabilidades do `npm audit` como informativas)
+- [x] 5.2 Rodar `dotnet build Coordin.slnx` e `dotnet test Coordin.slnx` na mesma cópia para confirmar que nada da API ou do motor mudou
+- [x] 5.3 Verificação manual no Chrome headless, com API e PostgreSQL descartáveis, credenciais temporárias e `Validation__Enabled=true`, autorizada pelo autor: roteiro das quatro etapas, bloqueios, comparação repetida com valores idênticos, gráficos desenhados, tabelas com os mesmos valores, zero violações de CSP, 360 px e 1280 px sem rolagem horizontal, e a área escondida com a flag desligada
+- [x] 5.4 Rodar `openspec validate simulation-validation-screens --strict` e registrar os resultados no PR, com a diferença entre verificação local e CI
