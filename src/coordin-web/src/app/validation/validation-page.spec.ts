@@ -40,7 +40,8 @@ describe('ValidationPage', () => {
     });
     fixture.detectChanges();
 
-    expect(text()).toContain('Etapa atual: Carregar o conjunto fictício');
+    expect(text()).toContain('Etapa atual');
+    expect(text()).toContain('Carregar o conjunto fictício');
   });
 
   it('says the area is not available when the switch is off', () => {
@@ -68,6 +69,74 @@ describe('ValidationPage', () => {
       currentPlanCapturedAt: null,
     });
     fixture.detectChanges();
-    expect(text()).toContain('Etapa atual: Comparar');
+    expect(text()).toContain('Etapa atual');
+    expect(text()).toContain('Comparar');
+  });
+
+  describe('the steps', () => {
+    const buttonWith = (label: string) =>
+      [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')].find((b) =>
+        b.textContent?.includes(label),
+      ) as HTMLButtonElement | undefined;
+
+    it('keeps the load button disabled until the confirmation is checked', () => {
+      statusRequest().flush({
+        demandCount: 0,
+        baselineCount: 0,
+        currentPlanCaptured: false,
+        currentPlanCapturedAt: null,
+      });
+      fixture.detectChanges();
+
+      expect(buttonWith('Carregar conjunto fictício')?.disabled).toBe(true);
+
+      const checkbox = (fixture.nativeElement as HTMLElement).querySelector(
+        'input[type="checkbox"]',
+      ) as HTMLInputElement;
+      checkbox.checked = true;
+      checkbox.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      expect(buttonWith('Carregar conjunto fictício')?.disabled).toBe(false);
+    });
+
+    it('counts the demands still without a baseline date', () => {
+      statusRequest().flush({
+        demandCount: 2,
+        baselineCount: 0,
+        currentPlanCaptured: false,
+        currentPlanCapturedAt: null,
+      });
+      fixture.detectChanges();
+      TestBed.flushEffects();
+
+      http
+        .expectOne((req) => req.url === '/api/validation/baseline')
+        .flush([
+          { demandId: 'a', title: 'Alfa', baselineDate: null },
+          { demandId: 'b', title: 'Beta', baselineDate: null },
+        ]);
+      fixture.detectChanges();
+
+      expect(text()).toContain('Faltam 2 de 2.');
+      expect(buttonWith('Salvar linha de base')?.disabled).toBe(true);
+    });
+
+    it('shows the comparison form with the suggested factors and seed', () => {
+      statusRequest().flush({
+        demandCount: 2,
+        baselineCount: 2,
+        currentPlanCaptured: true,
+        currentPlanCapturedAt: '2027-06-30T12:00:00Z',
+      });
+      fixture.detectChanges();
+
+      const inputs = [
+        ...(fixture.nativeElement as HTMLElement).querySelectorAll('input[type="number"]'),
+      ] as HTMLInputElement[];
+      expect(inputs.map((input) => input.value)).toEqual(['0.9', '1.1', '20261126']);
+      expect(text()).toContain('A comparação não grava nada');
+      expect(text()).toContain('Planejamento guardado em 30/06/2027');
+    });
   });
 });

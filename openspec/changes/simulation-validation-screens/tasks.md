@@ -12,12 +12,12 @@
 
 ## 3. Etapas do assistente
 
-- [ ] 3.1 Etapa de carga: texto do que será substituído, caixa de confirmação, envio de `confirmReplaceAll: true` só com a caixa marcada e resumo da carga (spec: carga exige confirmação explícita; design, decisão 3)
-- [ ] 3.2 Etapa de linha de base: uma data por demanda na ordem de prioridade, contagem das que faltam, bloqueio de avanço e gravação por `PUT /api/validation/baseline` (spec: linha de base completa; datas de calendário sem fuso, design, decisão 6)
-- [ ] 3.3 Etapa do plano atual: ação única, momento do registro e tratamento de `validation-current-plan-exists` como informação (spec: plano atual guardado uma vez)
-- [ ] 3.4 Etapa de comparação: parâmetros com sugestão 0,9, 1,1 e 20261126, validação antes do envio, aviso de que nada é gravado e chamada de `POST /api/validation/evaluate` (spec: comparação com parâmetros informados)
-- [ ] 3.5 Testes de componentes das quatro etapas: caminho feliz, bloqueios (carga sem confirmação, linha de base incompleta, parâmetros inválidos) e falha com "Tentar de novo" sem perder os dados digitados
-- [ ] 3.6 Rota `/validation` protegida pela sessão, como as demais telas (RNF-04), com link de volta à casca
+- [x] 3.1 Etapa de carga: texto do que será substituído, caixa de confirmação, envio de `confirmReplaceAll: true` só com a caixa marcada e resumo da carga (spec: carga exige confirmação explícita; design, decisão 3)
+- [x] 3.2 Etapa de linha de base: uma data por demanda na ordem de prioridade, contagem das que faltam, bloqueio de avanço e gravação por `PUT /api/validation/baseline` (spec: linha de base completa; datas de calendário sem fuso, design, decisão 6)
+- [x] 3.3 Etapa do plano atual: ação única, momento do registro e tratamento de `validation-current-plan-exists` como informação (spec: plano atual guardado uma vez)
+- [x] 3.4 Etapa de comparação: parâmetros com sugestão 0,9, 1,1 e 20261126, validação antes do envio, aviso de que nada é gravado e chamada de `POST /api/validation/evaluate` (spec: comparação com parâmetros informados)
+- [x] 3.5 Testes de componentes das quatro etapas: caminho feliz, bloqueios (carga sem confirmação, linha de base incompleta, parâmetros inválidos) e falha com "Tentar de novo" sem perder os dados digitados
+- [x] 3.6 Rota `/validation` protegida pela sessão, como as demais telas (RNF-04), com link de volta à casca
 
 ## 4. Resultado em gráficos e tabelas
 
