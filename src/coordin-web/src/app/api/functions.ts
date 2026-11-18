@@ -61,6 +61,8 @@ export type { DeleteHoliday$Params as DeleteHoliday$Params } from './fn/holidays
 export { deleteHoliday as deleteHoliday } from './fn/holidays/delete-holiday';
 export type { GetSchedule$Params as GetSchedule$Params } from './fn/schedule/get-schedule';
 export { getSchedule as getSchedule } from './fn/schedule/get-schedule';
+export type { ExportSchedule$Params as ExportSchedule$Params } from './fn/schedule/export-schedule';
+export { exportSchedule as exportSchedule } from './fn/schedule/export-schedule';
 export type { GetScenarioRecommendations$Params as GetScenarioRecommendations$Params } from './fn/scenarios/get-scenario-recommendations';
 export { getScenarioRecommendations as getScenarioRecommendations } from './fn/scenarios/get-scenario-recommendations';
 export type { SimulateScenario$Params as SimulateScenario$Params } from './fn/scenarios/simulate-scenario';

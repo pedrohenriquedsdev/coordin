@@ -18,6 +18,24 @@
   }
   @default {
     @if (store.schedule(); as schedule) {
+      <div class="mt-3 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          id="export-schedule"
+          (click)="store.exportCsv()"
+          [disabled]="store.exporting()"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-60"
+        >
+          @if (store.exporting()) {
+            Exportando…
+          } @else {
+            Exportar planilha
+          }
+        </button>
+        @if (store.exportError(); as text) {
+          <p role="alert" class="text-sm text-red-800">{{ text }}</p>
+        }
+      </div>
       <app-reset-to-priority [mode]="schedule.executionOrderMode" (done)="store.load()" />
       @if (schedule.items.length === 0) {
         <p class="mt-3 text-slate-600">
