@@ -4,9 +4,9 @@
 
 ## 1. Motor: causa da mudança e indicadores
 
-- [ ] 1.1 Adicionar `ForecastChangeCause` e a lista de mudanças de data prevista ao resultado do recálculo (`Coordin.Engine/Forecasting`), com testes de unidade para cada causa e para demanda cuja data não muda (RF-21; design, decisão 1)
-- [ ] 1.2 Criar `Coordin.Engine/Accuracy` com o cálculo do desvio médio de prazo, do percentual no prazo, da diferença média estimado × real e dos indicadores por setor e por time, com testes para: desvio positivo e negativo, percentual com uma demanda atrasada (66,7%), demanda sem linha de base, demanda sem esforço real, demanda com dois times, período e demandas de fora (RF-23; spec `accuracy-indicators`)
-- [ ] 1.3 Testes de determinismo do módulo: mesma entrada em ordem diferente dá o mesmo resultado, e o teste de arquitetura do motor continua verde (sem `DateTime`, `TimeZoneInfo` nem `Random`)
+- [x] 1.1 Adicionar `ForecastChangeCause` e a lista de mudanças de data prevista ao resultado do recálculo (`Coordin.Engine/Forecasting`), com testes de unidade para cada causa e para demanda cuja data não muda (RF-21; design, decisão 1)
+- [x] 1.2 Criar `Coordin.Engine/Accuracy` com o cálculo do desvio médio de prazo, do percentual no prazo, da diferença média estimado × real e dos indicadores por setor e por time, com testes para: desvio positivo e negativo, percentual com uma demanda atrasada (66,7%), demanda sem linha de base, demanda sem esforço real, demanda com dois times, período e demandas de fora (RF-23; spec `accuracy-indicators`)
+- [x] 1.3 Testes de determinismo do módulo: mesma entrada em ordem diferente dá o mesmo resultado, e o teste de arquitetura do motor continua verde (sem `DateTime`, `TimeZoneInfo` nem `Random`)
 
 ## 2. Banco e persistência
 
