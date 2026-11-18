@@ -52,7 +52,7 @@ Para cada planejamento, o motor SHALL calcular, sobre o período comparado, as h
 - **THEN** ele não entra no equilíbrio de ocupação, para não dividir por zero
 
 ### Requirement: Desvio da linha de base e do Coordin
-Para cada demanda previsível no processo atual, o motor SHALL calcular o desvio da linha de base (data real simulada menos a data de linha de base) e o desvio do Coordin (data real simulada menos a previsão do processo atual, com margem), em dias corridos, positivo para atraso (DT-27). O resultado SHALL trazer a média com sinal e a média dos valores absolutos de cada um (PRD 7.1).
+Para cada demanda previsível no processo atual, o motor SHALL calcular o desvio da linha de base (data real simulada menos a data de linha de base) e o desvio do Coordin (data real simulada menos a previsão do **planejamento com o Coordin**, com margem; PRD 7.3, passo 7), em dias corridos, positivo para atraso (DT-27). O resultado SHALL trazer a média com sinal e a média dos valores absolutos de cada um (PRD 7.1).
 
 #### Scenario: Desvio com sinal
 - **WHEN** a data real é 3 dias depois da previsão

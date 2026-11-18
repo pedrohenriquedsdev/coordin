@@ -97,4 +97,15 @@ public sealed class SimulatedActualsTests
         Assert.True(actuals.ContainsKey(ready));
         Assert.False(actuals.ContainsKey(unestimated));
     }
+
+    [Fact]
+    public void A_scaled_effort_never_goes_below_one_hundredth_of_an_hour()
+    {
+        // Um esforço de 0,01 h multiplicado por 0,1 daria zero: o piso mantém a demanda previsível.
+        var (snapshot, demand) = OneDemand(0.01m);
+
+        var actuals = SimulatedActuals.Calculate(snapshot, new ValidationParameters(0.1m, 0.1m, 1L));
+
+        Assert.True(actuals.ContainsKey(demand));
+    }
 }

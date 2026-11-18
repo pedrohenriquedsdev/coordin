@@ -49,6 +49,10 @@ O TDD 6.6 diz "ocupação média dos times" sem definir a média; a definição 
 
 Além da média com sinal do TDD (positivo é atraso), o resultado traz a **média dos valores absolutos**, porque, com sinal, +10 e −10 se anulam e "o desvio do Coordin é menor que o da linha de base" (PRD 7.1) ficaria enganoso. O PRD define o desvio com sinal; o valor absoluto é um acréscimo que não contradiz a definição. **Isso muda o contrato do TDD 5.3** (campos `averageBaselineAbsoluteDeviationDays` e `averageCoordinAbsoluteDeviationDays`) e é proposto na última task, com a aprovação do autor.
 
+### D5-bis. Correção do desvio do Coordin (grupo 2)
+
+O TDD 6.6, passo 5, diz que o desvio do Coordin é medido contra a "previsão do processo atual". O PRD 7.3, passo 7, diz que a comparação é entre o desvio da **linha de base** e o desvio das **previsões do Coordin**, ambos contra as datas reais simuladas. Esta change segue o PRD: `coordinDeviationDays` usa a previsão do planejamento com o Coordin. Usar a previsão do processo atual faria a comparação medir o próprio processo atual, e não o efeito do Coordin. A correção no TDD 6.6 entra na task 7.3, para aprovação do autor; o PRD não muda.
+
 ### D6. Checagem das 5 demandas mais prioritárias
 
 Dentre as demandas previsíveis nos dois planejamentos, as 5 de menor `PriorityRank` entram em `priorityCheck.items` com a previsão do processo atual, a do Coordin e a diferença em dias corridos. `worsenedCount` conta as de diferença positiva. O número 5 é uma constante do motor (`PriorityCheckSize`), simples de mudar. **Isso também muda o contrato do TDD 5.3** (decisão do autor em 2026-11-18, na pergunta desta change) e é proposto na última task.
