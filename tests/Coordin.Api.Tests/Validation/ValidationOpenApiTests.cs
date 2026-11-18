@@ -43,5 +43,18 @@ public sealed class ValidationOpenApiTests
             var found = Assert.Single(operations, operation => operation.GetProperty("operationId").GetString() == "GetValidationStatus");
             Assert.Equal("Validation", found.GetProperty("tags")[0].GetString());
         }
+
+        [Fact]
+        public async Task OpenApi_ListsEveryValidationOperation_WhenEnabled()
+        {
+            using var client = factory.CreateClient();
+
+            var operations = await OperationsAsync(client);
+
+            foreach (var id in new[] { "LoadValidationDataset", "GetValidationBaseline", "PutValidationBaseline", "CaptureCurrentPlan", "EvaluateValidation" })
+            {
+                Assert.Single(operations, operation => operation.GetProperty("operationId").GetString() == id);
+            }
+        }
     }
 }

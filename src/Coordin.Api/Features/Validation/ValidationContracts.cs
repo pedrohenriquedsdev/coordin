@@ -25,3 +25,6 @@ public sealed record SaveBaselineRequest(IReadOnlyList<BaselineItem>? Baselines)
 
 /// <summary>O planejamento do processo atual, guardado (PRD 7.3, passo 3).</summary>
 public sealed record CurrentPlanResponse(DateTimeOffset CapturedAt);
+
+/// <summary>Os parâmetros do realizado simulado: a faixa de variação do esforço e a semente (PRD 7.3, passo 6).</summary>
+public sealed record EvaluateRequest(decimal MinEffortFactor, decimal MaxEffortFactor, long Seed);

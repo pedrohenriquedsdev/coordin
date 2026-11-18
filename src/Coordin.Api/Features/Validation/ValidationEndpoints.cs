@@ -4,6 +4,7 @@ using Coordin.Api.Features.Validation.Dataset;
 using Coordin.Api.Infrastructure.Http;
 using Coordin.Api.Infrastructure.Persistence;
 using Coordin.Engine.Planning;
+using Coordin.Engine.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,6 +63,13 @@ public static class ValidationEndpoints
             .Produces<CurrentPlanResponse>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status409Conflict);
 
+        group.MapPost("/evaluate", EvaluateAsync)
+            .WithName("EvaluateValidation")
+            .WithSummary("Compara o processo atual com o planejamento do Coordin: eficiência, desvios e prioritárias (RF-24, passo 7). Não grava nada.")
+            .Produces<ValidationResult>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status409Conflict);
+
         return app;
     }
 
@@ -106,6 +114,64 @@ public static class ValidationEndpoints
             recalculator,
             () => ValidationDatasetLoader.ReplaceAsync(db, dataset, cancellationToken),
             cancellationToken);
+    }
+
+    /// <summary>
+    /// Compara o processo atual (guardado) com o planejamento vigente, sem gravar nada. Os fatores são validados
+    /// antes; sem plano guardado ou com demanda sem linha de base, responde 409 com o código do TDD (DT-37).
+    /// </summary>
+    private static async Task<IResult> EvaluateAsync(
+        EvaluateRequest request,
+        CoordinDbContext db,
+        PlanningSnapshotLoader loader,
+        CancellationToken cancellationToken)
+    {
+        if (request.MinEffortFactor <= 0m)
+        {
+            return ApiProblems.InvalidField("minEffortFactor", "O fator mínimo de esforço precisa ser maior que zero.");
+        }
+
+        if (request.MinEffortFactor > request.MaxEffortFactor)
+        {
+            return ApiProblems.InvalidField("maxEffortFactor", "O fator máximo precisa ser maior ou igual ao mínimo.");
+        }
+
+        var plan = await db.ValidationCurrentPlans.AsNoTracking()
+            .SingleOrDefaultAsync(item => item.Id == ValidationCurrentPlan.SingletonId, cancellationToken);
+        if (plan is null)
+        {
+            return ApiProblems.Conflict(
+                "validation-current-plan-missing",
+                "O planejamento do processo atual ainda não foi guardado.");
+        }
+
+        var current = ValidationSnapshotJson.Deserialize(plan.SnapshotJson);
+        var baseline = await db.ValidationBaselines.AsNoTracking()
+            .ToDictionaryAsync(item => item.DemandId, item => item.BaselineDate, cancellationToken);
+        if (current.Demands.Any(demand => !baseline.ContainsKey(demand.Id)))
+        {
+            return ApiProblems.Conflict(
+                "validation-baseline-incomplete",
+                "Há demanda sem a data de linha de base; informe a linha de base de todas as demandas.");
+        }
+
+        var withCoordin = await loader.LoadAsync(db, cancellationToken);
+        var input = new ValidationInput(
+            current,
+            withCoordin,
+            baseline,
+            new ValidationParameters(request.MinEffortFactor, request.MaxEffortFactor, request.Seed));
+
+        try
+        {
+            return Results.Ok(ValidationEvaluator.Evaluate(input));
+        }
+        catch (ArgumentException)
+        {
+            return ApiProblems.Conflict(
+                "validation-nothing-to-compare",
+                "Não há demanda previsível para comparar.");
+        }
     }
 
     private static async Task<IResult> GetBaselineAsync(CoordinDbContext db, CancellationToken cancellationToken)
