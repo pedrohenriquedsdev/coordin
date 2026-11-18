@@ -1,6 +1,6 @@
 # TDD — Coordin
 
-- **Status:** aprovado (2026-11-11); hospedagem (DT-09) decidida em 2026-11-12, com o provedor escolhido na change 7. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23. Ajuste em 2026-11-12, decorrente do PRD: RF-17 como Must no roadmap, validação por simulação no produto (RF-24, DT-37) e roadmap com 13 changes. Ajuste em 2026-11-12, na change 1: endpoint de saúde `GET /api/health` (seção 5.2). Ajuste em 2026-11-17, na change 9b (aprovado pelo autor): a linha 9 do roadmap (9.1) foi dividida em 9 (motor e API) e 9b (telas `scenario-screens`), sem mudança de DT. Ajuste em 2026-11-17, na change 8: campo `prerequisiteIds` no contrato da demanda, `prerequisites` no cronograma (seção 5.3) e código `demand-has-dependents` (DT-18). Ajuste em 2026-11-17, na change 9: campo `position` no corpo da demanda e resposta de `POST /api/demands/simulate` (5.3), `isComparable`, `apply` e `reset-to-priority` e correção dos itens do cenário (5.3), código `scenario-violates-dependencies` (DT-18), `n` do peso (DT-25), orçamento de 1.000 avaliações e demandas movíveis (DT-26), posição na simulação de nova demanda (6.5) e comando de testes com cobertura (8.6)
+- **Status:** aprovado (2026-11-11); hospedagem (DT-09) decidida em 2026-11-12, com o provedor escolhido na change 7. Ajuste em 2026-11-11: gráficos e justificativa dos cenários (DT-36), decorrentes dos ajustes do PRD em RF-13, RF-17 e RF-23. Ajuste em 2026-11-12, decorrente do PRD: RF-17 como Must no roadmap, validação por simulação no produto (RF-24, DT-37) e roadmap com 13 changes. Ajuste em 2026-11-12, na change 1: endpoint de saúde `GET /api/health` (seção 5.2). Ajuste em 2026-11-18, na change 11 (aprovado pelo autor): contrato da avaliação com as médias absolutas, o bloco `priorityCheck` e o período (5.3); o desvio do Coordin contra o planejamento com o Coordin e a ocupação média ponderada (6.6); o invariante do fator 1 com dependências (8.2); os códigos `validation-current-plan-exists` e `validation-nothing-to-compare` (DT-18); a linha 11b do roadmap. Ajuste em 2026-11-17, na change 9b (aprovado pelo autor): a linha 9 do roadmap (9.1) foi dividida em 9 (motor e API) e 9b (telas `scenario-screens`), sem mudança de DT. Ajuste em 2026-11-17, na change 8: campo `prerequisiteIds` no contrato da demanda, `prerequisites` no cronograma (seção 5.3) e código `demand-has-dependents` (DT-18). Ajuste em 2026-11-17, na change 9: campo `position` no corpo da demanda e resposta de `POST /api/demands/simulate` (5.3), `isComparable`, `apply` e `reset-to-priority` e correção dos itens do cenário (5.3), código `scenario-violates-dependencies` (DT-18), `n` do peso (DT-25), orçamento de 1.000 avaliações e demandas movíveis (DT-26), posição na simulação de nova demanda (6.5) e comando de testes com cobertura (8.6)
 - **Última atualização:** 2026-11-17
 - **Fontes:** [`docs/PRD.md`](PRD.md) (aprovado em 2026-11-10) · [`docs/references/tcc-proposal.pdf`](references/tcc-proposal.pdf)
 
@@ -498,12 +498,22 @@ A justificativa do cenário (RF-13, DT-36) vem do motor: `score` é o critério 
         "simulatedActualEndDate": "…", "baselineDeviationDays": 12, "coordinDeviationDays": 3 }
     ],
     "averageBaselineDeviationDays": 9.4,
-    "averageCoordinDeviationDays": 2.8
-  }
+    "averageCoordinDeviationDays": 2.8,
+    "averageBaselineAbsoluteDeviationDays": 11.2,
+    "averageCoordinAbsoluteDeviationDays": 4.1
+  },
+  "priorityCheck": {
+    "items": [
+      { "demandId": "…", "priorityRank": 1, "currentForecastEndDate": "…", "coordinForecastEndDate": "…", "deltaDays": -2 }
+    ],
+    "worsenedCount": 0
+  },
+  "periodStart": "2027-01-04",
+  "periodEnd": "2027-03-14"
 }
 ```
 
-Erros: `409 validation-current-plan-missing` (plano atual não guardado), `409 validation-baseline-incomplete` (demanda sem linha de base), `400` para fatores inválidos (`minEffortFactor > 0` e `minEffortFactor <= maxEffortFactor`). Com `Validation__Enabled` desligado, os endpoints não são mapeados e respondem `404`. Os valores do exemplo são ilustrativos.
+Erros: `409 validation-current-plan-missing` (plano atual não guardado), `409 validation-baseline-incomplete` (demanda sem linha de base), `409 validation-nothing-to-compare` (nenhuma demanda previsível para comparar), `400` para fatores inválidos (`minEffortFactor > 0` e `minEffortFactor <= maxEffortFactor`). Com `Validation__Enabled` desligado, os endpoints não são mapeados e respondem `404`. Os valores do exemplo são ilustrativos.
 
 ### 5.4 Decisões
 
@@ -533,7 +543,7 @@ Erros: `409 validation-current-plan-missing` (plano atual não guardado), `409 v
 - **Alternativas consideradas:**
   - *Problem Details com status adequado e uma extensão `code`:* padrão do ASP.NET Core, mensagem para o usuário em `detail`, e um código estável para o front tratar.
   - *Formato de erro próprio:* mais liberdade, menos padronização.
-- **Decisão:** `400` com `errors` por campo para validação; `404` para recurso inexistente; `409` para conflito de regra de negócio, com `code` estável, por exemplo `dependency-cycle`, `team-has-people`, `team-name-taken`, `holiday-date-taken`, `person-has-open-assignments`, `completed-demand-locked`, `person-not-in-demand-teams` (`team-name-taken` e `holiday-date-taken` acrescentados na change `capacity-registry`; `team-has-demands` acrescentado na change `demand-planning`, para o time que faz parte de demandas; `demand-has-dependents` acrescentado na change `demand-dependencies`, para a demanda que é pré-requisito de outra e por isso não pode ser excluída; `scenario-violates-dependencies` acrescentado na change `sequencing-scenarios`, para a aprovação de um cenário cujo cronograma violaria uma dependência, conferência final que o motor já torna inalcançável). `detail` em português.
+- **Decisão:** `400` com `errors` por campo para validação; `404` para recurso inexistente; `409` para conflito de regra de negócio, com `code` estável, por exemplo `dependency-cycle`, `team-has-people`, `team-name-taken`, `holiday-date-taken`, `person-has-open-assignments`, `completed-demand-locked`, `person-not-in-demand-teams` (`team-name-taken` e `holiday-date-taken` acrescentados na change `capacity-registry`; `team-has-demands` acrescentado na change `demand-planning`, para o time que faz parte de demandas; `demand-has-dependents` acrescentado na change `demand-dependencies`, `validation-current-plan-exists` e `validation-nothing-to-compare` acrescentados na change `simulation-validation`, para a demanda que é pré-requisito de outra e por isso não pode ser excluída; `scenario-violates-dependencies` acrescentado na change `sequencing-scenarios`, para a aprovação de um cenário cujo cronograma violaria uma dependência, conferência final que o motor já torna inalcançável). `detail` em português.
 - **Justificativa:** um formato só para tratar no front e mensagens já prontas para exibir.
 - **Atende:** RF-06, RF-18, RNF-07.
 
@@ -713,12 +723,12 @@ O motor calcula duas vezes, com o snapshot atual e com o snapshot acrescido da n
 1. **Período comparado:** da menor data de início à maior `ForecastEndDate` entre os dois planejamentos, em semanas (DT-24).
 2. **Eficiência (PRD 7.2):** para cada planejamento, a partir do relatório por time (DT-24) no período comparado:
    - `idleHours` = soma da ociosidade de todos os times e semanas;
-   - `occupancySpreadPoints` = (maior − menor ocupação média dos times) × 100;
+   - `occupancySpreadPoints` = (maior − menor ocupação média dos times) × 100, em que a ocupação média de um time é ponderada pela capacidade: horas alocadas ÷ capacidade no período (times sem capacidade ficam de fora);
    - `overloadedPeriods` = quantidade de pares time × semana com sobrecarga;
    - `sectorEndDate` = maior `ForecastEndDate`.
 3. **Fator de esforço por demanda:** `factor = min + (max − min) × u`, com `u` em [0, 1) gerado por um gerador pseudoaleatório próprio (SplitMix64) a partir de `seed` combinado com um hash estável do `Id` da demanda. Não usa `System.Random`, cuja sequência para uma semente não é garantida entre versões do .NET; e não depende da ordem das demandas.
 4. **Realizado simulado:** o snapshot do processo atual é simulado de novo (DT-21) com o esforço de cada parte multiplicado pelo fator da demanda e **margem zero**; a `EndDateWithoutMargin` resultante é a data real simulada.
-5. **Desvio (DT-27, dias corridos):** por demanda previsível no processo atual, `baselineDeviationDays = real − linha de base` e `coordinDeviationDays = real − ForecastEndDate` do processo atual (com margem); médias dos valores, com sinal.
+5. **Desvio (DT-27, dias corridos):** por demanda previsível no processo atual, `baselineDeviationDays = real − linha de base` e `coordinDeviationDays = real − ForecastEndDate` do **planejamento com o Coordin** (com margem; como no PRD 7.3, passo 7); médias dos valores, com sinal.
 
 O mesmo snapshot com os mesmos parâmetros produz sempre o mesmo resultado (RNF-02).
 
@@ -832,7 +842,7 @@ Os testes usam **construtores de dados** (por exemplo, `PlanningSnapshotBuilder`
 | Justificativa do cenário | A soma das parcelas `scoreContributionDelta` é igual a `score.delta`; demandas não previsíveis ficam fora do `score` | RF-13, DT-25, DT-36 |
 | Relatório por time | Capacidade, horas alocadas, ociosidade e sobrecarga corretas em um cenário montado à mão | RF-17, DT-24 |
 | Desvio | Diferença em dias corridos, positiva para atraso | RF-12, DT-27 |
-| Avaliação da validação | Fatores dentro da faixa e iguais para a mesma semente, independentemente da ordem das demandas; fator 1 reproduz `EndDateWithoutMargin`; métricas de eficiência corretas em um cenário montado à mão; mesmo resultado em execuções repetidas | RF-24, DT-37; RNF-02 |
+| Avaliação da validação | Fatores dentro da faixa e iguais para a mesma semente, independentemente da ordem das demandas; fator 1 reproduz o planejamento com margem zero (inclusive com dependências, que esperam o fim do pré-requisito sem a folga da margem); métricas de eficiência corretas em um cenário montado à mão; mesmo resultado em execuções repetidas | RF-24, DT-37; RNF-02 |
 
 #### 8.2.1 Invariantes com dados gerados
 
@@ -940,6 +950,7 @@ Cada change é uma fatia vertical (motor, API, tela e testes, conforme o caso), 
 | 9b | `scenario-screens` | `feat/scenario-screens` | Telas dos cenários: `/scenarios` (recomendações sob pedido, ordem própria, aprovação e rejeição), justificativa em gráfico com tabela, aviso do modo personalizado e simulação de nova demanda no formulário | RF-13 a RF-16 (telas); DT-36; RNF-03, RNF-07 | Should | 11-23 |
 | 10 | `schedule-export` | `feat/schedule-export` | Exportação do cronograma em CSV pt-BR | RF-19; DT-20 | Should | 11-24 (M5) |
 | 11 | `simulation-validation` | `feat/simulation-validation` | Avaliação da validação no motor, conjunto fictício embutido, endpoints habilitados por configuração e assistente de validação com gráficos | RF-24; DT-37 | Apoio à validação (não cortada) | 11-25 |
+| 11b | `simulation-validation-screens` | `feat/simulation-validation-screens` | Assistente de validação na tela (carregar, linha de base, guardar plano atual, comparar) com gráficos e tabela | RF-24 (tela); DT-36, DT-37 | Apoio à validação (não cortada) | 11-23 |
 | 12 | `delivery-insights` | `feat/delivery-insights` | Histórico de estimativas e de previsões, esforço real e indicadores de precisão com gráfico por time | RF-20 a RF-23; DT-14, DT-36 | Could | 11-25 (M6), se couber |
 | 13 | `e2e-smoke` | `test/e2e-smoke` | Três cenários de smoke com Playwright, inclusive viewport de celular | DT-32; RNF-03 | Could | 11-25, se couber |
 
