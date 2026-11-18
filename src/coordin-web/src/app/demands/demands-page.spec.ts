@@ -194,11 +194,44 @@ describe('DemandsPage', () => {
     expect(input.value).toBe('2026-12-31');
     buttonIn(element(), 'Confirmar conclusão')?.click();
     const complete = request('PUT', '/api/demands/a/completion');
-    expect(complete.request.body).toEqual({ completedOn: '2026-12-31' });
+    expect(complete.request.body).toEqual({ completedOn: '2026-12-31', actualEffortHours: null });
     complete.flush({ ...demand('a', 'Alfa', 1), completedOn: '2026-12-31' });
     await answerLists([demand('a', 'Alfa', 1, '2026-12-31')]);
 
     expect(element().textContent).toContain('Concluídas (1)');
+  });
+
+  it('sends the actual effort when the manager informs it, with a decimal comma', async () => {
+    await open([demand('a', 'Alfa', 1)]);
+    buttonIn(listOf('Demandas ativas')?.querySelector('li') as HTMLElement, 'Concluir')?.click();
+    fixture.detectChanges();
+    const effort = element().querySelector('input[id^="actual-effort-"]') as HTMLInputElement;
+    effort.value = '52,5';
+    effort.dispatchEvent(new Event('input'));
+
+    buttonIn(element(), 'Confirmar conclusão')?.click();
+
+    expect(request('PUT', '/api/demands/a/completion').request.body).toEqual({
+      completedOn: '2026-12-31',
+      actualEffortHours: 52.5,
+    });
+  });
+
+  it('refuses an actual effort of zero or less, without calling the API', async () => {
+    await open([demand('a', 'Alfa', 1)]);
+    buttonIn(listOf('Demandas ativas')?.querySelector('li') as HTMLElement, 'Concluir')?.click();
+    fixture.detectChanges();
+    const effort = element().querySelector('input[id^="actual-effort-"]') as HTMLInputElement;
+    effort.value = '0';
+    effort.dispatchEvent(new Event('input'));
+
+    buttonIn(element(), 'Confirmar conclusão')?.click();
+    fixture.detectChanges();
+
+    expect(element().textContent).toContain(
+      'Informe um esforço real maior que zero, ou deixe em branco.',
+    );
+    http.expectNone((req) => req.url === '/api/demands/a/completion');
   });
 
   it('refuses a completion before the start, without calling the API', async () => {

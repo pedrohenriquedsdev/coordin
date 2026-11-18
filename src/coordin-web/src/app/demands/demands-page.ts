@@ -16,6 +16,9 @@ const COMPLETION_BEFORE_START = 'A data de conclusão não pode ser anterior ao 
  * Tela "Demandas" (T03, T06; RF-04, RF-12): as demandas ativas na ordem de prioridade, com Subir e Descer,
  * exclusão com confirmação e conclusão na própria linha; e a aba "Concluídas", só de leitura.
  */
+/** Mensagem quando o esforço real informado não é um número maior que zero. */
+const ACTUAL_EFFORT_INVALID = 'Informe um esforço real maior que zero, ou deixe em branco.';
+
 @Component({
   selector: 'app-demands-page',
   imports: [RouterLink],
@@ -32,6 +35,8 @@ export class DemandsPage {
   protected readonly deletingId = signal<string | null>(null);
   protected readonly completingId = signal<string | null>(null);
   protected readonly completedOn = signal('');
+  /** O esforço real digitado na conclusão (RF-22); vazio = não informado. */
+  protected readonly actualEffort = signal('');
   protected readonly visible = computed(() =>
     this.tab() === 'active' ? this.store.active() : this.store.completed(),
   );
@@ -96,6 +101,11 @@ export class DemandsPage {
     this.cancelAll();
     this.completingId.set(demand.id);
     this.completedOn.set(this.clock.today());
+    this.actualEffort.set('');
+  }
+
+  protected setActualEffort(event: Event): void {
+    this.actualEffort.set((event.target as HTMLInputElement).value);
   }
 
   protected setCompletedOn(event: Event): void {
@@ -115,8 +125,20 @@ export class DemandsPage {
       return;
     }
 
+    const effortText = this.actualEffort().trim().replace(',', '.');
+    let actualEffortHours: number | null = null;
+    if (effortText !== '') {
+      const hours = Number(effortText);
+      if (!Number.isFinite(hours) || hours <= 0) {
+        this.message.set(ACTUAL_EFFORT_INVALID);
+        return;
+      }
+
+      actualEffortHours = hours;
+    }
+
     this.busyId.set(demand.id);
-    this.store.complete(demand.id, date).subscribe({
+    this.store.complete(demand.id, date, actualEffortHours).subscribe({
       complete: () => {
         this.busyId.set(null);
         this.completingId.set(null);

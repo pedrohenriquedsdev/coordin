@@ -1,0 +1,146 @@
+<h2 class="text-lg font-semibold">Indicadores de precisão</h2>
+<p class="mt-1 text-sm text-slate-600">
+  Demandas concluídas no período, pela data de conclusão. Desvio positivo é atraso.
+</p>
+
+<form (submit)="submit($event)" class="mt-4 flex flex-wrap items-end gap-3">
+  <label class="text-sm text-slate-700">
+    Concluídas de
+    <input
+      type="date"
+      [value]="store.from()"
+      (input)="setFrom($event)"
+      class="mt-1 block rounded-md border border-slate-300 px-2 py-1"
+    />
+  </label>
+  <label class="text-sm text-slate-700">
+    até
+    <input
+      type="date"
+      [value]="store.to()"
+      (input)="setTo($event)"
+      class="mt-1 block rounded-md border border-slate-300 px-2 py-1"
+    />
+  </label>
+  <button
+    type="submit"
+    [disabled]="store.load() === 'loading'"
+    class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60"
+  >
+    Ver indicadores
+  </button>
+</form>
+
+@if (store.message(); as message) {
+  <p role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">{{ message }}</p>
+}
+
+@switch (store.load()) {
+  @case ('loading') {
+    <p class="mt-4 text-slate-600">Carregando…</p>
+  }
+  @case ('ready') {
+    @if (store.response(); as response) {
+      @if (response.sector.usedCount === 0) {
+        <p class="mt-4 rounded-md bg-slate-100 p-3 text-sm text-slate-800">
+          Nenhuma demanda concluída no período.
+        </p>
+      } @else {
+        <section aria-labelledby="deviation-chart-title" class="mt-6 space-y-2">
+          <h3 id="deviation-chart-title" class="text-base font-semibold">Desvio de prazo (dias)</h3>
+          <app-chart
+            [configuration]="deviation()"
+            label="Desvio de prazo médio por time e para o setor"
+          />
+        </section>
+
+        <section aria-labelledby="estimate-chart-title" class="mt-6 space-y-2">
+          <h3 id="estimate-chart-title" class="text-base font-semibold">Estimado × real (%)</h3>
+          <app-chart
+            [configuration]="estimate()"
+            label="Diferença média entre o real e o estimado por time e para o setor"
+          />
+        </section>
+
+        <!-- Acima de 640 px, uma tabela; abaixo, um cartão por linha (sem rolagem horizontal). -->
+        <section aria-labelledby="accuracy-table-title" class="mt-6">
+          <h3 id="accuracy-table-title" class="text-base font-semibold">Números</h3>
+
+          <div class="mt-2 hidden overflow-x-auto sm:block">
+            <table class="min-w-full text-left text-sm">
+              <thead class="border-b border-slate-200 text-slate-600">
+                <tr>
+                  <th scope="col" class="py-2 pr-3 font-medium">Setor ou time</th>
+                  <th scope="col" class="py-2 pr-3 font-medium">Demandas</th>
+                  <th scope="col" class="py-2 pr-3 font-medium">Contra a 1ª previsão</th>
+                  <th scope="col" class="py-2 pr-3 font-medium">Contra a previsão da conclusão</th>
+                  <th scope="col" class="py-2 pr-3 font-medium">No prazo</th>
+                  <th scope="col" class="py-2 font-medium">Estimado × real</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of store.rows(); track row.label; let index = $index) {
+                  <tr class="border-b border-slate-100">
+                    <th scope="row" class="py-2 pr-3 font-normal text-slate-800">
+                      {{ row.label }}
+                      @if (row.isAboveSector) {
+                        <span
+                          class="ml-1 rounded bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-800"
+                          >acima do setor</span
+                        >
+                      }
+                    </th>
+                    <td class="py-2 pr-3">{{ row.used }}</td>
+                    <td class="py-2 pr-3">{{ row.baselineText }}</td>
+                    <td class="py-2 pr-3">{{ row.completionText }}</td>
+                    <td class="py-2 pr-3">{{ row.onTimeText }}</td>
+                    <td class="py-2">
+                      {{ row.estimateText }}
+                      @for (note of notesOf(index); track note) {
+                        <span class="block text-xs text-slate-600">{{ note }}</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <ul class="mt-2 space-y-2 sm:hidden">
+            @for (row of store.rows(); track row.label; let index = $index) {
+              <li class="rounded-md border border-slate-200 bg-white p-3 text-sm">
+                <p class="font-medium text-slate-900">
+                  {{ row.label }}
+                  @if (row.isAboveSector) {
+                    <span
+                      class="ml-1 rounded bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-800"
+                      >acima do setor</span
+                    >
+                  }
+                </p>
+                <dl class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1">
+                  <dt class="text-slate-500">Demandas</dt>
+                  <dd>{{ row.used }}</dd>
+                  <dt class="text-slate-500">Contra a 1ª previsão</dt>
+                  <dd>{{ row.baselineText }}</dd>
+                  <dt class="text-slate-500">Contra a previsão da conclusão</dt>
+                  <dd>{{ row.completionText }}</dd>
+                  <dt class="text-slate-500">No prazo</dt>
+                  <dd>{{ row.onTimeText }}</dd>
+                  <dt class="text-slate-500">Estimado × real</dt>
+                  <dd>{{ row.estimateText }}</dd>
+                </dl>
+                @for (note of notesOf(index); track note) {
+                  <p class="mt-2 text-xs text-slate-600">{{ note }}</p>
+                }
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    }
+  }
+  @case ('failed') {
+    <p class="mt-4 text-sm text-slate-600">Tente de novo com outro período ou mais tarde.</p>
+  }
+}

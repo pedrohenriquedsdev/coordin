@@ -58,6 +58,8 @@ export class DemandFormPage {
     startDate: [''],
     informedEndDate: [''],
     position: [''],
+    /** O motivo opcional de uma alteração de estimativa (RF-20); só vale na edição. */
+    estimateChangeReason: [''],
   });
 
   /** Times marcados, com o texto das horas de cada um (`''` = sem estimativa). */
@@ -188,7 +190,7 @@ export class DemandFormPage {
       teams.push({ teamId, estimatedEffortHours: effort.value });
     }
 
-    const { startDate, informedEndDate, position } = this.form.getRawValue();
+    const { startDate, informedEndDate, position, estimateChangeReason } = this.form.getRawValue();
     const parsed = parsePosition(position, this.maxPosition());
     if (!parsed.valid) {
       this.message.set(positionInvalid(this.maxPosition()));
@@ -203,6 +205,10 @@ export class DemandFormPage {
       assignedPersonIds: this.assignedPersonIds(),
       prerequisiteIds: this.prerequisiteIds(),
     };
+    const reason = estimateChangeReason.trim();
+    if (this.editing && reason !== '') {
+      body.estimateChangeReason = reason;
+    }
     if (parsed.value !== null) {
       body.position = parsed.value;
     }
@@ -293,6 +299,7 @@ export class DemandFormPage {
       startDate: demand.startDate ?? '',
       informedEndDate: demand.informedEndDate ?? '',
       position: '',
+      estimateChangeReason: '',
     });
     this.selected.set(
       Object.fromEntries(

@@ -25,12 +25,12 @@
 
 ## 4. Front: telas
 
-- [ ] 4.1 Rota `/demands/:id` com as duas listas de histórico, estados de carregamento e falha, e a mensagem de demanda inexistente (spec `delivery-web`)
-- [ ] 4.2 Link para o detalhe em cada demanda da lista; testes de componente do link
-- [ ] 4.3 Campo opcional de esforço real no fluxo de conclusão, com a validação de maior que zero antes do envio; campo de motivo opcional na edição de estimativa
-- [ ] 4.4 Página `/reports/accuracy` com filtro de período, gráfico por time e setor (`ChartComponent`), tabela com os mesmos valores, contagem das demandas de fora e marcação dos times acima do setor com texto
-- [ ] 4.5 Layout em 360 px: tabelas viram cartões abaixo de 640 px e a página não rola na horizontal (RNF-03)
-- [ ] 4.6 Testes de componente e de store, e teste de que os valores do gráfico e da tabela são iguais
+- [x] 4.1 Rota `/demands/:id` com as duas listas de histórico, estados de carregamento e falha, e a mensagem de demanda inexistente (spec `delivery-web`)
+- [x] 4.2 Link para o detalhe em cada demanda da lista; testes de componente do link
+- [x] 4.3 Campo opcional de esforço real no fluxo de conclusão, com a validação de maior que zero antes do envio; campo de motivo opcional na edição de estimativa
+- [x] 4.4 Página `/reports/accuracy` com filtro de período, gráfico por time e setor (`ChartComponent`), tabela com os mesmos valores, contagem das demandas de fora e marcação dos times acima do setor com texto
+- [x] 4.5 Layout em 360 px: tabelas viram cartões abaixo de 640 px e a página não rola na horizontal (RNF-03)
+- [x] 4.6 Testes de componente e de store, e teste de que os valores do gráfico e da tabela são iguais
 
 ## 5. Verificação
 
