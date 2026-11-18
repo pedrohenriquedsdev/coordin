@@ -266,6 +266,23 @@ npm test
 npm run build
 ```
 
+### End-to-end smoke test
+
+Three browser scenarios (login and logout; from a new demand to its predicted date; the schedule on a 360 px phone screen) run against a throwaway stack: a new PostgreSQL container, the API serving a fresh build of the front end, and temporary credentials. Nothing is read from your `.env` or your development database, and nothing is written to disk.
+
+Prerequisites:
+
+- Docker running (the stack starts a PostgreSQL 18 container).
+- The .NET SDK from `global.json` on your `PATH`.
+- Google Chrome installed (the tests use the system Chrome; no browser is downloaded).
+
+```bash
+# Inside src/coordin-web
+npm run test:e2e
+```
+
+The first run is slow (the API and the front end are built). Playwright removes the container when the run ends. The smoke test is not part of the CI pipeline: run it locally before a pull request that changes the screens.
+
 ### Regenerate the typed API client
 
 With the API running in `Development`, from `src/coordin-web`:
