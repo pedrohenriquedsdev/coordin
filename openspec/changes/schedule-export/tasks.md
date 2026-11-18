@@ -21,10 +21,10 @@ Regras para todas as tasks:
 
 ## 3. Endpoint de exportação (RF-19; RNF-04)
 
-- [ ] 3.1 Acrescentar `MapGet("/export", ExportScheduleAsync)` em `ScheduleEndpoints.cs` (nome `ExportSchedule`, tag `Schedule`, `Produces` `text/csv`). A resposta é `Results.File(bytes, "text/csv; charset=utf-8", "coordin-cronograma-AAAA-MM-DD.csv")`, com o nome calculado pelo `TimeProvider` no fuso `America/Sao_Paulo` (D5).
-- [ ] 3.2 Criar `Features/Planning/ScheduleExportName.cs` (pura): `string For(DateTimeOffset utcNow)`, que converte para `America/Sao_Paulo` (com a conversão fixa de UTC-3 se o fuso IANA não existir). Teste unitário: 2026-11-24T02:30Z é 2026-11-23 em Brasília; 2026-11-24T15:00Z é 2026-11-24.
-- [ ] 3.3 Criar `tests/Coordin.Api.Tests/Planning/ScheduleExportTests.cs` (integração com PostgreSQL real): `200` com `text/csv; charset=utf-8`, BOM, cabeçalho, uma linha por demanda na ordem de execução, e a alteração da ordem aparece na exportação seguinte; sem demandas, só o cabeçalho; nome do arquivo com a data do relógio injetado; `401` sem token (não devolve conteúdo); nada é gravado (contagem de linhas nas tabelas não muda).
-- [ ] 3.4 Acrescentar no teste de contrato do OpenAPI (`Http/`) a operação `ExportSchedule` com a tag `Schedule` e a rota `401` sem token, no estilo dos contratos existentes.
+- [x] 3.1 Acrescentar `MapGet("/export", ExportScheduleAsync)` em `ScheduleEndpoints.cs` (nome `ExportSchedule`, tag `Schedule`, `Produces` `text/csv`). A resposta é `Results.File(bytes, "text/csv; charset=utf-8", "coordin-cronograma-AAAA-MM-DD.csv")`, com o nome calculado pelo `TimeProvider` no fuso `America/Sao_Paulo` (D5).
+- [x] 3.2 Criar `Features/Planning/ScheduleExportName.cs` (pura): `string For(DateTimeOffset utcNow)`, que converte para `America/Sao_Paulo` (com a conversão fixa de UTC-3 se o fuso IANA não existir). Teste unitário: 2026-11-24T02:30Z é 2026-11-23 em Brasília; 2026-11-24T15:00Z é 2026-11-24.
+- [x] 3.3 Criar `tests/Coordin.Api.Tests/Planning/ScheduleExportTests.cs` (integração com PostgreSQL real): `200` com `text/csv; charset=utf-8`, BOM, cabeçalho, uma linha por demanda na ordem de execução, e a alteração da ordem aparece na exportação seguinte; sem demandas, só o cabeçalho; nome do arquivo com a data do relógio injetado; `401` sem token (não devolve conteúdo); nada é gravado (contagem de linhas nas tabelas não muda).
+- [x] 3.4 Acrescentar no teste de contrato do OpenAPI (`Http/`) a operação `ExportSchedule` com a tag `Schedule` e a rota `401` sem token, no estilo dos contratos existentes.
 
 ## 4. Cliente Angular regenerado e tela (RF-19; schedule-web)
 
