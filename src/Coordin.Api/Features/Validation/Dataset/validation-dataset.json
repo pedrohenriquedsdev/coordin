@@ -1,0 +1,914 @@
+{
+  "name": "Setor fictício de validação",
+  "description": "Conjunto fictício da simulação (PRD 7.3): nenhum dado real. Nomes genéricos.",
+  "generator": {
+    "seed": 20261126,
+    "note": "gerado uma vez, por script descartável; o arquivo versionado é o resultado"
+  },
+  "marginPercent": 20,
+  "teams": [
+    {
+      "id": "356886ee-c644-51d2-9283-c48ecc1be129",
+      "name": "Web"
+    },
+    {
+      "id": "5182a20f-bcd9-5348-85c0-003826b31d2d",
+      "name": "Dados"
+    },
+    {
+      "id": "093e4206-6c4f-5cf3-bd36-55fbcce03ae7",
+      "name": "Mobile"
+    },
+    {
+      "id": "abfbe375-1efe-53e4-9f3d-4b7052406b78",
+      "name": "Plataforma"
+    },
+    {
+      "id": "9fe70bbb-d5f7-5c71-a92f-f8bf22506795",
+      "name": "Pagamentos"
+    },
+    {
+      "id": "7b9932cc-a9f7-5f4d-9464-0fcb4a4a78c3",
+      "name": "Relatorios"
+    },
+    {
+      "id": "00f79185-be48-5374-89d8-56503dacae52",
+      "name": "Infraestrutura"
+    }
+  ],
+  "people": [
+    {
+      "id": "5645f567-6059-56a3-9e84-a5383db52419",
+      "name": "Pessoa 01",
+      "teamId": "356886ee-c644-51d2-9283-c48ecc1be129",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "11921a33-0468-5cf1-9561-4b0b04ccf427",
+      "name": "Pessoa 02",
+      "teamId": "356886ee-c644-51d2-9283-c48ecc1be129",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "2f1ac5b5-d0da-55d4-8c91-63ab4edcf0a1",
+      "name": "Pessoa 03",
+      "teamId": "356886ee-c644-51d2-9283-c48ecc1be129",
+      "dailyCapacityHours": 6
+    },
+    {
+      "id": "027ca906-39a6-5341-9b7f-c51b22021721",
+      "name": "Pessoa 04",
+      "teamId": "356886ee-c644-51d2-9283-c48ecc1be129",
+      "dailyCapacityHours": 6
+    },
+    {
+      "id": "66d3b8a0-c49b-5d67-8ccf-13e3343f9dd2",
+      "name": "Pessoa 05",
+      "teamId": "356886ee-c644-51d2-9283-c48ecc1be129",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "3079c79a-9fb7-5342-ae37-3561136daf30",
+      "name": "Pessoa 06",
+      "teamId": "5182a20f-bcd9-5348-85c0-003826b31d2d",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "e0b24122-01e1-5987-8760-bbe81b907e20",
+      "name": "Pessoa 07",
+      "teamId": "5182a20f-bcd9-5348-85c0-003826b31d2d",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "22ba9b0d-6143-57bb-9053-efa0781b2af9",
+      "name": "Pessoa 08",
+      "teamId": "5182a20f-bcd9-5348-85c0-003826b31d2d",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "56b5f3bd-9223-5c3e-8122-8c76e984a8c9",
+      "name": "Pessoa 09",
+      "teamId": "5182a20f-bcd9-5348-85c0-003826b31d2d",
+      "dailyCapacityHours": 6
+    },
+    {
+      "id": "73f68599-5275-5f95-a7a6-4b2bcaa71ee1",
+      "name": "Pessoa 10",
+      "teamId": "5182a20f-bcd9-5348-85c0-003826b31d2d",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "df50955f-e6de-526f-82ff-60f506e21555",
+      "name": "Pessoa 11",
+      "teamId": "093e4206-6c4f-5cf3-bd36-55fbcce03ae7",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "45b7ea14-b94f-59eb-a280-ff0450b11769",
+      "name": "Pessoa 12",
+      "teamId": "093e4206-6c4f-5cf3-bd36-55fbcce03ae7",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "e530127a-039c-5f04-9b1c-824a388e6204",
+      "name": "Pessoa 13",
+      "teamId": "093e4206-6c4f-5cf3-bd36-55fbcce03ae7",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "7651d361-95ea-5d9f-8b21-978a8763426e",
+      "name": "Pessoa 14",
+      "teamId": "093e4206-6c4f-5cf3-bd36-55fbcce03ae7",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "5e99a5a3-7709-5e52-8485-b6122010cbda",
+      "name": "Pessoa 15",
+      "teamId": "093e4206-6c4f-5cf3-bd36-55fbcce03ae7",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "cf850add-c416-5b89-b223-55570f3df30d",
+      "name": "Pessoa 16",
+      "teamId": "abfbe375-1efe-53e4-9f3d-4b7052406b78",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "02128ff2-5cb5-565c-a14f-b0b56545383d",
+      "name": "Pessoa 17",
+      "teamId": "abfbe375-1efe-53e4-9f3d-4b7052406b78",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "04e15331-a453-51f2-847f-51086bc09420",
+      "name": "Pessoa 18",
+      "teamId": "abfbe375-1efe-53e4-9f3d-4b7052406b78",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "70679fcb-cae9-5b85-acb7-b5a800ae3c4e",
+      "name": "Pessoa 19",
+      "teamId": "abfbe375-1efe-53e4-9f3d-4b7052406b78",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "748694eb-e70e-52f0-8cff-e4c2decc402b",
+      "name": "Pessoa 20",
+      "teamId": "abfbe375-1efe-53e4-9f3d-4b7052406b78",
+      "dailyCapacityHours": 6
+    },
+    {
+      "id": "67dc290d-a849-5fef-9220-d7d867f92810",
+      "name": "Pessoa 21",
+      "teamId": "9fe70bbb-d5f7-5c71-a92f-f8bf22506795",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "77cceaa7-d03b-5bf6-83f0-962767d16f4f",
+      "name": "Pessoa 22",
+      "teamId": "9fe70bbb-d5f7-5c71-a92f-f8bf22506795",
+      "dailyCapacityHours": 6
+    },
+    {
+      "id": "2aca2fae-3871-5404-a4a1-0b276b6fbee2",
+      "name": "Pessoa 23",
+      "teamId": "9fe70bbb-d5f7-5c71-a92f-f8bf22506795",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "9dd92f54-6476-5ed2-bcf5-460f607a164f",
+      "name": "Pessoa 24",
+      "teamId": "9fe70bbb-d5f7-5c71-a92f-f8bf22506795",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "91225833-ec90-594e-ab5e-76f927cfebb8",
+      "name": "Pessoa 25",
+      "teamId": "9fe70bbb-d5f7-5c71-a92f-f8bf22506795",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "394b4bcf-6bf3-50ed-b196-436d12fef43f",
+      "name": "Pessoa 26",
+      "teamId": "7b9932cc-a9f7-5f4d-9464-0fcb4a4a78c3",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "aba2552d-9a51-5132-be80-10b467d8ad6f",
+      "name": "Pessoa 27",
+      "teamId": "7b9932cc-a9f7-5f4d-9464-0fcb4a4a78c3",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "1dc4d16e-dd81-5344-bfdc-a7ba9e452b13",
+      "name": "Pessoa 28",
+      "teamId": "7b9932cc-a9f7-5f4d-9464-0fcb4a4a78c3",
+      "dailyCapacityHours": 6
+    },
+    {
+      "id": "bcb79e53-c6d5-5e2a-b718-f54dc7e40f9a",
+      "name": "Pessoa 29",
+      "teamId": "7b9932cc-a9f7-5f4d-9464-0fcb4a4a78c3",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "0c98a87f-e6fb-583b-90a9-a8cc7cb35d85",
+      "name": "Pessoa 30",
+      "teamId": "7b9932cc-a9f7-5f4d-9464-0fcb4a4a78c3",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "d76295d7-1f45-5fb1-ad0b-cfa63a7df63b",
+      "name": "Pessoa 31",
+      "teamId": "00f79185-be48-5374-89d8-56503dacae52",
+      "dailyCapacityHours": 6
+    },
+    {
+      "id": "3a676d9a-e83f-522c-b453-d42eeee683c2",
+      "name": "Pessoa 32",
+      "teamId": "00f79185-be48-5374-89d8-56503dacae52",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "3f2c70f8-ee2e-5aef-a949-cc3bb67c2f06",
+      "name": "Pessoa 33",
+      "teamId": "00f79185-be48-5374-89d8-56503dacae52",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "24db6fa3-6a0a-56eb-b8ac-8f29d1d88165",
+      "name": "Pessoa 34",
+      "teamId": "00f79185-be48-5374-89d8-56503dacae52",
+      "dailyCapacityHours": 8
+    },
+    {
+      "id": "3b5ecefe-4263-505e-84b7-97844398352d",
+      "name": "Pessoa 35",
+      "teamId": "00f79185-be48-5374-89d8-56503dacae52",
+      "dailyCapacityHours": 8
+    }
+  ],
+  "absences": [
+    {
+      "personId": "56b5f3bd-9223-5c3e-8122-8c76e984a8c9",
+      "startDate": "2027-01-12",
+      "endDate": "2027-01-14"
+    },
+    {
+      "personId": "77cceaa7-d03b-5bf6-83f0-962767d16f4f",
+      "startDate": "2027-02-23",
+      "endDate": "2027-02-27"
+    },
+    {
+      "personId": "77cceaa7-d03b-5bf6-83f0-962767d16f4f",
+      "startDate": "2027-01-29",
+      "endDate": "2027-02-02"
+    },
+    {
+      "personId": "1dc4d16e-dd81-5344-bfdc-a7ba9e452b13",
+      "startDate": "2027-01-09",
+      "endDate": "2027-01-13"
+    },
+    {
+      "personId": "24db6fa3-6a0a-56eb-b8ac-8f29d1d88165",
+      "startDate": "2027-01-04",
+      "endDate": "2027-01-08"
+    }
+  ],
+  "holidays": [
+    {
+      "date": "2027-04-21"
+    },
+    {
+      "date": "2027-09-07"
+    },
+    {
+      "date": "2027-10-12"
+    },
+    {
+      "date": "2027-11-02"
+    }
+  ],
+  "demands": [
+    {
+      "id": "27836153-6a40-5b5d-869d-db41cb7aec38",
+      "title": "Demanda 01",
+      "priorityRank": 1,
+      "startDate": "2027-01-18",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "9fe70bbb-d5f7-5c71-a92f-f8bf22506795",
+          "estimatedEffortHours": 34
+        }
+      ],
+      "assignedPersonIds": [
+        "67dc290d-a849-5fef-9220-d7d867f92810",
+        "77cceaa7-d03b-5bf6-83f0-962767d16f4f"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "f9eb728b-588b-5b35-9104-58cb717c1661",
+      "title": "Demanda 02",
+      "priorityRank": 2,
+      "startDate": "2027-03-01",
+      "informedEndDate": "2027-04-15",
+      "parts": [
+        {
+          "teamId": "7b9932cc-a9f7-5f4d-9464-0fcb4a4a78c3",
+          "estimatedEffortHours": 151
+        },
+        {
+          "teamId": "093e4206-6c4f-5cf3-bd36-55fbcce03ae7",
+          "estimatedEffortHours": 133
+        }
+      ],
+      "assignedPersonIds": [
+        "394b4bcf-6bf3-50ed-b196-436d12fef43f",
+        "45b7ea14-b94f-59eb-a280-ff0450b11769",
+        "aba2552d-9a51-5132-be80-10b467d8ad6f",
+        "df50955f-e6de-526f-82ff-60f506e21555"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "f215bcd3-d8e7-5cb4-a93d-9e8da62f73f8",
+      "title": "Demanda 03",
+      "priorityRank": 3,
+      "startDate": "2027-03-08",
+      "informedEndDate": "2027-04-22",
+      "parts": [
+        {
+          "teamId": "00f79185-be48-5374-89d8-56503dacae52",
+          "estimatedEffortHours": 50
+        }
+      ],
+      "assignedPersonIds": [
+        "3a676d9a-e83f-522c-b453-d42eeee683c2",
+        "d76295d7-1f45-5fb1-ad0b-cfa63a7df63b"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "b5a66c2c-0880-5d1c-ae92-354b321fde46",
+      "title": "Demanda 04",
+      "priorityRank": 4,
+      "startDate": "2027-02-08",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "093e4206-6c4f-5cf3-bd36-55fbcce03ae7",
+          "estimatedEffortHours": 154
+        }
+      ],
+      "assignedPersonIds": [
+        "45b7ea14-b94f-59eb-a280-ff0450b11769",
+        "df50955f-e6de-526f-82ff-60f506e21555"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "abbded53-3b6c-5bb0-81c0-4045b3a9edd6",
+      "title": "Demanda 05",
+      "priorityRank": 5,
+      "startDate": "2027-01-18",
+      "informedEndDate": "2027-03-04",
+      "parts": [
+        {
+          "teamId": "093e4206-6c4f-5cf3-bd36-55fbcce03ae7",
+          "estimatedEffortHours": 157
+        },
+        {
+          "teamId": "5182a20f-bcd9-5348-85c0-003826b31d2d",
+          "estimatedEffortHours": 30
+        }
+      ],
+      "assignedPersonIds": [
+        "3079c79a-9fb7-5342-ae37-3561136daf30",
+        "7651d361-95ea-5d9f-8b21-978a8763426e",
+        "e0b24122-01e1-5987-8760-bbe81b907e20",
+        "e530127a-039c-5f04-9b1c-824a388e6204"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "9c917476-c143-5e55-8f84-c30e2c3bfd53",
+      "title": "Demanda 06",
+      "priorityRank": 6,
+      "startDate": "2027-02-15",
+      "informedEndDate": "2027-04-01",
+      "parts": [
+        {
+          "teamId": "9fe70bbb-d5f7-5c71-a92f-f8bf22506795",
+          "estimatedEffortHours": 134
+        }
+      ],
+      "assignedPersonIds": [
+        "67dc290d-a849-5fef-9220-d7d867f92810",
+        "91225833-ec90-594e-ab5e-76f927cfebb8"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "a9bdaee6-a080-5b9e-a19c-9870cb5b4da9",
+      "title": "Demanda 07",
+      "priorityRank": 7,
+      "startDate": "2027-03-08",
+      "informedEndDate": "2027-04-22",
+      "parts": [
+        {
+          "teamId": "9fe70bbb-d5f7-5c71-a92f-f8bf22506795",
+          "estimatedEffortHours": 34
+        }
+      ],
+      "assignedPersonIds": [
+        "2aca2fae-3871-5404-a4a1-0b276b6fbee2",
+        "91225833-ec90-594e-ab5e-76f927cfebb8"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "0c615277-4728-501b-bc18-5acf212cd13c",
+      "title": "Demanda 08",
+      "priorityRank": 8,
+      "startDate": "2027-02-15",
+      "informedEndDate": "2027-04-01",
+      "parts": [
+        {
+          "teamId": "abfbe375-1efe-53e4-9f3d-4b7052406b78",
+          "estimatedEffortHours": 80
+        }
+      ],
+      "assignedPersonIds": [
+        "02128ff2-5cb5-565c-a14f-b0b56545383d",
+        "cf850add-c416-5b89-b223-55570f3df30d"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "c1d04466-1039-58af-bf12-325f789717f4",
+      "title": "Demanda 09",
+      "priorityRank": 9,
+      "startDate": "2027-02-01",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "356886ee-c644-51d2-9283-c48ecc1be129",
+          "estimatedEffortHours": 38
+        }
+      ],
+      "assignedPersonIds": [
+        "11921a33-0468-5cf1-9561-4b0b04ccf427",
+        "5645f567-6059-56a3-9e84-a5383db52419"
+      ],
+      "prerequisiteIds": [
+        "27836153-6a40-5b5d-869d-db41cb7aec38"
+      ]
+    },
+    {
+      "id": "33738ce1-c3ac-545f-9c0a-10534d392252",
+      "title": "Demanda 10",
+      "priorityRank": 10,
+      "startDate": "2027-02-22",
+      "informedEndDate": "2027-04-08",
+      "parts": [
+        {
+          "teamId": "7b9932cc-a9f7-5f4d-9464-0fcb4a4a78c3",
+          "estimatedEffortHours": 27
+        }
+      ],
+      "assignedPersonIds": [
+        "394b4bcf-6bf3-50ed-b196-436d12fef43f",
+        "aba2552d-9a51-5132-be80-10b467d8ad6f"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "0f7bc4fa-f209-5647-ab1f-4094c67a4be8",
+      "title": "Demanda 11",
+      "priorityRank": 11,
+      "startDate": "2027-02-01",
+      "informedEndDate": "2027-03-18",
+      "parts": [
+        {
+          "teamId": "7b9932cc-a9f7-5f4d-9464-0fcb4a4a78c3",
+          "estimatedEffortHours": 74
+        },
+        {
+          "teamId": "9fe70bbb-d5f7-5c71-a92f-f8bf22506795",
+          "estimatedEffortHours": 41
+        }
+      ],
+      "assignedPersonIds": [
+        "394b4bcf-6bf3-50ed-b196-436d12fef43f",
+        "67dc290d-a849-5fef-9220-d7d867f92810",
+        "77cceaa7-d03b-5bf6-83f0-962767d16f4f",
+        "aba2552d-9a51-5132-be80-10b467d8ad6f"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "7e162294-9b27-546c-966b-d8428d8b61ea",
+      "title": "Demanda 12",
+      "priorityRank": 12,
+      "startDate": "2027-02-08",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "356886ee-c644-51d2-9283-c48ecc1be129",
+          "estimatedEffortHours": 158
+        },
+        {
+          "teamId": "093e4206-6c4f-5cf3-bd36-55fbcce03ae7",
+          "estimatedEffortHours": 136
+        }
+      ],
+      "assignedPersonIds": [
+        "2f1ac5b5-d0da-55d4-8c91-63ab4edcf0a1",
+        "5645f567-6059-56a3-9e84-a5383db52419",
+        "df50955f-e6de-526f-82ff-60f506e21555",
+        "e530127a-039c-5f04-9b1c-824a388e6204"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "42c631c7-1542-5127-ba1b-3228f270b8cc",
+      "title": "Demanda 13",
+      "priorityRank": 13,
+      "startDate": "2027-02-01",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "7b9932cc-a9f7-5f4d-9464-0fcb4a4a78c3",
+          "estimatedEffortHours": 144
+        },
+        {
+          "teamId": "abfbe375-1efe-53e4-9f3d-4b7052406b78",
+          "estimatedEffortHours": 106
+        }
+      ],
+      "assignedPersonIds": [
+        "394b4bcf-6bf3-50ed-b196-436d12fef43f",
+        "70679fcb-cae9-5b85-acb7-b5a800ae3c4e",
+        "aba2552d-9a51-5132-be80-10b467d8ad6f",
+        "cf850add-c416-5b89-b223-55570f3df30d"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "65f3a7aa-97bc-54f1-a73d-e95019ae4dc3",
+      "title": "Demanda 14",
+      "priorityRank": 14,
+      "startDate": "2027-01-25",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "356886ee-c644-51d2-9283-c48ecc1be129",
+          "estimatedEffortHours": 24
+        }
+      ],
+      "assignedPersonIds": [
+        "11921a33-0468-5cf1-9561-4b0b04ccf427",
+        "5645f567-6059-56a3-9e84-a5383db52419"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "48507aeb-ddc2-5584-8547-62a4597a22df",
+      "title": "Demanda 15",
+      "priorityRank": 15,
+      "startDate": "2027-02-22",
+      "informedEndDate": "2027-04-08",
+      "parts": [
+        {
+          "teamId": "7b9932cc-a9f7-5f4d-9464-0fcb4a4a78c3",
+          "estimatedEffortHours": 131
+        }
+      ],
+      "assignedPersonIds": [
+        "394b4bcf-6bf3-50ed-b196-436d12fef43f",
+        "aba2552d-9a51-5132-be80-10b467d8ad6f"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "48632415-a721-58fe-85ef-d3e9b42fc2dd",
+      "title": "Demanda 16",
+      "priorityRank": 16,
+      "startDate": "2027-02-22",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "5182a20f-bcd9-5348-85c0-003826b31d2d",
+          "estimatedEffortHours": 56
+        },
+        {
+          "teamId": "9fe70bbb-d5f7-5c71-a92f-f8bf22506795",
+          "estimatedEffortHours": 122
+        }
+      ],
+      "assignedPersonIds": [
+        "2aca2fae-3871-5404-a4a1-0b276b6fbee2",
+        "3079c79a-9fb7-5342-ae37-3561136daf30",
+        "77cceaa7-d03b-5bf6-83f0-962767d16f4f",
+        "e0b24122-01e1-5987-8760-bbe81b907e20"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "35e78a06-817e-579a-91d4-5d9e1488dea8",
+      "title": "Demanda 17",
+      "priorityRank": 17,
+      "startDate": "2027-02-08",
+      "informedEndDate": "2027-03-25",
+      "parts": [
+        {
+          "teamId": "9fe70bbb-d5f7-5c71-a92f-f8bf22506795",
+          "estimatedEffortHours": 86
+        }
+      ],
+      "assignedPersonIds": [
+        "2aca2fae-3871-5404-a4a1-0b276b6fbee2",
+        "77cceaa7-d03b-5bf6-83f0-962767d16f4f"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "f602ab8a-b0f6-545a-ad11-39cc7ccfb5c8",
+      "title": "Demanda 18",
+      "priorityRank": 18,
+      "startDate": "2027-03-01",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "abfbe375-1efe-53e4-9f3d-4b7052406b78",
+          "estimatedEffortHours": 133
+        }
+      ],
+      "assignedPersonIds": [
+        "02128ff2-5cb5-565c-a14f-b0b56545383d",
+        "04e15331-a453-51f2-847f-51086bc09420"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "1759a606-50aa-5631-9dc7-7229e56fce72",
+      "title": "Demanda 19",
+      "priorityRank": 19,
+      "startDate": "2027-01-25",
+      "informedEndDate": "2027-03-11",
+      "parts": [
+        {
+          "teamId": "093e4206-6c4f-5cf3-bd36-55fbcce03ae7",
+          "estimatedEffortHours": 142
+        },
+        {
+          "teamId": "00f79185-be48-5374-89d8-56503dacae52",
+          "estimatedEffortHours": 125
+        }
+      ],
+      "assignedPersonIds": [
+        "3a676d9a-e83f-522c-b453-d42eeee683c2",
+        "45b7ea14-b94f-59eb-a280-ff0450b11769",
+        "d76295d7-1f45-5fb1-ad0b-cfa63a7df63b",
+        "df50955f-e6de-526f-82ff-60f506e21555"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "952b5e56-739c-5ef2-9171-80411dc70996",
+      "title": "Demanda 20",
+      "priorityRank": 20,
+      "startDate": "2027-02-15",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "7b9932cc-a9f7-5f4d-9464-0fcb4a4a78c3",
+          "estimatedEffortHours": 24
+        }
+      ],
+      "assignedPersonIds": [
+        "394b4bcf-6bf3-50ed-b196-436d12fef43f",
+        "aba2552d-9a51-5132-be80-10b467d8ad6f"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "524145dc-ce63-597f-946e-1b0c574cef59",
+      "title": "Demanda 21",
+      "priorityRank": 21,
+      "startDate": "2027-01-18",
+      "informedEndDate": "2027-03-04",
+      "parts": [
+        {
+          "teamId": "9fe70bbb-d5f7-5c71-a92f-f8bf22506795",
+          "estimatedEffortHours": 53
+        }
+      ],
+      "assignedPersonIds": [
+        "67dc290d-a849-5fef-9220-d7d867f92810",
+        "77cceaa7-d03b-5bf6-83f0-962767d16f4f"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "c1b3cd4d-7dc7-5cf3-9719-add7ad68a190",
+      "title": "Demanda 22",
+      "priorityRank": 22,
+      "startDate": "2027-02-22",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "5182a20f-bcd9-5348-85c0-003826b31d2d",
+          "estimatedEffortHours": 69
+        }
+      ],
+      "assignedPersonIds": [
+        "3079c79a-9fb7-5342-ae37-3561136daf30",
+        "e0b24122-01e1-5987-8760-bbe81b907e20"
+      ],
+      "prerequisiteIds": [
+        "48507aeb-ddc2-5584-8547-62a4597a22df"
+      ]
+    },
+    {
+      "id": "bd276087-c9a0-53e4-bd56-0e5db0b4fa36",
+      "title": "Demanda 23",
+      "priorityRank": 23,
+      "startDate": "2027-01-18",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "abfbe375-1efe-53e4-9f3d-4b7052406b78",
+          "estimatedEffortHours": 72
+        }
+      ],
+      "assignedPersonIds": [
+        "02128ff2-5cb5-565c-a14f-b0b56545383d",
+        "cf850add-c416-5b89-b223-55570f3df30d"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "59c170aa-5863-5866-92f4-d18852db5e78",
+      "title": "Demanda 24",
+      "priorityRank": 24,
+      "startDate": "2027-03-08",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "7b9932cc-a9f7-5f4d-9464-0fcb4a4a78c3",
+          "estimatedEffortHours": 43
+        }
+      ],
+      "assignedPersonIds": [
+        "0c98a87f-e6fb-583b-90a9-a8cc7cb35d85",
+        "bcb79e53-c6d5-5e2a-b718-f54dc7e40f9a"
+      ],
+      "prerequisiteIds": [
+        "b5a66c2c-0880-5d1c-ae92-354b321fde46"
+      ]
+    },
+    {
+      "id": "23607dd7-38b8-5cf1-afac-8c9255684d36",
+      "title": "Demanda 25",
+      "priorityRank": 25,
+      "startDate": "2027-03-08",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "7b9932cc-a9f7-5f4d-9464-0fcb4a4a78c3",
+          "estimatedEffortHours": 142
+        },
+        {
+          "teamId": "abfbe375-1efe-53e4-9f3d-4b7052406b78",
+          "estimatedEffortHours": 128
+        }
+      ],
+      "assignedPersonIds": [
+        "02128ff2-5cb5-565c-a14f-b0b56545383d",
+        "394b4bcf-6bf3-50ed-b196-436d12fef43f",
+        "aba2552d-9a51-5132-be80-10b467d8ad6f",
+        "cf850add-c416-5b89-b223-55570f3df30d"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "41f7e524-c87c-51b3-8f7b-2945a6390e90",
+      "title": "Demanda 26",
+      "priorityRank": 26,
+      "startDate": "2027-02-08",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "356886ee-c644-51d2-9283-c48ecc1be129",
+          "estimatedEffortHours": 72
+        }
+      ],
+      "assignedPersonIds": [
+        "11921a33-0468-5cf1-9561-4b0b04ccf427",
+        "5645f567-6059-56a3-9e84-a5383db52419"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "bbee017c-3af6-5cd8-bc53-bbe363f0ae45",
+      "title": "Demanda 27",
+      "priorityRank": 27,
+      "startDate": "2027-02-22",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "356886ee-c644-51d2-9283-c48ecc1be129",
+          "estimatedEffortHours": 33
+        },
+        {
+          "teamId": "5182a20f-bcd9-5348-85c0-003826b31d2d",
+          "estimatedEffortHours": 106
+        }
+      ],
+      "assignedPersonIds": [
+        "027ca906-39a6-5341-9b7f-c51b22021721",
+        "3079c79a-9fb7-5342-ae37-3561136daf30",
+        "5645f567-6059-56a3-9e84-a5383db52419",
+        "e0b24122-01e1-5987-8760-bbe81b907e20"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "77898295-d022-5c9b-8a44-99537c5f22d5",
+      "title": "Demanda 28",
+      "priorityRank": 28,
+      "startDate": "2027-03-01",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "093e4206-6c4f-5cf3-bd36-55fbcce03ae7",
+          "estimatedEffortHours": 74
+        },
+        {
+          "teamId": "abfbe375-1efe-53e4-9f3d-4b7052406b78",
+          "estimatedEffortHours": 107
+        }
+      ],
+      "assignedPersonIds": [
+        "02128ff2-5cb5-565c-a14f-b0b56545383d",
+        "cf850add-c416-5b89-b223-55570f3df30d",
+        "df50955f-e6de-526f-82ff-60f506e21555",
+        "e530127a-039c-5f04-9b1c-824a388e6204"
+      ],
+      "prerequisiteIds": [
+        "f602ab8a-b0f6-545a-ad11-39cc7ccfb5c8"
+      ]
+    },
+    {
+      "id": "8aa9dab6-6ec1-56aa-9cba-bb034f884d76",
+      "title": "Demanda 29",
+      "priorityRank": 29,
+      "startDate": "2027-02-08",
+      "informedEndDate": null,
+      "parts": [
+        {
+          "teamId": "356886ee-c644-51d2-9283-c48ecc1be129",
+          "estimatedEffortHours": 155
+        },
+        {
+          "teamId": "093e4206-6c4f-5cf3-bd36-55fbcce03ae7",
+          "estimatedEffortHours": 117
+        }
+      ],
+      "assignedPersonIds": [
+        "027ca906-39a6-5341-9b7f-c51b22021721",
+        "45b7ea14-b94f-59eb-a280-ff0450b11769",
+        "66d3b8a0-c49b-5d67-8ccf-13e3343f9dd2",
+        "df50955f-e6de-526f-82ff-60f506e21555"
+      ],
+      "prerequisiteIds": []
+    },
+    {
+      "id": "c2dbc1d3-7ac9-5c4d-89e1-b2b861e4d00b",
+      "title": "Demanda 30",
+      "priorityRank": 30,
+      "startDate": "2027-01-04",
+      "informedEndDate": "2027-02-18",
+      "parts": [
+        {
+          "teamId": "356886ee-c644-51d2-9283-c48ecc1be129",
+          "estimatedEffortHours": 77
+        },
+        {
+          "teamId": "9fe70bbb-d5f7-5c71-a92f-f8bf22506795",
+          "estimatedEffortHours": 94
+        }
+      ],
+      "assignedPersonIds": [
+        "11921a33-0468-5cf1-9561-4b0b04ccf427",
+        "5645f567-6059-56a3-9e84-a5383db52419",
+        "67dc290d-a849-5fef-9220-d7d867f92810",
+        "77cceaa7-d03b-5bf6-83f0-962767d16f4f"
+      ],
+      "prerequisiteIds": []
+    }
+  ]
+}

@@ -44,8 +44,8 @@ O conjunto SHALL trazer a ordem de prioridade (1 a 30, sem repetição) e a aloc
 - **THEN** nenhuma demanda está concluída e o modo de execução é o de prioridade
 
 ### Requirement: Conjunto reprodutível
-O conteúdo do conjunto SHALL ser fixo: o recurso embutido é um arquivo versionado, e o mesmo arquivo SHALL produzir sempre os mesmos dados no banco, exceto os identificadores, que são gerados no carregamento (a conta do gestor não faz parte do conjunto).
+O conteúdo do conjunto SHALL ser fixo: o recurso embutido é um arquivo versionado, com identificadores fixos, e o mesmo arquivo SHALL produzir sempre os mesmos dados no banco e o mesmo cálculo (a conta do gestor não faz parte do conjunto). Os identificadores vêm do arquivo, e não são sorteados no carregamento, para a validação ser reproduzível (ajuste do grupo 4, ver design, D10).
 
 #### Scenario: Dois carregamentos
 - **WHEN** o conjunto é carregado duas vezes
-- **THEN** os títulos, estimativas, datas e alocações são os mesmos, e o cronograma resultante tem as mesmas datas
+- **THEN** os títulos, estimativas, datas, alocações e identificadores são os mesmos, e o cronograma resultante tem as mesmas datas

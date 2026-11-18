@@ -23,4 +23,9 @@
     <ProjectReference Include="..\Coordin.Engine\Coordin.Engine.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- O conjunto fictício da validação (DT-37): versionado como recurso embutido, sem dado real. -->
+    <EmbeddedResource Include="Features/Validation/Dataset/validation-dataset.json" LogicalName="validation-dataset.json" />
+  </ItemGroup>
+
 </Project>

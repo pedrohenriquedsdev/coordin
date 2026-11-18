@@ -71,7 +71,7 @@ Dentre as demandas previsíveis nos dois planejamentos, as 5 de menor `PriorityR
 
 ### D10. O conjunto vem de um gerador descartável, e o arquivo é o que vale
 
-Por decisão do autor (2026-11-18), eu gero o conteúdo e ele revisa. O gerador é um script **fora do repositório** (a estrutura de pastas do DT-04 não prevê uma pasta de ferramentas), executado uma vez com semente fixa; **o JSON gerado é o artefato versionado** e o recurso embutido. O conjunto reflete um setor típico, com alocação inicial concentrada como o gestor faria hoje, **sem ser ajustado depois de se conhecer o resultado** (evita ajustar o experimento ao resultado). Uma pausa para a revisão do autor fica nas tasks, antes de o carregador existir.
+Por decisão do autor (2026-11-18), eu gero o conteúdo e ele revisa. O gerador é um script **fora do repositório** (a estrutura de pastas do DT-04 não prevê uma pasta de ferramentas), executado uma vez com semente fixa; **o JSON gerado é o artefato versionado** e o recurso embutido. O conjunto reflete um setor típico, com alocação inicial concentrada como o gestor faria hoje, **sem ser ajustado depois de se conhecer o resultado** (evita ajustar o experimento ao resultado). Os identificadores são **fixos** no arquivo (UUID v5 a partir de um nome estável), e não sorteados no carregamento: assim a validação é reproduzível e o mesmo arquivo gera sempre o mesmo planejamento (ajuste do grupo 4; a spec `validation-dataset` foi corrigida no mesmo sentido). Uma pausa para a revisão do autor fica nas tasks, antes de o carregador existir.
 
 ### D11. Guardar o plano atual na ordem de prioridade, uma vez
 
