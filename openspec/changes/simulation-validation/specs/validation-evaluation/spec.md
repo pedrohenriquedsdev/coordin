@@ -26,15 +26,19 @@ O fator de esforço de cada demanda SHALL ser `min + (max − min) × u`, com `u
 - **THEN** os fatores das demandas mudam
 
 ### Requirement: Realizado simulado
-O realizado simulado SHALL ser calculado simulando de novo o planejamento do processo atual com o esforço de cada parte multiplicado pelo fator da demanda (arredondado a duas casas) e **margem zero**; a data real simulada de cada demanda é o seu fim sem margem (PRD 7.3, passo 6). A previsão do processo atual SHALL NOT ser alterada por esse cálculo.
+O realizado simulado SHALL ser calculado simulando de novo o planejamento do processo atual com o esforço de cada parte multiplicado pelo fator da demanda (arredondado a duas casas) e **margem zero**; a data real simulada de cada demanda é a sua data de fim sem margem nesse planejamento (PRD 7.3, passo 6). A previsão do processo atual SHALL NOT ser alterada por esse cálculo.
 
-#### Scenario: Fator um reproduz a previsão sem margem
+#### Scenario: Fator um reproduz o planejamento com margem zero
 - **WHEN** os dois fatores limites são 1
-- **THEN** a data real simulada de cada demanda é igual ao fim sem margem do processo atual
+- **THEN** a data real simulada de cada demanda é igual à data de fim sem margem do planejamento com margem zero
+
+#### Scenario: Dependência sem folga
+- **WHEN** uma demanda depende de outra e o planejamento tem margem
+- **THEN** com fator 1, a data real simulada da dependente é a do planejamento com margem zero, e não a do planejamento com margem
 
 #### Scenario: Esforço maior atrasa
 - **WHEN** o fator de uma demanda é maior que 1 e nada mais muda
-- **THEN** a data real simulada dessa demanda não é anterior ao fim sem margem do processo atual
+- **THEN** a data real simulada dessa demanda não é anterior à data sem margem do planejamento com margem zero
 
 ### Requirement: Métricas de eficiência dos dois planejamentos
 Para cada planejamento, o motor SHALL calcular, sobre o período comparado, as horas ociosas (soma da ociosidade de todos os times), o equilíbrio de ocupação (a maior menos a menor ocupação média dos times, em pontos percentuais), os períodos de sobrecarga (pares time × semana com sobrecarga) e o prazo total do setor (a última previsão com margem) (PRD 7.2). O período comparado SHALL ir da menor data de início à maior previsão entre os dois planejamentos, em semanas completas (DT-24).

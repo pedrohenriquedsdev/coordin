@@ -108,4 +108,26 @@ public sealed class SimulatedActualsTests
 
         Assert.True(actuals.ContainsKey(demand));
     }
+
+    [Fact]
+    public void With_a_dependency_factor_one_matches_the_planning_with_zero_margin_not_the_one_with_margin()
+    {
+        // B depende de A. Com margem, B espera o fim de A com a folga (DT-23); o realizado não tem essa folga,
+        // então a data real simulada é a do planejamento com margem zero.
+        var builder = new PlanningSnapshotBuilder();
+        var team = builder.AddTeam();
+        var person = builder.AddPerson(team, 8m);
+        var first = builder.AddDemand(Day.Monday, [(team, 16m)]);
+        builder.Assign(first, person);
+        var second = builder.AddDemand(Day.Monday, [(team, 16m)]);
+        builder.Assign(second, person).DependsOn(second, first).Margin(50m);
+        var snapshot = builder.Build();
+
+        var actuals = SimulatedActuals.Calculate(snapshot, new ValidationParameters(1m, 1m, 1L));
+
+        var zeroMargin = ForecastEngine.Calculate(snapshot with { SafetyMarginPercent = 0m }).Demands;
+        var withMargin = ForecastEngine.Calculate(snapshot).Demands;
+        Assert.Equal(zeroMargin.Single(item => item.DemandId == second).EndDateWithoutMargin, actuals[second]);
+        Assert.NotEqual(withMargin.Single(item => item.DemandId == second).EndDateWithoutMargin, actuals[second]);
+    }
 }

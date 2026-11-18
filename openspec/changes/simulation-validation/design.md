@@ -33,7 +33,7 @@ Entrada: `ValidationInput(PlanningSnapshot CurrentProcess, PlanningSnapshot With
 
 ### D3. Realizado simulado com margem zero
 
-O planejamento do processo atual é simulado de novo com o esforço escalado e `SafetyMarginPercent = 0`; a `EndDateWithoutMargin` de cada demanda é a data real simulada. A margem zero só serve para **medir o real**: a previsão do processo atual (com margem) não é alterada, então a regra inviolável 1 não é tocada. Com os dois fatores iguais a 1, o resultado reproduz o `EndDateWithoutMargin` do processo atual (invariante testada).
+O planejamento do processo atual é simulado de novo com o esforço escalado e `SafetyMarginPercent = 0`; a `EndDateWithoutMargin` de cada demanda é a data real simulada. A margem zero só serve para **medir o real**: a previsão do processo atual (com margem) não é alterada, então a regra inviolável 1 não é tocada. Com os dois fatores iguais a 1, o resultado reproduz o planejamento **com margem zero** (invariante testada). Isso vale também com dependências: o TDD 8.2 dizia "reproduz `EndDateWithoutMargin`", o que só é verdade sem dependências, porque a margem também atrasa quem espera o pré-requisito (DT-23). Descoberto na verificação com a API real (grupo 7): 2 de 30 demandas dependentes divergiam da agenda sem margem, e a divergência foi provada no motor. A realidade não tem a folga da margem, então a margem zero é o comportamento correto; a correção vai para o TDD 8.2 na task 7.3, com a aprovação do autor.
 
 ### D4. Métricas de eficiência sobre um período comum
 
