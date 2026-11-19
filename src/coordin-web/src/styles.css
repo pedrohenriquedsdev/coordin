@@ -3,37 +3,45 @@
 /* `dark:` passa a depender do atributo `data-theme="dark"` (definido pelo ThemeService). */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
-/* Poppins (SIL OFL, ver public/fonts/Poppins-OFL.txt), servida do próprio site: a CSP só aceita `font-src 'self'`. */
+/* Inter (SIL OFL, ver public/fonts/Inter-OFL.txt), servida do próprio site: a CSP só aceita `font-src 'self'`. */
 @font-face {
-  font-family: 'Poppins';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/poppins-latin-400-normal.woff2') format('woff2');
+  src: url('/fonts/inter-latin-400-normal.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Poppins';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/poppins-latin-500-normal.woff2') format('woff2');
+  src: url('/fonts/inter-latin-500-normal.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Poppins';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/fonts/poppins-latin-600-normal.woff2') format('woff2');
+  src: url('/fonts/inter-latin-600-normal.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Poppins';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/fonts/poppins-latin-700-normal.woff2') format('woff2');
+  src: url('/fonts/inter-latin-700-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/inter-latin-800-normal.woff2') format('woff2');
 }
 
 /*
@@ -45,34 +53,33 @@
  * Sem fonte externa: a CSP do projeto só aceita `font-src 'self'`.
  */
 @theme {
-  --font-poppins: 'Poppins', 'Segoe UI', system-ui, sans-serif;
-  --font-sans: 'Poppins', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
 
-  /* Marca: índigo. Usada em ação principal, foco e item ativo do menu. */
-  --color-brand-50: #f3edff;
-  --color-brand-100: #e7dbff;
-  --color-brand-200: #d0b8ff;
-  --color-brand-300: #b48aff;
-  --color-brand-400: #9552ff;
-  --color-brand-500: #7a29ff;
-  --color-brand-600: #5700ff;
-  --color-brand-700: #4a00d9;
-  --color-brand-800: #3d00b3;
-  --color-brand-900: #2f008c;
-  --color-brand-950: #1c0055;
+  /* Marca: ciano (#1EC1CB). Texto sobre o ciano é sempre o verde-petróleo escuro (#04282b), nunca branco. */
+  --color-brand-50: #eafbfc;
+  --color-brand-100: #c9f4f6;
+  --color-brand-200: #9be8ec;
+  --color-brand-300: #66d9df;
+  --color-brand-400: #3acfd6;
+  --color-brand-500: #1ec1cb;
+  --color-brand-600: #0d8a93;
+  --color-brand-700: #0a6b73;
+  --color-brand-800: #0a565c;
+  --color-brand-900: #0a4146;
+  --color-brand-950: #052c30;
 
-  /* Neutros levemente azulados: menos "cinza de planilha", mais calmos para leitura longa. */
-  --color-slate-50: #fbf8fb;
-  --color-slate-100: #f3eff3;
-  --color-slate-200: #e6e1e6;
-  --color-slate-300: #cfcfd4;
-  --color-slate-400: #9d9da5;
-  --color-slate-500: #6e6e78;
-  --color-slate-600: #555560;
-  --color-slate-700: #3d3d47;
-  --color-slate-800: #26262e;
-  --color-slate-900: #141418;
-  --color-slate-950: #0a0a0d;
+  /* Neutros levemente esverdeados, para combinar com o ciano. */
+  --color-slate-50: #f3fafa;
+  --color-slate-100: #e7f2f3;
+  --color-slate-200: #d5e6e8;
+  --color-slate-300: #b8cfd2;
+  --color-slate-400: #84a2a6;
+  --color-slate-500: #587479;
+  --color-slate-600: #3f5a5e;
+  --color-slate-700: #2b4145;
+  --color-slate-800: #172a2d;
+  --color-slate-900: #0a1c1f;
+  --color-slate-950: #041012;
 
   /* Vermelho e laranja da paleta do projeto, para erros e avisos. */
   --color-red-700: #cc0000;
@@ -81,7 +88,7 @@
   --color-amber-900: #8a2e00;
 
   /* Paleta da tela de login (identidade do projeto). */
-  --color-aqua: #1febcc;
+  --color-aqua: #1ec1cb;
   --color-magenta: #ed008c;
   --color-violet: #5700ff;
   --color-ember: #e24b00;
@@ -89,8 +96,8 @@
 
   --animate-float: float 6s ease-in-out infinite;
 
-  --shadow-card: 0 1px 2px rgb(23 26 46 / 0.04), 0 4px 16px rgb(23 26 46 / 0.05);
-  --shadow-pop: 0 8px 30px rgb(79 70 229 / 0.18);
+  --shadow-card: 0 1px 2px rgb(4 40 43 / 0.05), 0 10px 30px rgb(4 40 43 / 0.08);
+  --shadow-pop: 0 12px 36px rgb(30 193 203 / 0.28);
 }
 
 @layer base {
@@ -99,10 +106,10 @@
   }
 
   body {
-    @apply bg-[#fdf9fb] font-sans text-slate-900 antialiased;
+    @apply bg-[#eef8f8] font-sans text-slate-900 antialiased;
   }
 
-  /* Manchas de cor suaves e fixas atrás de todas as telas (as mesmas do login). */
+  /* Esferas suaves e fixas atrás das telas (o vidro desfoca o que passa por trás). */
   body::before {
     content: '';
     position: fixed;
@@ -110,14 +117,26 @@
     z-index: -1;
     pointer-events: none;
     background-image:
-      radial-gradient(38rem 24rem at 0% 6%, rgb(247 182 214 / 0.45), transparent 65%),
-      radial-gradient(34rem 24rem at 100% 10%, rgb(246 107 240 / 0.18), transparent 65%),
-      radial-gradient(40rem 26rem at 75% 100%, rgb(79 220 245 / 0.2), transparent 65%);
+      radial-gradient(40rem 40rem at 100% 0%, rgb(30 193 203 / 0.5), transparent 62%),
+      radial-gradient(34rem 34rem at 0% 100%, rgb(30 193 203 / 0.38), transparent 62%),
+      radial-gradient(18rem 18rem at 15% 30%, rgb(30 193 203 / 0.18), transparent 65%),
+      radial-gradient(22rem 22rem at 45% 55%, rgb(255 255 255 / 0.7), transparent 65%);
+  }
+
+  html[data-theme='dark'] body {
+    background-color: #050909;
+  }
+
+  html[data-theme='dark'] body::before {
+    background-image:
+      radial-gradient(36rem 36rem at 100% 0%, rgb(30 193 203 / 0.3), transparent 62%),
+      radial-gradient(32rem 32rem at 0% 100%, rgb(15 110 118 / 0.45), transparent 62%),
+      radial-gradient(20rem 20rem at 40% 60%, rgb(255 255 255 / 0.07), transparent 65%);
   }
 
   /* Tabelas: cabeçalho discreto em caixa alta, linhas que respondem ao ponteiro. */
   main table {
-    @apply border border-slate-200 bg-white;
+    @apply border border-slate-200/70 bg-white/55 backdrop-blur-xl;
   }
   main thead th {
     @apply bg-slate-50 text-[0.7rem] font-semibold tracking-wider text-slate-500 uppercase;
@@ -130,12 +149,60 @@
     @apply bg-slate-50/70;
   }
   main h2 {
-    @apply text-black;
+    @apply text-slate-900;
   }
 
   /* Foco visível e consistente em tudo que é interativo (RNF-03). */
   :where(a, button, input, select, textarea, summary):focus-visible {
     @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+
+  /* Checkbox animado: caixa de vidro que se enche de azul e "desenha" o visto com uma mola. */
+  input[type='checkbox'] {
+    appearance: none;
+    display: inline-grid;
+    flex-shrink: 0;
+    place-content: center;
+    width: 1.3rem;
+    height: 1.3rem;
+    cursor: pointer;
+    vertical-align: middle;
+    border: 1.5px solid var(--color-slate-300);
+    border-radius: 0.45rem;
+    background: color-mix(in srgb, var(--color-white) 70%, transparent);
+    transition:
+      background 0.25s,
+      border-color 0.25s,
+      box-shadow 0.25s,
+      transform 0.15s;
+  }
+  input[type='checkbox']::after {
+    content: '';
+    width: 0.7rem;
+    height: 0.7rem;
+    background: #fff;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0, 43% 62%);
+    transform: scale(0) rotate(-25deg);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  input[type='checkbox']:hover:not(:disabled) {
+    border-color: var(--color-brand-500);
+    box-shadow: 0 0 0 4px rgb(30 193 203 / 0.14);
+  }
+  input[type='checkbox']:active:not(:disabled) {
+    transform: scale(0.88);
+  }
+  input[type='checkbox']:checked {
+    border-color: var(--color-brand-600);
+    background: linear-gradient(135deg, var(--color-brand-600), var(--color-brand-400));
+    box-shadow: 0 0 0 4px rgb(30 193 203 / 0.2);
+  }
+  input[type='checkbox']:checked::after {
+    transform: scale(1) rotate(0);
+  }
+  input[type='checkbox']:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 
   ::selection {
@@ -146,7 +213,7 @@
 @layer components {
   /* Cartão: superfície branca com sombra suave. */
   .card {
-    @apply rounded-xl border border-slate-200 bg-white/85 shadow-card backdrop-blur-sm;
+    @apply rounded-2xl border border-slate-200/70 bg-white/55 shadow-card backdrop-blur-xl;
   }
 
   /* Botões. Cada variante só muda a aparência; tamanho e foco vêm do `.btn`. */
@@ -154,13 +221,13 @@
   .btn-primary,
   .btn-secondary,
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
   }
   .btn-primary {
-    @apply bg-black text-white shadow-sm hover:bg-brand-600;
+    @apply bg-brand-500 font-bold text-[#04282b] shadow-sm hover:bg-brand-400;
   }
   .btn-secondary {
-    @apply border border-slate-300 bg-white text-slate-700 hover:bg-slate-100;
+    @apply border border-white/70 bg-white/50 text-slate-700 backdrop-blur-md hover:bg-white/80 dark:border-white/15;
   }
   .btn-danger {
     @apply border border-red-300 bg-white text-red-700 hover:bg-red-50;
@@ -173,7 +240,7 @@
 
   /* Campos de formulário. */
   .field {
-    @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-black focus:outline-none focus:ring-1 focus:ring-black aria-[invalid=true]:border-red-500;
+    @apply block w-full rounded-xl border border-slate-300 bg-white/60 px-3 py-2 text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40 aria-[invalid=true]:border-red-500;
   }
 
   /* Pílulas de status (sempre com texto: a cor nunca é o único sinal). */
@@ -185,6 +252,407 @@
 /* Tela de login um pouco menor (90%). A altura mínima compensa o zoom, para o fundo ocupar a tela toda. */
 .zoom-90 {
   zoom: 0.9;
+}
+
+/*
+ * Tema escuro das telas internas: dentro de `.app-shell` as variáveis de cor são trocadas, então toda
+ * classe `bg-white`, `text-slate-*` etc. já existente se adapta sem reescrever cada tela.
+ * (A tela de login tem o próprio tema e fica fora de `.app-shell`.)
+ */
+:root[data-theme='dark'] .app-shell {
+  --color-white: #0a1517;
+  --color-slate-50: #0a1214;
+  --color-slate-100: #101c1e;
+  --color-slate-200: #1a2b2e;
+  --color-slate-300: #2a4044;
+  --color-slate-400: #6f9094;
+  --color-slate-500: #93b0b4;
+  --color-slate-600: #b3cacd;
+  --color-slate-700: #cbdcde;
+  --color-slate-800: #e1ecee;
+  --color-slate-900: #f1f8f9;
+  --color-slate-950: #ffffff;
+  --color-brand-50: #0b2a2e;
+  --color-brand-100: #0f3a40;
+  --color-brand-200: #17565e;
+  --color-brand-600: #3acfd6;
+  --color-brand-700: #66d9df;
+  color-scheme: dark;
+}
+
+/* ---------- Campo com borda brilhante (GlowField) ---------- */
+.glow-field {
+  --gf-bg: #f3fcfc;
+  --gf-ring: #cfe3e5;
+  position: relative;
+  display: block;
+  isolation: isolate;
+  border-radius: 0.95rem;
+}
+html[data-theme='dark'] .glow-field {
+  --gf-bg: #081314;
+  --gf-ring: rgb(255 255 255 / 0.12);
+}
+.gf-border,
+.gf-glow {
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.gf-border {
+  background: var(--gf-ring);
+}
+.gf-glow {
+  inset: -6px;
+  opacity: 0;
+  filter: blur(16px);
+  transition: opacity 0.6s;
+}
+.gf-border::before,
+.gf-glow::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 900px;
+  height: 900px;
+  background-image: conic-gradient(
+    transparent 0 52%,
+    #1ec1cb 62%,
+    #1febcc 72%,
+    #3acfd6 80%,
+    transparent 90%
+  );
+  transform: translate(-50%, -50%) rotate(70deg);
+  transition: transform 2s;
+}
+.glow-field:hover .gf-border::before,
+.glow-field:hover .gf-glow::before {
+  transform: translate(-50%, -50%) rotate(250deg);
+}
+.glow-field:focus-within .gf-border::before,
+.glow-field:focus-within .gf-glow::before {
+  transform: translate(-50%, -50%) rotate(430deg);
+  transition-duration: 4s;
+}
+.glow-field:focus-within .gf-glow {
+  opacity: 0.55;
+}
+.gf-body {
+  position: relative;
+  border-radius: calc(0.95rem - 1px);
+  background: var(--gf-bg);
+}
+.gf-body input {
+  background: transparent;
+}
+
+/* ---------- Loader ---------- */
+.loader {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.loader-ring {
+  position: relative;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0 20%,
+    var(--color-brand-600),
+    var(--color-aqua)
+  );
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  animation: loader-spin 0.9s linear infinite;
+}
+.loader-dot {
+  position: absolute;
+  inset: 0.85rem;
+  border-radius: 9999px;
+  background: var(--color-brand-600);
+  animation: loader-pulse 1.2s ease-in-out infinite;
+}
+@keyframes loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes loader-pulse {
+  50% {
+    transform: scale(0.45);
+    opacity: 0.5;
+  }
+}
+
+/* ---------- Cartão de hub: spotlight que segue o ponteiro ---------- */
+.hub-card {
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+  transition:
+    border-color 0.25s,
+    box-shadow 0.25s;
+}
+.hub-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    20rem circle at var(--mx, 50%) var(--my, 50%),
+    rgb(30 193 203 / 0.25),
+    transparent 45%
+  );
+  transition: opacity 0.3s;
+}
+.hub-card:hover::before,
+.hub-card:focus-within::before {
+  opacity: 1;
+}
+.hub-card:hover,
+.hub-card:focus-within {
+  border-color: var(--color-brand-300);
+  box-shadow: var(--shadow-pop);
+}
+.hub-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.hub-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* ---------- Botão de brilho que segue o cursor (GlowButton) ---------- */
+.glow-btn {
+  position: relative;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+}
+.glow-btn[data-block='true'] {
+  display: flex;
+  width: 100%;
+}
+.gb-edge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(100% + 9px);
+  height: calc(100% + 9px);
+  border-radius: 9999px;
+  pointer-events: none;
+  will-change: transform, opacity;
+  transform: translate(-50%, -50%);
+}
+.gb-edge-left {
+  opacity: 0;
+  transform: translate(-50%, -50%) scaleX(-1);
+}
+.gb-edge span {
+  position: absolute;
+  inset: -2px;
+  box-sizing: content-box;
+  border: 2px solid transparent;
+  border-radius: 9999px;
+}
+.gb-edge .gb-e1 {
+  z-index: 20;
+  border-width: 3px;
+  filter: blur(15px);
+  background:
+    linear-gradient(transparent, transparent) padding-box,
+    linear-gradient(91.88deg, rgb(102 217 223 / 0.25) 46%, #1ec1cb 98%) border-box;
+}
+.gb-edge .gb-e2 {
+  z-index: 10;
+  filter: blur(2px);
+  background:
+    linear-gradient(transparent, transparent) padding-box,
+    linear-gradient(97deg, rgb(155 232 236 / 0) 38%, rgb(155 232 236 / 0.3) 82%, #66d9df 93%)
+      border-box;
+}
+.gb-edge .gb-e3 {
+  z-index: 30;
+  filter: blur(7px);
+  background:
+    linear-gradient(transparent, transparent) padding-box,
+    linear-gradient(92deg, rgb(155 232 236 / 0) 6%, rgb(155 232 236 / 0.25) 53%, #3acfd6 93%)
+      border-box;
+}
+.gb-button {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  width: 100%;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 9999px;
+  background: #063f44;
+  padding: 0 2.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+}
+.gb-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.gb-button:focus-visible {
+  outline: 2px solid #3acfd6;
+  outline-offset: 6px;
+}
+.gb-track {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: -10;
+  display: flex;
+  width: 204px;
+  height: 100%;
+  margin-left: -102px;
+  align-items: center;
+  justify-content: center;
+  --light-x: 120px;
+  transform: translateX(var(--light-x)) translateZ(0);
+}
+.gb-core,
+.gb-halo {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.gb-core {
+  width: 121px;
+  height: 121px;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    #ffffff 3.5%,
+    #9be8ec 26.5%,
+    #3acfd6 37.5%,
+    rgb(30 193 203 / 0.5) 49%,
+    rgb(30 193 203 / 0) 92.5%
+  );
+}
+.gb-halo {
+  width: 204px;
+  height: 103px;
+  filter: blur(5px);
+  background: radial-gradient(
+    43% 44% at 50% 49.5%,
+    #f2fcfc 29%,
+    #d9f6f7 48.5%,
+    #9be8ec 60.7%,
+    rgb(155 232 236 / 0) 100%
+  );
+  opacity: 0.7;
+}
+
+/* ---------- Segurar para confirmar (HoldButton) ---------- */
+.hold-btn {
+  --hold-ms: 1600ms;
+  position: relative;
+  display: inline-flex;
+  height: 2.75rem;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 0;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-white) 80%, transparent);
+  padding: 0 1.25rem;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-slate-900);
+  box-shadow:
+    inset 0 0 0 1px var(--color-slate-200),
+    0 8px 20px rgb(4 40 43 / 0.1),
+    0 6px 24px rgb(204 0 0 / 0);
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hold-btn[data-state='holding'],
+.hold-btn[data-state='deleted'] {
+  box-shadow:
+    inset 0 0 0 1px var(--color-slate-200),
+    0 8px 20px rgb(4 40 43 / 0.1),
+    0 6px 24px rgb(204 0 0 / 0.5);
+}
+.hold-btn[data-state='holding'] {
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow var(--hold-ms) linear;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hold-btn[data-state='holding'] {
+    transform: scale(0.97);
+  }
+  .hold-btn[data-state='deleted'] {
+    animation: hold-pulse 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+.hold-btn:focus-visible {
+  outline: 2px solid var(--color-danger);
+  outline-offset: 4px;
+}
+.hold-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.hold-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  white-space: nowrap;
+}
+.hold-fill {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: var(--color-danger);
+  color: #fff;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hold-btn[data-state='holding'] .hold-fill {
+  clip-path: inset(0);
+  transition: clip-path var(--hold-ms) linear;
+}
+.hold-btn[data-state='deleted'] .hold-fill {
+  clip-path: inset(0);
+}
+@keyframes hold-pulse {
+  from {
+    outline: 1px solid rgb(204 0 0 / 0.9);
+    outline-offset: 0;
+  }
+  to {
+    outline: 1px solid rgb(204 0 0 / 0);
+    outline-offset: 12px;
+  }
 }
 
 @keyframes float {
