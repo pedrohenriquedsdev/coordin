@@ -1,100 +1,217 @@
-<h2 class="text-lg font-semibold">Indicadores de precisão</h2>
-<p class="mt-1 text-sm text-slate-600">
-  Demandas concluídas no período, pela data de conclusão. Desvio positivo é atraso.
-</p>
+<app-page-header
+  eyebrow="Análise"
+  title="Indicadores de precisão"
+  description="Demandas concluídas no período, pela data de conclusão. Desvio positivo é atraso."
+/>
 
-<form (submit)="submit($event)" class="mt-4 flex flex-wrap items-end gap-3">
-  <label class="text-sm text-slate-700">
-    Concluídas de
-    <input
-      type="date"
-      [value]="store.from()"
-      (input)="setFrom($event)"
-      class="mt-1 block rounded-md border border-slate-300 px-2 py-1"
-    />
-  </label>
-  <label class="text-sm text-slate-700">
-    até
-    <input
-      type="date"
-      [value]="store.to()"
-      (input)="setTo($event)"
-      class="mt-1 block rounded-md border border-slate-300 px-2 py-1"
-    />
-  </label>
-  <button
-    type="submit"
-    [disabled]="store.load() === 'loading'"
-    class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60"
-  >
-    Ver indicadores
-  </button>
-</form>
+<!-- Período -->
+<section class="card p-5" aria-label="Período dos indicadores">
+  <form (submit)="submit($event)" class="flex flex-wrap items-end gap-4">
+    <label class="text-sm font-semibold text-slate-800">
+      Concluídas de
+      <input
+        type="date"
+        [value]="store.from()"
+        (input)="setFrom($event)"
+        class="field mt-1 font-normal"
+      />
+    </label>
+    <label class="text-sm font-semibold text-slate-800">
+      até
+      <input
+        type="date"
+        [value]="store.to()"
+        (input)="setTo($event)"
+        class="field mt-1 font-normal"
+      />
+    </label>
+    <button
+      type="submit"
+      [disabled]="store.load() === 'loading'"
+      class="btn-primary h-11 rounded-full px-6"
+    >
+      Ver indicadores
+    </button>
+    <div
+      class="flex flex-wrap items-center gap-1.5 sm:ml-auto"
+      role="group"
+      aria-label="Períodos rápidos"
+    >
+      <span class="mr-1 text-xs font-medium text-slate-600">Atalhos:</span>
+      @for (preset of presets; track preset.id) {
+        <button
+          type="button"
+          class="btn-secondary btn-sm rounded-full"
+          [disabled]="store.load() === 'loading'"
+          (click)="usePreset(preset.id)"
+        >
+          {{ preset.label }}
+        </button>
+      }
+    </div>
+  </form>
+</section>
 
 @if (store.message(); as message) {
-  <p role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">{{ message }}</p>
+  <p role="alert" class="card mt-4 border-red-700/50 p-3 text-sm font-semibold text-red-800">
+    {{ message }}
+  </p>
 }
 
 @switch (store.load()) {
+  @case ('idle') {
+    <div class="card mt-4 flex items-center gap-4 p-6 text-sm text-slate-700">
+      <span
+        class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+        ><app-icon name="accuracy"
+      /></span>
+      <p>
+        Escolha o período de conclusão e clique em <strong>Ver indicadores</strong>, ou use um dos
+        atalhos, para comparar o previsto com o realizado.
+      </p>
+    </div>
+  }
   @case ('loading') {
-    <p class="mt-4 text-slate-600">Carregando…</p>
+    <div class="card mt-4 p-6"><app-loader label="Carregando…" /></div>
   }
   @case ('ready') {
     @if (store.response(); as response) {
       @if (response.sector.usedCount === 0) {
-        <p class="mt-4 rounded-md bg-slate-100 p-3 text-sm text-slate-800">
-          Nenhuma demanda concluída no período.
-        </p>
+        <div class="card mt-4 p-8 text-center text-sm text-slate-800">
+          <p>Nenhuma demanda concluída no período.</p>
+        </div>
       } @else {
-        <section aria-labelledby="deviation-chart-title" class="mt-6 space-y-2">
-          <h3 id="deviation-chart-title" class="text-base font-semibold">Desvio de prazo (dias)</h3>
-          <app-chart
-            [configuration]="deviation()"
-            label="Desvio de prazo médio por time e para o setor"
-          />
-        </section>
+        @if (sector(); as total) {
+          <section
+            aria-label="Resumo do setor"
+            class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+          >
+            <div class="card flex items-center gap-3 p-4" [appReveal]="0">
+              <span
+                class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+                ><app-icon name="demands"
+              /></span>
+              <div>
+                <p class="text-2xl leading-none font-extrabold tracking-tight text-slate-900">
+                  {{ total.used }}
+                </p>
+                <p class="mt-1 text-xs font-medium text-slate-600">
+                  {{ total.used === 1 ? 'Demanda concluída' : 'Demandas concluídas' }} no período
+                </p>
+              </div>
+            </div>
+            <div class="card flex items-center gap-3 p-4" [appReveal]="1">
+              <span
+                class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+                ><app-icon name="schedule"
+              /></span>
+              <div>
+                <p class="text-2xl leading-none font-extrabold tracking-tight text-slate-900">
+                  {{ total.baselineText }}
+                </p>
+                <p class="mt-1 text-xs font-medium text-slate-600">
+                  Desvio médio contra a 1ª previsão
+                </p>
+              </div>
+            </div>
+            <div class="card flex items-center gap-3 p-4" [appReveal]="2">
+              <span
+                class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+                ><app-icon name="check"
+              /></span>
+              <div>
+                <p class="text-2xl leading-none font-extrabold tracking-tight text-slate-900">
+                  {{ total.onTimeText }}
+                </p>
+                <p class="mt-1 text-xs font-medium text-slate-600">Entregues no prazo</p>
+              </div>
+            </div>
+            <div class="card flex items-center gap-3 p-4" [appReveal]="3">
+              <span
+                class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+                ><app-icon name="report"
+              /></span>
+              <div>
+                <p class="text-2xl leading-none font-extrabold tracking-tight text-slate-900">
+                  {{ total.estimateText }}
+                </p>
+                <p class="mt-1 text-xs font-medium text-slate-600">Real em relação ao estimado</p>
+              </div>
+            </div>
+          </section>
+        }
 
-        <section aria-labelledby="estimate-chart-title" class="mt-6 space-y-2">
-          <h3 id="estimate-chart-title" class="text-base font-semibold">Estimado × real (%)</h3>
-          <app-chart
-            [configuration]="estimate()"
-            label="Diferença média entre o real e o estimado por time e para o setor"
-          />
-        </section>
+        <div class="mt-5 grid gap-5 xl:grid-cols-2">
+          <section
+            aria-labelledby="deviation-chart-title"
+            class="card min-w-0 space-y-2 p-5"
+            [appReveal]="4"
+          >
+            <h3 id="deviation-chart-title" class="text-base font-bold text-slate-900">
+              Desvio de prazo (dias)
+            </h3>
+            <p class="text-xs text-slate-600">
+              Média por time e para o setor. Acima de zero é atraso.
+            </p>
+            <app-chart
+              [configuration]="deviation()"
+              label="Desvio de prazo médio por time e para o setor"
+            />
+          </section>
+
+          <section
+            aria-labelledby="estimate-chart-title"
+            class="card min-w-0 space-y-2 p-5"
+            [appReveal]="5"
+          >
+            <h3 id="estimate-chart-title" class="text-base font-bold text-slate-900">
+              Estimado × real (%)
+            </h3>
+            <p class="text-xs text-slate-600">
+              Quanto o esforço real passou (ou ficou abaixo) do estimado.
+            </p>
+            <app-chart
+              [configuration]="estimate()"
+              label="Diferença média entre o real e o estimado por time e para o setor"
+            />
+          </section>
+        </div>
 
         <!-- Acima de 640 px, uma tabela; abaixo, um cartão por linha (sem rolagem horizontal). -->
-        <section aria-labelledby="accuracy-table-title" class="mt-6">
-          <h3 id="accuracy-table-title" class="text-base font-semibold">Números</h3>
+        <section aria-labelledby="accuracy-table-title" class="mt-5">
+          <h3 id="accuracy-table-title" class="mb-2 text-base font-bold text-slate-900">Números</h3>
 
-          <div class="mt-2 hidden overflow-x-auto sm:block">
-            <table class="min-w-full text-left text-sm">
-              <thead class="border-b border-slate-200 text-slate-600">
+          <div class="table-scroll hidden sm:block">
+            <table class="min-w-full overflow-hidden rounded-3xl text-left text-sm">
+              <thead>
                 <tr>
-                  <th scope="col" class="py-2 pr-3 font-medium">Setor ou time</th>
-                  <th scope="col" class="py-2 pr-3 font-medium">Demandas</th>
-                  <th scope="col" class="py-2 pr-3 font-medium">Contra a 1ª previsão</th>
-                  <th scope="col" class="py-2 pr-3 font-medium">Contra a previsão da conclusão</th>
-                  <th scope="col" class="py-2 pr-3 font-medium">No prazo</th>
-                  <th scope="col" class="py-2 font-medium">Estimado × real</th>
+                  <th scope="col" class="px-3 py-3">Setor ou time</th>
+                  <th scope="col" class="px-3 py-3">Demandas</th>
+                  <th scope="col" class="px-3 py-3">Contra a 1ª previsão</th>
+                  <th scope="col" class="px-3 py-3">Contra a previsão da conclusão</th>
+                  <th scope="col" class="px-3 py-3">No prazo</th>
+                  <th scope="col" class="px-3 py-3">Estimado × real</th>
                 </tr>
               </thead>
               <tbody>
                 @for (row of store.rows(); track row.label; let index = $index) {
-                  <tr class="border-b border-slate-100">
-                    <th scope="row" class="py-2 pr-3 font-normal text-slate-800">
+                  <tr
+                    class="border-t border-white/40 dark:border-white/10"
+                    [class]="row.isSector ? 'bg-brand-500/10' : ''"
+                  >
+                    <th scope="row" class="px-3 py-3 font-semibold text-slate-900">
                       {{ row.label }}
                       @if (row.isAboveSector) {
-                        <span
-                          class="ml-1 rounded bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-800"
+                        <span class="badge ml-1 bg-red-100 text-red-800 dark:bg-red-400/20"
                           >acima do setor</span
                         >
                       }
                     </th>
-                    <td class="py-2 pr-3">{{ row.used }}</td>
-                    <td class="py-2 pr-3">{{ row.baselineText }}</td>
-                    <td class="py-2 pr-3">{{ row.completionText }}</td>
-                    <td class="py-2 pr-3">{{ row.onTimeText }}</td>
-                    <td class="py-2">
+                    <td class="px-3 py-3">{{ row.used }}</td>
+                    <td class="px-3 py-3">{{ row.baselineText }}</td>
+                    <td class="px-3 py-3">{{ row.completionText }}</td>
+                    <td class="px-3 py-3">{{ row.onTimeText }}</td>
+                    <td class="px-3 py-3">
                       {{ row.estimateText }}
                       @for (note of notesOf(index); track note) {
                         <span class="block text-xs text-slate-600">{{ note }}</span>
@@ -106,28 +223,27 @@
             </table>
           </div>
 
-          <ul class="mt-2 space-y-2 sm:hidden">
+          <ul class="space-y-3 sm:hidden">
             @for (row of store.rows(); track row.label; let index = $index) {
-              <li class="rounded-md border border-slate-200 bg-white p-3 text-sm">
-                <p class="font-medium text-slate-900">
+              <li class="card p-4 text-sm">
+                <p class="font-bold text-slate-900">
                   {{ row.label }}
                   @if (row.isAboveSector) {
-                    <span
-                      class="ml-1 rounded bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-800"
+                    <span class="badge ml-1 bg-red-100 text-red-800 dark:bg-red-400/20"
                       >acima do setor</span
                     >
                   }
                 </p>
                 <dl class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1">
-                  <dt class="text-slate-500">Demandas</dt>
+                  <dt class="text-slate-600">Demandas</dt>
                   <dd>{{ row.used }}</dd>
-                  <dt class="text-slate-500">Contra a 1ª previsão</dt>
+                  <dt class="text-slate-600">Contra a 1ª previsão</dt>
                   <dd>{{ row.baselineText }}</dd>
-                  <dt class="text-slate-500">Contra a previsão da conclusão</dt>
+                  <dt class="text-slate-600">Contra a previsão da conclusão</dt>
                   <dd>{{ row.completionText }}</dd>
-                  <dt class="text-slate-500">No prazo</dt>
+                  <dt class="text-slate-600">No prazo</dt>
                   <dd>{{ row.onTimeText }}</dd>
-                  <dt class="text-slate-500">Estimado × real</dt>
+                  <dt class="text-slate-600">Estimado × real</dt>
                   <dd>{{ row.estimateText }}</dd>
                 </dl>
                 @for (note of notesOf(index); track note) {
@@ -141,6 +257,8 @@
     }
   }
   @case ('failed') {
-    <p class="mt-4 text-sm text-slate-600">Tente de novo com outro período ou mais tarde.</p>
+    <div class="card mt-4 p-5 text-sm text-slate-700">
+      <p>Tente de novo com outro período ou mais tarde.</p>
+    </div>
   }
 }

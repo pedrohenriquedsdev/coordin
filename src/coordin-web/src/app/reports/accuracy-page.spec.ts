@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideApiConfiguration } from '../api/api-configuration';
 import { CHART_FACTORY } from '../charts/chart.component';
 import { createFakeChartFactory } from '../charts/chart-test-double';
+import { addDays, Clock } from '../core/dates/calendar-date';
 import { AccuracyPage } from './accuracy-page';
 import { AccuracyStore } from './accuracy.store';
 
@@ -148,5 +149,49 @@ describe('AccuracyPage', () => {
 
     expect(text()).toContain('Tente de novo com outro período ou mais tarde.');
     expect(storeOf().from()).toBe('2027-01-01');
+  });
+
+  it('asks the manager to choose a period before any search', () => {
+    expect(text()).toContain('Escolha o período de conclusão');
+    http.expectNone((request) => request.url.includes('/api/reports/accuracy'));
+  });
+
+  it('searches the last 30 days from today when the shortcut is used', () => {
+    const today = TestBed.inject(Clock).today();
+    [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')]
+      .find((b) => b.textContent?.trim() === 'Últimos 30 dias')
+      ?.click();
+    fixture.detectChanges();
+
+    http
+      .expectOne(
+        (request) =>
+          request.url === '/api/reports/accuracy' &&
+          request.params.get('to') === today &&
+          request.params.get('from') === addDays(today, -30),
+      )
+      .flush({ from: '', to: '', sector: indicators(0), teams: [] });
+  });
+
+  it('summarizes the sector on top: how many were completed and how many were on time', () => {
+    storeOf().from.set('2027-01-01');
+    storeOf().to.set('2027-01-31');
+    submit();
+    http
+      .expectOne((request) => request.url === '/api/reports/accuracy')
+      .flush({
+        from: '2027-01-01',
+        to: '2027-01-31',
+        sector: indicators(3),
+        teams: [],
+      });
+    fixture.detectChanges();
+
+    const summary =
+      (fixture.nativeElement as HTMLElement).querySelector('[aria-label="Resumo do setor"]')
+        ?.textContent ?? '';
+    expect(summary).toContain('3');
+    expect(summary).toContain('Demandas concluídas no período');
+    expect(summary).toContain('66,7%');
   });
 });
