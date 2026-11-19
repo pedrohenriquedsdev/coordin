@@ -1,25 +1,108 @@
-<!-- Autenticado: menu lateral no computador, barra no topo com menu recolhível no celular. -->
+<!-- Autenticado: barra de navegação no topo (vidro), para as telas aproveitarem toda a largura. -->
 @if (session.isAuthenticated()) {
-  <div class="min-h-screen lg:grid lg:grid-cols-[16rem_1fr]">
+  <div class="app-shell min-h-screen">
     <header
-      class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur-md lg:h-screen lg:border-r lg:border-b-0"
+      class="sticky top-0 z-30 border-b border-white/50 before:absolute before:inset-0 before:-z-10 before:bg-white/25 before:backdrop-blur-2xl before:backdrop-saturate-150 dark:border-white/10 dark:before:bg-black/30"
     >
-      <div class="flex h-full flex-col">
-        <div class="flex items-center justify-between gap-3 px-4 py-3 lg:px-6 lg:py-6">
-          <h1 class="flex items-center gap-2.5 text-xl font-bold tracking-tight text-black">
-            <span
-              class="relative grid h-9 w-9 place-items-center bg-black text-base font-bold text-white"
-              aria-hidden="true"
-            >
-              C
-              <span class="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-magenta"></span>
-            </span>
+      <div
+        class="mx-auto flex w-full max-w-[120rem] flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 sm:px-6 lg:px-8"
+      >
+        <h1 class="text-xl font-semibold tracking-tight text-slate-900">
+          <a
+            routerLink="/inicio"
+            class="flex items-center gap-2.5"
+            aria-label="Coordin, ir ao início"
+          >
+            <img src="login/logo.png" alt="" width="512" height="568" class="h-9 w-auto" />
             Coordin
-          </h1>
+          </a>
+        </h1>
 
+        <!-- No computador: três listas suspensas. No celular: painel recolhível sob a barra. -->
+        <nav
+          id="main-nav"
+          aria-label="Principal"
+          class="order-last w-full flex-col gap-4 pt-2 lg:order-none lg:ml-6 lg:flex lg:w-auto lg:flex-row lg:items-center lg:gap-1 lg:pt-0"
+          [class.hidden]="!menuOpen()"
+          [class.flex]="menuOpen()"
+        >
+          <a
+            routerLink="/inicio"
+            routerLinkActive="border-brand-200 bg-brand-50/80 !text-brand-700"
+            ariaCurrentWhenActive="page"
+            (click)="closeMenu()"
+            class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-white/60 lg:px-3.5 lg:py-2 dark:hover:bg-white/10"
+          >
+            <app-icon name="home" />
+            Início
+          </a>
+          @for (group of groups(); track group.title) {
+            <div data-nav-group class="relative">
+              <p class="px-1 pb-1 text-sm font-medium text-slate-500 lg:hidden">
+                {{ group.title }}
+              </p>
+              <button
+                type="button"
+                class="hidden items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors hover:bg-white/60 lg:inline-flex dark:hover:bg-white/10"
+                [class]="isGroupActive(group) ? 'bg-brand-50/80 text-brand-700' : 'text-slate-700'"
+                [attr.aria-expanded]="openGroup() === group.title"
+                (click)="toggleGroup(group.title)"
+              >
+                {{ group.title }}
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="h-4 w-4 transition-transform"
+                  [class.rotate-180]="openGroup() === group.title"
+                  aria-hidden="true"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+
+              <div
+                class="flex flex-col gap-1 lg:absolute lg:top-full lg:left-0 lg:z-40 lg:mt-2 lg:w-60 lg:rounded-2xl lg:border lg:border-white/70 lg:bg-white/35 lg:backdrop-saturate-150 dark:lg:bg-[#0a1517]/55 lg:p-2 lg:shadow-pop lg:backdrop-blur-3xl dark:lg:border-white/10"
+                [class]="openGroup() === group.title ? '' : 'lg:hidden'"
+              >
+                @for (item of group.items; track item.path) {
+                  <a
+                    [routerLink]="item.path"
+                    [routerLinkActiveOptions]="{ exact: item.exact }"
+                    routerLinkActive="border-brand-200 bg-brand-50/80 !text-brand-700"
+                    ariaCurrentWhenActive="page"
+                    (click)="closeMenu()"
+                    class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-white/60 dark:hover:bg-white/10"
+                  >
+                    <app-icon [name]="item.icon" />
+                    {{ item.label }}
+                  </a>
+                }
+              </div>
+            </div>
+          }
+        </nav>
+
+        <div class="ml-auto flex items-center gap-2">
           <button
             type="button"
-            class="btn-secondary px-2.5 py-2 lg:hidden"
+            class="btn-secondary h-10 w-10 !p-0"
+            [attr.title]="theme.isDark() ? 'Tema claro' : 'Tema escuro'"
+            (click)="theme.toggle()"
+          >
+            <app-icon [name]="theme.isDark() ? 'sun' : 'moon'" />
+            <span class="sr-only">{{ theme.isDark() ? 'Tema claro' : 'Tema escuro' }}</span>
+          </button>
+          <button type="button" (click)="signOut()" class="btn-secondary h-10 !px-3">
+            <app-icon name="logout" />
+            <span class="sr-only sm:not-sr-only">Sair</span>
+          </button>
+          <button
+            type="button"
+            class="btn-secondary h-10 w-10 !p-0 lg:hidden"
             [attr.aria-expanded]="menuOpen()"
             aria-controls="main-nav"
             (click)="toggleMenu()"
@@ -28,50 +111,10 @@
             <span class="sr-only">{{ menuOpen() ? 'Fechar menu' : 'Abrir menu' }}</span>
           </button>
         </div>
-
-        <!-- Em telas pequenas o menu abre sob a barra; no computador está sempre visível. -->
-        <div
-          id="main-nav"
-          class="flex-1 flex-col overflow-y-auto px-3 pb-4 lg:flex"
-          [class.hidden]="!menuOpen()"
-          [class.flex]="menuOpen()"
-        >
-          <nav aria-label="Principal" class="flex flex-1 flex-col gap-6">
-            @for (group of groups(); track group.title) {
-              <div>
-                <p
-                  class="px-3 pb-1.5 text-[0.68rem] font-semibold tracking-widest text-slate-400 uppercase"
-                >
-                  {{ group.title }}
-                </p>
-                <div class="flex flex-col gap-0.5">
-                  @for (item of group.items; track item.path) {
-                    <a
-                      [routerLink]="item.path"
-                      [routerLinkActiveOptions]="{ exact: item.exact }"
-                      routerLinkActive="bg-brand-50 text-brand-700 shadow-[inset_3px_0_0_0_var(--color-violet)]"
-                      ariaCurrentWhenActive="page"
-                      (click)="closeMenu()"
-                      class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-black"
-                    >
-                      <app-icon [name]="item.icon" />
-                      {{ item.label }}
-                    </a>
-                  }
-                </div>
-              </div>
-            }
-          </nav>
-
-          <button type="button" (click)="signOut()" class="btn-secondary mt-6 w-full">
-            <app-icon name="logout" />
-            Sair
-          </button>
-        </div>
       </div>
     </header>
 
-    <main class="mx-auto w-full max-w-6xl min-w-0 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+    <main class="mx-auto w-full max-w-[120rem] min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <router-outlet />
     </main>
   </div>

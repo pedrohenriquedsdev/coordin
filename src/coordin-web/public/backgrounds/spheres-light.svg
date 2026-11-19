@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="s0" cx="34%" cy="30%" r="75%">
+  <stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#7ff0f4"/><stop offset="1" stop-color="#1ec1cb"/></radialGradient>
+<filter id="b0" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="10"/></filter><radialGradient id="s1" cx="34%" cy="30%" r="75%">
+  <stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#bdf3f6"/><stop offset="1" stop-color="#4fd2da"/></radialGradient>
+<filter id="b1" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter><radialGradient id="s2" cx="34%" cy="30%" r="75%">
+  <stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#9cc9ff"/><stop offset="1" stop-color="#2f8cff"/></radialGradient>
+<filter id="b2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="18"/></filter><radialGradient id="s3" cx="34%" cy="30%" r="75%">
+  <stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#9bf0f4"/><stop offset="1" stop-color="#1ec1cb"/></radialGradient>
+<filter id="b3" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="6"/></filter><radialGradient id="s4" cx="34%" cy="30%" r="75%">
+  <stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#a9d1ff"/><stop offset="1" stop-color="#4aa0ff"/></radialGradient>
+<filter id="b4" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="22"/></filter></defs><rect width="1920" height="1080" fill="#e6f6f8"/><circle cx="1560" cy="120" r="430" fill="url(#s0)" opacity="0.95" filter="url(#b0)"/><circle cx="260" cy="980" r="520" fill="url(#s1)" opacity="0.95" filter="url(#b1)"/><circle cx="980" cy="1180" r="380" fill="url(#s2)" opacity="0.9" filter="url(#b2)"/><circle cx="1750" cy="860" r="240" fill="url(#s3)" opacity="0.95" filter="url(#b3)"/><circle cx="120" cy="160" r="200" fill="url(#s4)" opacity="0.8" filter="url(#b4)"/><rect width="1920" height="1080" fill="rgba(255,255,255,.35)"/></svg>
