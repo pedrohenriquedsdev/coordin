@@ -109,3 +109,62 @@ export function formatShortCalendarDate(value: string): string {
   const match = CALENDAR_DATE.exec(value);
   return match ? `${match[3]}/${match[2]}` : value;
 }
+
+/** Quantos dias corridos há de `from` até `to` (negativo se `to` for anterior). */
+export function daysBetween(from: string, to: string): number {
+  return Math.round((fromCalendar(to).getTime() - fromCalendar(from).getTime()) / DAY_MS);
+}
+
+/** O primeiro dia do mês de uma data de calendário. */
+export function startOfMonth(value: string): string {
+  const date = fromCalendar(value);
+  return toCalendar(new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)));
+}
+
+/** O primeiro dia do mês que fica `months` meses depois (ou antes, se negativo) do mês da data. */
+export function addMonths(value: string, months: number): string {
+  const date = fromCalendar(value);
+  return toCalendar(new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1)));
+}
+
+/** As 42 datas (6 semanas, de segunda a domingo) que desenham o mês de uma data em um calendário. */
+export function monthGrid(value: string): string[] {
+  const first = mondayOf(startOfMonth(value));
+  return Array.from({ length: 42 }, (_, index) => addDays(first, index));
+}
+
+export const MONTH_NAMES = [
+  'janeiro',
+  'fevereiro',
+  'março',
+  'abril',
+  'maio',
+  'junho',
+  'julho',
+  'agosto',
+  'setembro',
+  'outubro',
+  'novembro',
+  'dezembro',
+] as const;
+
+export const WEEKDAY_SHORT = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'] as const;
+
+/** `2026-12-01` → `dezembro de 2026`. */
+export function formatMonth(value: string): string {
+  const match = CALENDAR_DATE.exec(value);
+  return match ? `${MONTH_NAMES[Number(match[2]) - 1]} de ${match[1]}` : value;
+}
+
+/** `2026-12-25` → `25 de dezembro de 2026`. */
+export function formatLongCalendarDate(value: string): string {
+  const match = CALENDAR_DATE.exec(value);
+  return match
+    ? `${Number(match[3])} de ${MONTH_NAMES[Number(match[2]) - 1]} de ${match[1]}`
+    : value;
+}
+
+/** O mesmo mês (`aaaa-mm`) para duas datas? */
+export function isSameMonth(a: string, b: string): boolean {
+  return a.slice(0, 7) === b.slice(0, 7);
+}

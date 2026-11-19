@@ -58,7 +58,7 @@ describe('guards', () => {
     it('sends an authenticated manager to the home page', () => {
       authenticated.set(true);
 
-      expect(serialize(run(unknownPageGuard, '/nao-existe'))).toBe('/');
+      expect(serialize(run(unknownPageGuard, '/nao-existe'))).toBe('/inicio');
     });
   });
 
@@ -70,7 +70,7 @@ describe('guards', () => {
     it('sends an authenticated manager away from the login page', () => {
       authenticated.set(true);
 
-      expect(serialize(run(guestGuard, '/login'))).toBe('/');
+      expect(serialize(run(guestGuard, '/login'))).toBe('/inicio');
     });
   });
 });

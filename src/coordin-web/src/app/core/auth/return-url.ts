@@ -1,3 +1,6 @@
+/** A página inicial do gestor depois de entrar. */
+export const HOME_URL = '/inicio';
+
 /**
  * Destino a abrir depois do login, a partir do parâmetro `returnUrl` da URL (que qualquer pessoa pode
  * forjar). Só aceita um caminho interno da própria aplicação; qualquer outra coisa vira a página inicial.
@@ -7,7 +10,7 @@
  */
 export function safeReturnUrl(candidate: unknown): string {
   if (typeof candidate !== 'string') {
-    return '/';
+    return HOME_URL;
   }
 
   const isInternalPath =
@@ -18,5 +21,5 @@ export function safeReturnUrl(candidate: unknown): string {
     // eslint-disable-next-line no-control-regex -- barra caracteres de controle em um destino
     !/[\u0000-\u001f]/.test(candidate);
 
-  return isInternalPath ? candidate : '/';
+  return isInternalPath ? candidate : HOME_URL;
 }

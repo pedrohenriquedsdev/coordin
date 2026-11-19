@@ -91,3 +91,31 @@ describe('calendar dates', () => {
     });
   });
 });
+
+describe('month helpers', () => {
+  it('builds a 42-day grid that starts on a Monday and covers the month', async () => {
+    const { monthGrid } = await import('./calendar-date');
+    const grid = monthGrid('2026-12-15');
+
+    expect(grid).toHaveLength(42);
+    expect(grid[0]).toBe('2026-11-30'); // segunda-feira
+    expect(grid).toContain('2026-12-01');
+    expect(grid).toContain('2026-12-31');
+  });
+
+  it('moves between months, including the year change', async () => {
+    const { addMonths, startOfMonth, daysBetween } = await import('./calendar-date');
+
+    expect(startOfMonth('2026-12-15')).toBe('2026-12-01');
+    expect(addMonths('2026-12-15', 1)).toBe('2027-01-01');
+    expect(addMonths('2026-01-31', -1)).toBe('2025-12-01');
+    expect(daysBetween('2026-12-01', '2026-12-11')).toBe(10);
+  });
+
+  it('writes the month and the long date in Portuguese', async () => {
+    const { formatMonth, formatLongCalendarDate } = await import('./calendar-date');
+
+    expect(formatMonth('2026-12-01')).toBe('dezembro de 2026');
+    expect(formatLongCalendarDate('2026-03-05')).toBe('5 de março de 2026');
+  });
+});

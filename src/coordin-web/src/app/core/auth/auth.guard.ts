@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { HOME_URL } from './return-url';
 import { SessionService } from './session.service';
 
 /**
@@ -16,7 +17,7 @@ export const authGuard: CanActivateFn = (_route, state) => {
 
   return router.createUrlTree(
     ['/login'],
-    state.url === '/' ? {} : { queryParams: { returnUrl: state.url } },
+    state.url === '/' || state.url === HOME_URL ? {} : { queryParams: { returnUrl: state.url } },
   );
 };
 
@@ -28,7 +29,7 @@ export const authGuard: CanActivateFn = (_route, state) => {
 export const unknownPageGuard: CanActivateFn = (route, state) => {
   const result = authGuard(route, state);
 
-  return result === true ? inject(Router).createUrlTree(['/']) : result;
+  return result === true ? inject(Router).createUrlTree([HOME_URL]) : result;
 };
 
 /** Guarda inversa de `/login`: quem já tem sessão não precisa ver a tela de login. */
@@ -36,5 +37,5 @@ export const guestGuard: CanActivateFn = () => {
   const session = inject(SessionService);
   const router = inject(Router);
 
-  return session.isAuthenticated() ? router.createUrlTree(['/']) : true;
+  return session.isAuthenticated() ? router.createUrlTree([HOME_URL]) : true;
 };
