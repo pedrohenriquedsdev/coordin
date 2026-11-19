@@ -3,6 +3,11 @@ import { Component, effect, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { messageFor } from '../core/problems/messages';
+import { HoldButton } from '../core/ui/hold-button';
+import { Reveal } from '../core/ui/hub-motion';
+import { Icon } from '../core/ui/icon';
+import { Loader } from '../core/ui/loader';
+import { PageHeader } from '../core/ui/page-header';
 import { readProblem } from '../core/problems/problem';
 import { PeopleSection } from './people-section';
 import { TeamsStore } from './teams.store';
@@ -15,7 +20,16 @@ function peopleLabel(count: number): string {
 /** Tela "Times e pessoas" (protótipo T07; RF-01, RF-02): lista de times à esquerda, o time escolhido à direita. */
 @Component({
   selector: 'app-teams-page',
-  imports: [ReactiveFormsModule, DecimalPipe, PeopleSection],
+  imports: [
+    ReactiveFormsModule,
+    DecimalPipe,
+    PeopleSection,
+    PageHeader,
+    Icon,
+    Loader,
+    HoldButton,
+    Reveal,
+  ],
   providers: [TeamsStore],
   templateUrl: './teams-page.html',
 })

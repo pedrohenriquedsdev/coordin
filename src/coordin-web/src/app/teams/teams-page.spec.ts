@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -100,6 +101,19 @@ describe('TeamsPage', () => {
 
   const click = async (label: string) => {
     button(label).click();
+    await settle();
+  };
+
+  /** A confirmação de exclusão é segurar o botão pelo tempo todo (1,6 s). */
+  const hold = async () => {
+    const hold = root.querySelector<HTMLButtonElement>('.hold-btn');
+    vi.useFakeTimers();
+    try {
+      hold?.dispatchEvent(new PointerEvent('pointerdown', { button: 0 }));
+      vi.advanceTimersByTime(1700);
+    } finally {
+      vi.useRealTimers();
+    }
     await settle();
   };
 
@@ -268,7 +282,7 @@ describe('TeamsPage', () => {
       await click('Excluir time');
       expect(text()).toContain('Excluir o time “Web”?');
       http.expectNone((req) => req.method === 'DELETE'); // ainda não: falta confirmar
-      await click('Confirmar exclusão');
+      await hold();
 
       request('DELETE', '/api/teams/t2').flush(null, { status: 204, statusText: 'No Content' });
       await answerReload([TEAMS[0]]);
@@ -284,7 +298,7 @@ describe('TeamsPage', () => {
       await settle();
       await click('Excluir time');
 
-      await click('Confirmar exclusão');
+      await hold();
       request('DELETE', '/api/teams/t2').flush(
         { code: 'team-has-people', detail: 'Não é possível excluir um time que tem pessoas.' },
         { status: 409, statusText: 'Conflict' },
@@ -448,6 +462,27 @@ describe('TeamsPage', () => {
       expect(root.querySelector<HTMLInputElement>('#person-name')?.value).toBe('');
     });
 
+    it('does not delete a person when the hold button is released early', async () => {
+      await open();
+
+      root.querySelector<HTMLButtonElement>('button[aria-label="Excluir Ana"]')!.click();
+      await settle();
+      const holdButton = root.querySelector<HTMLButtonElement>('.hold-btn');
+      vi.useFakeTimers();
+      try {
+        holdButton?.dispatchEvent(new PointerEvent('pointerdown', { button: 0 }));
+        vi.advanceTimersByTime(700);
+        holdButton?.dispatchEvent(new PointerEvent('pointerup'));
+        vi.advanceTimersByTime(2000);
+      } finally {
+        vi.useRealTimers();
+      }
+      await settle();
+
+      http.expectNone((req) => req.method === 'DELETE');
+      expect(text()).toContain('Ana');
+    });
+
     it('deletes a person only after the manager confirms', async () => {
       await open();
 
@@ -455,7 +490,7 @@ describe('TeamsPage', () => {
       await settle();
       expect(text()).toContain('Excluir Ana?');
       http.expectNone((req) => req.method === 'DELETE');
-      await click('Confirmar');
+      await hold();
 
       request('DELETE', '/api/people/p1').flush(null, { status: 204, statusText: 'No Content' });
       await answerReload(
