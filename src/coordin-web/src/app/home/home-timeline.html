@@ -32,12 +32,12 @@
           >
             <span
               class="h-full"
-              [class]="row.late ? 'bg-red-700' : 'bg-brand-600'"
+              [class]="row.late ? 'bg-red-700' : 'bg-linear-to-r from-brand-500 to-azure-500'"
               [style.width.%]="(row.workPct / (row.workPct + row.marginPct)) * 100"
             ></span>
             <span
               class="h-full flex-1"
-              [class]="row.late ? 'bg-red-700/40' : 'bg-brand-300'"
+              [class]="row.late ? 'bg-red-700/40' : 'bg-azure-300'"
             ></span>
           </span>
         </div>
@@ -48,10 +48,11 @@
     <span>{{ timeline().fromLabel }}</span>
     <ul class="flex flex-wrap gap-x-4 gap-y-1" aria-label="Legenda">
       <li class="flex items-center gap-1.5">
-        <span class="h-2 w-4 rounded-sm bg-brand-600"></span>Trabalho previsto
+        <span class="h-2 w-4 rounded-sm bg-linear-to-r from-brand-500 to-azure-500"></span>Trabalho
+        previsto
       </li>
       <li class="flex items-center gap-1.5">
-        <span class="h-2 w-4 rounded-sm bg-brand-300"></span>Margem de segurança
+        <span class="h-2 w-4 rounded-sm bg-azure-300"></span>Margem de segurança
       </li>
       @if (timeline().todayPct !== null) {
         <li class="flex items-center gap-1.5"><span class="h-3 w-px bg-brand-600"></span>Hoje</li>

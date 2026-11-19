@@ -85,7 +85,7 @@ describe('HomePage', () => {
     ]);
 
     expect(text()).toContain('20/12/2026');
-    expect(text()).toContain('3 ativas · 1 concluídas');
+    expect(text()).toContain('3 ativas · 1 concluída');
     expect(text()).toContain('Faltam dados para prever');
     expect(text()).toContain('A previsão passa do prazo desejado');
   });
@@ -93,9 +93,9 @@ describe('HomePage', () => {
   it('shows team, holiday and margin numbers on the shortcuts', () => {
     answer([item()]);
 
-    expect(text()).toContain('2 times · 5 pessoas');
+    expect(text()).toContain('5 pessoas em 2 times');
     expect(text()).toContain('1 feriado');
-    expect(text()).toContain('Margem de 20%');
+    expect(text()).toContain('de margem de segurança');
   });
 
   it('links every area of the system', () => {
@@ -126,6 +126,6 @@ describe('HomePage', () => {
     fixture.detectChanges();
 
     expect(text()).toContain('indisponível');
-    expect(text()).toContain('0 times · 0 pessoas');
+    expect(text()).toContain('0 pessoas em 0 times');
   });
 });

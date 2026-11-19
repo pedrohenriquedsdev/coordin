@@ -18,9 +18,24 @@ interface Shortcut {
   readonly icon: IconName;
   readonly title: string;
   readonly text: string;
-  /** O número vivo do cartão; `null` quando o atalho não tem um. */
-  readonly metric: string | null;
+  /** O número em destaque do cartão (`null` quando a área não tem um número vivo). */
+  readonly stat: string | null;
+  readonly statLabel: string | null;
+  /** Qual par de cores de destaque (índice em `ACCENTS`). */
+  readonly accent: number;
+  /** Ocupa duas colunas nas telas largas. */
+  readonly wide: boolean;
+  /** Um mini-gráfico decorativo (sempre acompanhado do número e do texto do cartão). */
+  readonly visual: 'bars' | 'progress' | 'occupancy' | null;
 }
+
+/** Pares de cores dos cartões (ciano e azul do sistema). */
+const ACCENTS: readonly (readonly [string, string])[] = [
+  ['#1ec1cb', '#2f8cff'],
+  ['#66d9df', '#1ec1cb'],
+  ['#4aa8ff', '#1d6fe0'],
+  ['#1ec1cb', '#0d8a93'],
+];
 
 interface Indicator {
   readonly label: string;
@@ -99,69 +114,117 @@ export class HomePage {
     ];
   });
 
+  protected readonly accents = ACCENTS;
+
   protected readonly shortcuts = computed<readonly Shortcut[]>(() => {
     const active = this.store.activeCount();
     const done = this.store.completedCount();
     const teams = this.store.teams();
+    const holidays = this.store.holidays();
+    const margin = this.store.margin();
+    const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+
     const list: Shortcut[] = [
       {
         path: '/',
         icon: 'schedule',
         title: 'Cronograma',
-        text: 'Datas de entrega, com e sem margem.',
-        metric: active === null ? null : `${active} em andamento`,
+        text: 'Datas de entrega de cada demanda, com e sem margem de segurança.',
+        stat: active === null ? null : String(active),
+        statLabel:
+          active === null ? null : plural(active, 'demanda em andamento', 'demandas em andamento'),
+        accent: 0,
+        wide: true,
+        visual: 'bars',
       },
       {
         path: '/demands',
         icon: 'demands',
         title: 'Demandas',
-        text: 'Cadastre, priorize e conclua demandas.',
-        metric: active === null || done === null ? null : `${active} ativas · ${done} concluídas`,
+        text: 'Cadastre, priorize na fila e conclua demandas.',
+        stat: active === null ? null : String(active),
+        statLabel:
+          active === null || done === null
+            ? null
+            : `${plural(active, 'ativa', 'ativas')} · ${done} ${plural(done, 'concluída', 'concluídas')}`,
+        accent: 3,
+        wide: true,
+        visual: 'progress',
       },
       {
         path: '/scenarios',
         icon: 'scenarios',
         title: 'Cenários',
-        text: 'Compare ordens de execução e decida.',
-        metric: null,
+        text: 'Compare ordens de execução e aprove só o que fizer sentido.',
+        stat: null,
+        statLabel: null,
+        accent: 2,
+        wide: false,
+        visual: null,
       },
       {
         path: '/reports/teams',
         icon: 'report',
         title: 'Relatório por time',
         text: 'Ocupação, ociosidade e sobrecarga por semana.',
-        metric: teams.state === 'ready' ? `${teams.value.teams} times` : null,
+        stat: teams.state === 'ready' ? String(teams.value.teams) : null,
+        statLabel: teams.state === 'ready' ? plural(teams.value.teams, 'time', 'times') : null,
+        accent: 1,
+        wide: false,
+        visual: 'occupancy',
       },
       {
         path: '/reports/accuracy',
         icon: 'accuracy',
         title: 'Precisão',
         text: 'Previsto × realizado nas demandas concluídas.',
-        metric: null,
+        stat: null,
+        statLabel: null,
+        accent: 0,
+        wide: false,
+        visual: null,
       },
       {
         path: '/teams',
         icon: 'teams',
         title: 'Times e pessoas',
-        text: 'Times, pessoas e capacidade diária.',
-        metric:
+        text: 'Times, pessoas e a capacidade diária de cada um.',
+        stat: teams.state === 'ready' ? String(teams.value.people) : null,
+        statLabel:
           teams.state === 'ready'
-            ? `${teams.value.teams} times · ${teams.value.people} pessoas`
+            ? `${plural(teams.value.people, 'pessoa', 'pessoas')} em ${teams.value.teams} ${plural(teams.value.teams, 'time', 'times')}`
             : null,
+        accent: 2,
+        wide: false,
+        visual: null,
       },
       {
         path: '/calendar',
         icon: 'calendar',
         title: 'Calendário',
         text: 'Feriados do setor e ausências das pessoas.',
-        metric: this.holidayMetric(),
+        stat: holidays.state === 'ready' ? String(holidays.value.length) : null,
+        statLabel:
+          holidays.state === 'ready'
+            ? plural(holidays.value.length, 'feriado cadastrado', 'feriados cadastrados')
+            : null,
+        accent: 1,
+        wide: true,
+        visual: null,
       },
       {
         path: '/settings',
         icon: 'settings',
         title: 'Configurações',
-        text: 'Margem de segurança das previsões.',
-        metric: this.marginMetric(),
+        text: 'A margem de segurança aplicada às previsões.',
+        stat:
+          margin.state === 'ready'
+            ? `${margin.value.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`
+            : null,
+        statLabel: margin.state === 'ready' ? 'de margem de segurança' : null,
+        accent: 3,
+        wide: true,
+        visual: null,
       },
     ];
 
@@ -171,11 +234,30 @@ export class HomePage {
         icon: 'validation',
         title: 'Validação',
         text: 'Simule e compare o planejamento atual com o Coordin.',
-        metric: null,
+        stat: null,
+        statLabel: null,
+        accent: 0,
+        wide: false,
+        visual: null,
       });
     }
 
     return list;
+  });
+
+  /** Barras do mini-gráfico do cronograma: entregas por semana, de 0 a 100% da maior. */
+  protected readonly miniBars = computed(() => {
+    const d = this.deliveries();
+    const totals = d.onTime.map((count, index) => count + d.late[index]);
+    const max = Math.max(...totals, 1);
+    return totals.map((total) => Math.max((total / max) * 100, total > 0 ? 18 : 6));
+  });
+
+  /** Fatia das demandas ativas no total (ativas + concluídas), para a barra segmentada. */
+  protected readonly activeShare = computed(() => {
+    const active = this.store.activeCount() ?? 0;
+    const done = this.store.completedCount() ?? 0;
+    return active + done === 0 ? 0 : (active / (active + done)) * 100;
   });
 
   protected readonly today = this.store.today;
@@ -262,21 +344,5 @@ export class HomePage {
 
   private unavailable(): string {
     return this.store.schedule().state === 'loading' ? '…' : 'indisponível';
-  }
-
-  private holidayMetric(): string | null {
-    const holidays = this.store.holidays();
-    if (holidays.state !== 'ready') {
-      return null;
-    }
-    const count = holidays.value.length;
-    return count === 1 ? '1 feriado' : `${count} feriados`;
-  }
-
-  private marginMetric(): string | null {
-    const margin = this.store.margin();
-    return margin.state === 'ready'
-      ? `Margem de ${margin.value.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`
-      : null;
   }
 }

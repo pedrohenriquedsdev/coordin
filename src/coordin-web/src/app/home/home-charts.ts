@@ -11,7 +11,8 @@ export const LIGHT_CHART: ChartTheme = { text: '#3f5a5e', grid: 'rgba(63, 90, 94
 export const DARK_CHART: ChartTheme = { text: '#b3cacd', grid: 'rgba(179, 202, 205, 0.16)' };
 
 const BLUE = '#1ec1cb';
-const BLUE_SOFT = 'rgba(30, 193, 203, 0.28)';
+const BLUE_SOFT = 'rgba(47, 140, 255, 0.3)';
+const AZURE = '#2f8cff';
 const RED = '#cc0000';
 
 function baseOptions(theme: ChartTheme, yTitle: string): ChartConfiguration<'bar'>['options'] {
@@ -77,7 +78,7 @@ export function buildDeliveriesChart(
         {
           label: 'Dentro do prazo',
           data: series.onTime,
-          backgroundColor: '#1ec1cb',
+          backgroundColor: AZURE,
           borderRadius: 6,
           stack: 'deliveries',
         },
