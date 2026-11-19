@@ -111,4 +111,91 @@ describe('DemandHistoryPage', () => {
     expect(text()).toContain('Nenhuma alteração de estimativa registrada.');
     expect(text()).toContain('Nenhuma previsão registrada ainda.');
   });
+
+  describe('timeline and summary', () => {
+    const estimate = (hours: number, changedAt: string) => ({
+      teamId: 'a',
+      teamName: 'Alfa',
+      previousHours: 10,
+      newHours: hours,
+      reason: null,
+      changedAt,
+    });
+    const forecast = (changedAt: string) => ({
+      previousEndDate: '2027-03-10',
+      newEndDate: '2027-03-17',
+      cause: 'Capacity',
+      changedAt,
+    });
+    const click = (label: string) =>
+      [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')]
+        .find((b) => b.textContent?.trim() === label)
+        ?.click();
+
+    it('mixes both kinds in one list, newest first, and filters by kind', () => {
+      answer(
+        { id: 'demand-1', title: 'Alterar escopo' },
+        [estimate(20, '2027-03-01T12:00:00Z')],
+        [forecast('2027-03-02T12:00:00Z')],
+      );
+
+      const titles = () =>
+        [
+          ...(fixture.nativeElement as HTMLElement).querySelectorAll(
+            'ol[aria-label="Eventos da demanda"] li',
+          ),
+        ].map((li) => li.querySelector('p')?.textContent?.trim());
+      expect(titles()).toEqual(['Previsão atualizada', 'Estimativa alterada']);
+
+      click('Estimativas');
+      fixture.detectChanges();
+      expect(titles()).toEqual(['Estimativa alterada']);
+
+      click('Previsões');
+      fixture.detectChanges();
+      expect(titles()).toEqual(['Previsão atualizada']);
+    });
+
+    it('says what is missing for the chosen kind', () => {
+      answer({ id: 'demand-1', title: 'Parada' }, [], [forecast('2027-03-02T12:00:00Z')]);
+
+      click('Estimativas');
+      fixture.detectChanges();
+      expect(text()).toContain('Nenhuma alteração de estimativa registrada.');
+      expect(text()).not.toContain('Nenhuma previsão registrada ainda.');
+    });
+
+    it('summarizes the demand with what the API sent, and marks a completed one', () => {
+      answer(
+        {
+          id: 'demand-1',
+          title: 'Concluída',
+          priorityRank: '3',
+          informedEndDate: '2027-04-01',
+          completedOn: '2027-03-20',
+          startDate: '2027-03-01',
+          teams: [
+            { teamName: 'Alfa', estimatedEffortHours: '40' },
+            { teamName: 'Beta', estimatedEffortHours: null },
+          ],
+        },
+        [],
+        [],
+      );
+
+      expect(text()).toContain('Alfa, Beta');
+      expect(text()).toContain('40 h');
+      expect(text()).toContain('1 sem estimativa');
+      expect(text()).toContain('01/04/2027');
+      expect(text()).toContain('Concluída em 20/03/2027');
+    });
+
+    it('offers the way back to the list', () => {
+      answer({ id: 'demand-1', title: 'Qualquer' }, [], []);
+
+      const link = (fixture.nativeElement as HTMLElement).querySelector('a[href="/demands"]');
+      expect(link).not.toBeNull();
+      expect(text()).toContain('Voltar às demandas');
+    });
+  });
 });
