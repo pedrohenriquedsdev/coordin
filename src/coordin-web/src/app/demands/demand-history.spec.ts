@@ -92,3 +92,48 @@ describe('demand history presentation', () => {
     });
   });
 });
+
+describe('buildTimeline', () => {
+  it('merges both histories, newest first, with the cause and the reason in words', async () => {
+    const { buildTimeline } = await import('./demand-history');
+    const events = buildTimeline(
+      [
+        {
+          teamId: 'a',
+          teamName: 'Alfa',
+          previousHours: 40,
+          newHours: 60,
+          reason: 'escopo',
+          changedAt: '2027-03-01T12:00:00Z',
+        },
+        {
+          teamId: 'b',
+          teamName: null,
+          previousHours: null,
+          newHours: 8,
+          reason: null,
+          changedAt: '2027-03-05T12:00:00Z',
+        },
+      ] as never,
+      [
+        {
+          previousEndDate: '2027-03-10',
+          newEndDate: '2027-03-17',
+          cause: 'Dependency',
+          changedAt: '2027-03-03T12:00:00Z',
+        },
+      ] as never,
+    );
+
+    expect(events.map((e) => e.kind)).toEqual(['estimate', 'forecast', 'estimate']);
+    expect(events[0].text).toBe('Time removido: — → 8 h');
+    expect(events[1].text).toBe('10/03/2027 → 17/03/2027');
+    expect(events[1].detail).toBe('Causa: Dependência');
+    expect(events[2].detail).toBe('escopo');
+  });
+
+  it('is empty without histories', async () => {
+    const { buildTimeline } = await import('./demand-history');
+    expect(buildTimeline([], [])).toEqual([]);
+  });
+});
