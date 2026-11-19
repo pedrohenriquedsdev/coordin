@@ -9,6 +9,7 @@ import { provideRouter } from '@angular/router';
 import { provideApiConfiguration } from '../api/api-configuration';
 import { Clock } from '../core/dates/calendar-date';
 import { provideLocalePtBr } from '../core/locale';
+import { vi } from 'vitest';
 import { DemandsPage } from './demands-page';
 
 /** Uma demanda como a API a devolve (números em texto onde o cliente gerado os tipa assim). */
@@ -178,11 +179,53 @@ describe('DemandsPage', () => {
     buttonIn(listOf('Demandas ativas')?.querySelector('li') as HTMLElement, 'Excluir')?.click();
     fixture.detectChanges();
 
-    buttonIn(element(), 'Confirmar exclusão')?.click();
+    // A confirmação é segurar o botão pelo tempo todo (1,6 s); soltar antes cancela.
+    const hold = element().querySelector<HTMLButtonElement>('.hold-btn');
+    vi.useFakeTimers();
+    try {
+      hold?.dispatchEvent(new PointerEvent('pointerdown', { button: 0 }));
+      vi.advanceTimersByTime(1700);
+    } finally {
+      vi.useRealTimers();
+    }
     request('DELETE', '/api/demands/a').flush(null, { status: 204, statusText: 'No Content' });
     await answerLists([]);
 
     expect(element().textContent).toContain('Não há demandas ativas.');
+  });
+
+  it('does not delete when the hold button is released early', async () => {
+    await open([demand('a', 'Alfa', 1)]);
+    buttonIn(listOf('Demandas ativas')?.querySelector('li') as HTMLElement, 'Excluir')?.click();
+    fixture.detectChanges();
+
+    const hold = element().querySelector<HTMLButtonElement>('.hold-btn');
+    vi.useFakeTimers();
+    try {
+      hold?.dispatchEvent(new PointerEvent('pointerdown', { button: 0 }));
+      vi.advanceTimersByTime(800);
+      hold?.dispatchEvent(new PointerEvent('pointerup'));
+      vi.advanceTimersByTime(2000);
+    } finally {
+      vi.useRealTimers();
+    }
+
+    http.expectNone((req) => req.method === 'DELETE');
+  });
+
+  it('filters the lists by title, ignoring accents, and pauses reordering while searching', async () => {
+    await open([demand('a', 'Autenticação', 1), demand('b', 'Relatório', 2)]);
+
+    const input = element().querySelector<HTMLInputElement>('input[type="search"]');
+    input!.value = 'AUTENTICACAO';
+    input!.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    const rows = listOf('Demandas ativas')?.querySelectorAll('li') ?? [];
+    expect(rows.length).toBe(1);
+    expect(rows[0].textContent).toContain('Autenticação');
+    expect(buttonIn(rows[0] as HTMLElement, 'Descer')?.disabled).toBe(true);
+    expect(element().textContent).toContain('Limpe a busca para reordenar');
   });
 
   it('suggests today as the completion date, and completes the demand with that date', async () => {

@@ -1,162 +1,266 @@
-<div class="flex flex-wrap items-center justify-between gap-3">
-  <h2 class="text-2xl font-bold tracking-tight">Demandas</h2>
-  <a routerLink="/demands/new" class="btn-primary"> + Nova demanda </a>
-</div>
+<app-page-header
+  eyebrow="Planejamento"
+  title="Demandas"
+  description="Priorize a fila, edite, conclua ou exclua. A ordem aqui é a prioridade combinada entre produto e desenvolvimento: o sistema nunca a muda sozinho."
+>
+  <a routerLink="/demands/new" class="btn-primary h-12 rounded-full px-6">
+    <app-icon name="plus" /> Nova demanda
+  </a>
+</app-page-header>
 
 @if (message(); as text) {
-  <p role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">{{ text }}</p>
+  <p role="alert" class="card mb-4 border-red-700/50 p-3 text-sm font-semibold text-red-800">
+    {{ text }}
+  </p>
 }
 
 @switch (store.status()) {
   @case ('loading') {
-    <p class="mt-3 text-slate-600">Carregando…</p>
+    <div class="card p-6"><app-loader label="Carregando…" /></div>
   }
   @case ('failed') {
-    <div role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">
-      <p>Não foi possível carregar as demandas.</p>
-      <button type="button" (click)="store.load()" class="btn-danger btn-sm mt-2">
+    <div role="alert" class="card border-red-700/50 p-5 text-sm">
+      <p class="font-semibold text-red-800">Não foi possível carregar as demandas.</p>
+      <button type="button" (click)="store.load()" class="btn-danger btn-sm mt-3 rounded-full">
         Tentar de novo
       </button>
     </div>
   }
   @default {
-    <div role="tablist" aria-label="Situação das demandas" class="mt-4 flex gap-1">
-      <button
-        type="button"
-        role="tab"
-        [attr.aria-selected]="tab() === 'active'"
-        (click)="selectTab('active')"
-        class="rounded-md px-3 py-1.5 text-sm font-medium"
-        [class]="
-          tab() === 'active' ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-100'
-        "
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div
+        role="tablist"
+        aria-label="Situação das demandas"
+        class="inline-flex gap-1 rounded-full border border-white/50 bg-white/40 p-1 dark:border-white/15"
       >
-        Ativas ({{ store.active().length }})
-      </button>
-      <button
-        type="button"
-        role="tab"
-        [attr.aria-selected]="tab() === 'completed'"
-        (click)="selectTab('completed')"
-        class="rounded-md px-3 py-1.5 text-sm font-medium"
-        [class]="
-          tab() === 'completed'
-            ? 'bg-slate-100 text-slate-900'
-            : 'text-slate-600 hover:bg-slate-100'
-        "
-      >
-        Concluídas ({{ store.completed().length }})
-      </button>
+        <button
+          type="button"
+          role="tab"
+          [attr.aria-selected]="tab() === 'active'"
+          (click)="selectTab('active')"
+          class="rounded-full px-4 py-1.5 text-sm font-semibold transition-colors"
+          [class]="
+            tab() === 'active'
+              ? 'bg-linear-to-r from-brand-500 to-azure-500 text-[#021a1d]'
+              : 'text-slate-700 hover:bg-white/60'
+          "
+        >
+          Ativas ({{ store.active().length }})
+        </button>
+        <button
+          type="button"
+          role="tab"
+          [attr.aria-selected]="tab() === 'completed'"
+          (click)="selectTab('completed')"
+          class="rounded-full px-4 py-1.5 text-sm font-semibold transition-colors"
+          [class]="
+            tab() === 'completed'
+              ? 'bg-linear-to-r from-brand-500 to-azure-500 text-[#021a1d]'
+              : 'text-slate-700 hover:bg-white/60'
+          "
+        >
+          Concluídas ({{ store.completed().length }})
+        </button>
+      </div>
+
+      <app-glow-field class="w-full sm:w-72">
+        <div class="relative">
+          <span
+            aria-hidden="true"
+            class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-slate-500"
+          >
+            <app-icon name="search" />
+          </span>
+          <input
+            type="search"
+            aria-label="Buscar demanda pelo título"
+            placeholder="Buscar demanda"
+            [value]="query()"
+            (input)="onSearch($event)"
+            class="block h-11 w-full rounded-[0.9rem] border-0 bg-transparent pr-3 pl-11 text-sm text-slate-900 outline-none placeholder:text-slate-500"
+          />
+        </div>
+      </app-glow-field>
     </div>
 
-    @if (visible().length === 0) {
-      <p class="mt-4 text-slate-600">
-        @if (tab() === 'active') {
-          Não há demandas ativas.
-          <a routerLink="/demands/new" class="font-medium underline">Nova demanda</a>
-        } @else {
-          Nenhuma demanda concluída ainda.
-        }
+    @if (searching() && tab() === 'active' && visible().length > 0) {
+      <p class="mt-3 text-xs text-slate-600">
+        Com a busca ligada, Subir e Descer ficam desativados. Limpe a busca para reordenar a fila.
       </p>
+    }
+
+    @if (visible().length === 0) {
+      <div class="card mt-4 p-8 text-center text-sm text-slate-700">
+        @if (searching()) {
+          <p>Nenhuma demanda encontrada para essa busca.</p>
+          <button type="button" class="btn-secondary mt-3 rounded-full" (click)="clearSearch()">
+            Limpar busca
+          </button>
+        } @else if (tab() === 'active') {
+          <p>
+            Não há demandas ativas.
+            <a routerLink="/demands/new" class="font-semibold text-brand-700 underline"
+              >Nova demanda</a
+            >
+          </p>
+        } @else {
+          <p>Nenhuma demanda concluída ainda.</p>
+        }
+      </div>
     } @else if (tab() === 'active') {
       <ol aria-label="Demandas ativas" class="mt-4 space-y-3">
-        @for (demand of store.active(); track demand.id; let index = $index) {
-          <li class="card p-3 text-sm">
-            <div class="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <h3 class="font-semibold">{{ demand.priorityRank }}. {{ demand.title }}</h3>
-                @for (team of demand.teams; track team.teamId) {
-                  <p>{{ team.teamName }}: {{ hoursOf(team.estimatedEffortHours) }}</p>
-                }
-                <p class="text-slate-600">Início: {{ dateOf(demand.startDate) }}</p>
-                <p class="text-slate-900">{{ reasonOf(store.itemOf(demand.id)) }}</p>
+        @for (demand of activeList(); track demand.id; let i = $index) {
+          <li class="card p-4 text-sm" [appReveal]="i">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div class="flex min-w-0 items-start gap-3">
+                <span
+                  class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-linear-to-br from-brand-400 to-azure-500 text-base font-extrabold text-[#021a1d]"
+                  aria-hidden="true"
+                  >{{ demand.priorityRank }}</span
+                >
+                <div class="min-w-0">
+                  <h3 class="text-base font-bold text-slate-900">
+                    {{ demand.priorityRank }}. {{ demand.title }}
+                  </h3>
+                  <div class="mt-1.5 flex flex-wrap items-center gap-2">
+                    @if (store.itemOf(demand.id)?.isPredictable) {
+                      <span
+                        class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-400/20 dark:text-emerald-300"
+                        >{{ reasonOf(store.itemOf(demand.id)) }}</span
+                      >
+                    } @else {
+                      <span
+                        class="badge bg-amber-100 text-amber-900 dark:bg-amber-400/20 dark:text-amber-300"
+                        >{{ reasonOf(store.itemOf(demand.id)) }}</span
+                      >
+                    }
+                    @if (store.itemOf(demand.id)?.exceedsInformedEndDate) {
+                      <span class="badge bg-red-100 text-red-800 dark:bg-red-400/20"
+                        >Passa do prazo informado</span
+                      >
+                    }
+                  </div>
+                  <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                    @for (team of demand.teams; track team.teamId) {
+                      <p class="text-slate-800">
+                        {{ team.teamName }}: {{ hoursOf(team.estimatedEffortHours) }}
+                      </p>
+                    }
+                  </div>
+                  <p class="mt-1 text-slate-600">Início: {{ dateOf(demand.startDate) }}</p>
+                </div>
               </div>
 
-              <div class="flex flex-wrap gap-2">
+              <div class="flex flex-wrap items-center gap-2 lg:justify-end">
                 <button
                   type="button"
                   (click)="move(demand, 'up')"
-                  [disabled]="!canMove(demand, 'up') || busyId() !== null"
-                  class="btn-secondary btn-sm"
+                  [disabled]="!canMove(demand, 'up') || busyId() !== null || searching()"
+                  class="btn-secondary btn-sm rounded-full"
                 >
-                  Subir
+                  <app-icon name="arrowUp" /> Subir
                 </button>
                 <button
                   type="button"
                   (click)="move(demand, 'down')"
-                  [disabled]="!canMove(demand, 'down') || busyId() !== null"
-                  class="btn-secondary btn-sm"
+                  [disabled]="!canMove(demand, 'down') || busyId() !== null || searching()"
+                  class="btn-secondary btn-sm rounded-full"
                 >
-                  Descer
+                  <app-icon name="arrowDown" /> Descer
                 </button>
-                <a [routerLink]="['/demands', demand.id, 'edit']" class="btn-secondary btn-sm">
-                  Editar
+                <a
+                  [routerLink]="['/demands', demand.id, 'edit']"
+                  class="btn-secondary btn-sm rounded-full"
+                >
+                  <app-icon name="edit" /> Editar
                 </a>
-                <a [routerLink]="['/demands', demand.id]" class="btn-secondary btn-sm">
-                  Histórico
+                <a [routerLink]="['/demands', demand.id]" class="btn-secondary btn-sm rounded-full">
+                  <app-icon name="history" /> Histórico
                 </a>
-                <button type="button" (click)="startComplete(demand)" class="btn-secondary btn-sm">
-                  Concluir
+                <button
+                  type="button"
+                  (click)="startComplete(demand)"
+                  class="btn-primary btn-sm rounded-full"
+                >
+                  <app-icon name="check" /> Concluir
                 </button>
-                <button type="button" (click)="startDelete(demand)" class="btn-danger btn-sm">
-                  Excluir
+                <button
+                  type="button"
+                  (click)="startDelete(demand)"
+                  class="btn-danger btn-sm rounded-full"
+                >
+                  <app-icon name="trash" /> Excluir
                 </button>
               </div>
             </div>
 
             @if (deletingId() === demand.id) {
-              <div class="mt-3 border-t border-slate-200 pt-3">
-                <p>Excluir a demanda “{{ demand.title }}”?</p>
-                <div class="mt-2 flex gap-2">
-                  <button
-                    type="button"
-                    (click)="confirmDelete(demand)"
+              <div class="mt-4 rounded-2xl border border-red-700/40 bg-red-700/5 p-4">
+                <p class="font-semibold text-slate-900">Excluir a demanda “{{ demand.title }}”?</p>
+                <p class="mt-0.5 text-xs text-slate-600">
+                  Segure o botão para confirmar (ou use a tecla Espaço). Soltar antes cancela.
+                </p>
+                <div class="mt-3 flex flex-wrap items-center gap-3">
+                  <app-hold-button
+                    label="Segure para excluir"
+                    doneLabel="Excluída"
                     [disabled]="busyId() !== null"
-                    class="rounded-md bg-red-700 px-3 py-1.5 text-sm font-medium text-[#fff] disabled:opacity-60"
-                  >
-                    Confirmar exclusão
+                    (confirmed)="confirmDelete(demand)"
+                  />
+                  <button type="button" (click)="cancelAll()" class="btn-secondary rounded-full">
+                    Cancelar
                   </button>
-                  <button type="button" (click)="cancelAll()" class="field">Cancelar</button>
                 </div>
               </div>
             }
 
             @if (completingId() === demand.id) {
-              <div class="mt-3 border-t border-slate-200 pt-3">
-                <label for="completed-on-{{ demand.id }}" class="block font-medium text-slate-700">
-                  Data de conclusão
-                </label>
-                <input
-                  id="completed-on-{{ demand.id }}"
-                  type="date"
-                  [value]="completedOn()"
-                  (input)="setCompletedOn($event)"
-                  class="field mt-1"
-                />
-                <label
-                  for="actual-effort-{{ demand.id }}"
-                  class="mt-3 block font-medium text-slate-700"
-                >
-                  Esforço real em horas (opcional)
-                </label>
-                <input
-                  id="actual-effort-{{ demand.id }}"
-                  type="text"
-                  inputmode="decimal"
-                  [value]="actualEffort()"
-                  (input)="setActualEffort($event)"
-                  class="field mt-1 w-40"
-                />
-                <div class="mt-2 flex gap-2">
+              <div
+                class="mt-4 rounded-2xl border border-white/50 bg-white/30 p-4 dark:border-white/15 dark:bg-white/5"
+              >
+                <div class="flex flex-wrap items-start gap-4">
+                  <div>
+                    <label
+                      for="completed-on-{{ demand.id }}"
+                      class="block font-semibold text-slate-800"
+                      >Data de conclusão</label
+                    >
+                    <input
+                      id="completed-on-{{ demand.id }}"
+                      type="date"
+                      [value]="completedOn()"
+                      (input)="setCompletedOn($event)"
+                      class="field mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      for="actual-effort-{{ demand.id }}"
+                      class="block font-semibold text-slate-800"
+                      >Esforço real em horas (opcional)</label
+                    >
+                    <input
+                      id="actual-effort-{{ demand.id }}"
+                      type="text"
+                      inputmode="decimal"
+                      [value]="actualEffort()"
+                      (input)="setActualEffort($event)"
+                      class="field mt-1 w-40"
+                    />
+                  </div>
+                </div>
+                <div class="mt-3 flex gap-2">
                   <button
                     type="button"
                     (click)="confirmComplete(demand)"
                     [disabled]="busyId() !== null"
-                    class="btn-primary"
+                    class="btn-primary rounded-full"
                   >
                     Confirmar conclusão
                   </button>
-                  <button type="button" (click)="cancelAll()" class="field">Cancelar</button>
+                  <button type="button" (click)="cancelAll()" class="btn-secondary rounded-full">
+                    Cancelar
+                  </button>
                 </div>
               </div>
             }
@@ -165,23 +269,37 @@
       </ol>
     } @else {
       <ul aria-label="Demandas concluídas" class="mt-4 space-y-3">
-        @for (demand of store.completed(); track demand.id) {
-          <li class="card p-3 text-sm">
-            <h3 class="font-semibold">{{ demand.title }}</h3>
-            <p>Concluída em {{ dateOf(demand.completedOn) }}</p>
-            <p>
-              <a [routerLink]="['/demands', demand.id]" class="font-medium underline"
-                >Ver histórico</a
+        @for (demand of completedList(); track demand.id; let i = $index) {
+          <li
+            class="card flex flex-col gap-3 p-4 text-sm sm:flex-row sm:items-start sm:justify-between"
+            [appReveal]="i"
+          >
+            <div class="flex min-w-0 items-start gap-3">
+              <span
+                class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-azure-500/20 text-azure-700 dark:text-azure-300"
+                aria-hidden="true"
               >
-            </p>
-            <p class="text-slate-600">
-              Contra a primeira previsão:
-              {{ deviation(store.itemOf(demand.id)?.baselineDeviationDays ?? null) }}
-            </p>
-            <p class="text-slate-600">
-              Contra a previsão vigente:
-              {{ deviation(store.itemOf(demand.id)?.forecastDeviationDays ?? null) }}
-            </p>
+                <app-icon name="check" />
+              </span>
+              <div>
+                <h3 class="text-base font-bold text-slate-900">{{ demand.title }}</h3>
+                <p class="text-slate-800">Concluída em {{ dateOf(demand.completedOn) }}</p>
+                <p class="mt-1 text-slate-600">
+                  Contra a primeira previsão:
+                  {{ deviation(store.itemOf(demand.id)?.baselineDeviationDays ?? null) }}
+                </p>
+                <p class="text-slate-600">
+                  Contra a previsão vigente:
+                  {{ deviation(store.itemOf(demand.id)?.forecastDeviationDays ?? null) }}
+                </p>
+              </div>
+            </div>
+            <a
+              [routerLink]="['/demands', demand.id]"
+              class="btn-secondary btn-sm shrink-0 rounded-full"
+            >
+              <app-icon name="history" /> Ver histórico
+            </a>
           </li>
         }
       </ul>
