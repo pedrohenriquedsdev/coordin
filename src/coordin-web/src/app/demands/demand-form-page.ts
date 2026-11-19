@@ -1,10 +1,16 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DemandRequest } from '../api/models/demand-request';
 import { messageFor } from '../core/problems/messages';
 import { readProblem } from '../core/problems/problem';
 import { formatCalendarDate } from '../core/dates/calendar-date';
+import { GlowField } from '../core/ui/glow-field';
+import { Icon } from '../core/ui/icon';
+import { Loader } from '../core/ui/loader';
+import { PageHeader } from '../core/ui/page-header';
+import { normalizeText } from '../schedule/schedule-view';
 import { deviationLabel, unpredictableReasonLabel } from '../planning/labels';
 import { Demand, DemandSimulation } from '../planning/planning';
 import { parsePosition } from './demand-position';
@@ -42,7 +48,7 @@ export function parseEffort(text: string): { value: number | null; valid: boolea
  */
 @Component({
   selector: 'app-demand-form-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, PageHeader, Icon, Loader, GlowField],
   providers: [DemandFormStore],
   templateUrl: './demand-form-page.html',
 })
@@ -76,6 +82,59 @@ export class DemandFormPage {
     null,
   );
   protected readonly simulating = signal(false);
+
+  /** Os valores do formulário como sinal, para o resumo da lateral acompanhar a digitação. */
+  private readonly formValue = toSignal(this.form.valueChanges, {
+    initialValue: this.form.getRawValue(),
+  });
+
+  /** A busca dentro de "Depende de". */
+  protected readonly prerequisiteQuery = signal('');
+
+  /** Os nomes dos times marcados, na ordem do cadastro de times. */
+  protected readonly selectedTeamNames = computed(() =>
+    this.store
+      .teams()
+      .filter((team) => this.isChecked(team.id))
+      .map((team) => team.name),
+  );
+
+  /** A soma das horas digitadas dos times marcados (só as válidas) e quantos times ainda estão sem estimativa. */
+  protected readonly effortSummary = computed(() => {
+    let total = 0;
+    let missing = 0;
+    for (const text of Object.values(this.selected())) {
+      const effort = parseEffort(text);
+      if (effort.valid && effort.value !== null) {
+        total += effort.value;
+      } else {
+        missing += 1;
+      }
+    }
+    return { total, missing, count: Object.keys(this.selected()).length };
+  });
+
+  protected readonly summaryStart = computed(() => this.formValue().startDate ?? '');
+  protected readonly summaryEnd = computed(() => this.formValue().informedEndDate ?? '');
+  protected readonly summaryPosition = computed(() => (this.formValue().position ?? '').trim());
+
+  /** A simulação só vale enquanto nada mudou depois dela; velha, o resumo não a mostra. */
+  protected readonly freshSimulation = computed(() => {
+    this.formValue(); // acompanha a digitação: o formulário reativo não é um sinal
+    const simulated = this.simulation();
+    return simulated !== null && !this.isStale() ? simulated.result : null;
+  });
+
+  protected readonly visibleCandidates = computed(() => {
+    const needle = normalizeText(this.prerequisiteQuery());
+    return this.candidates().filter(
+      (candidate) => needle === '' || normalizeText(candidate.title).includes(needle),
+    );
+  });
+
+  protected onPrerequisiteSearch(event: Event): void {
+    this.prerequisiteQuery.set((event.target as HTMLInputElement).value);
+  }
 
   /** A posição mais alta aceita: uma a mais que o número de demandas, que é o fim da fila (RF-16). */
   protected readonly maxPosition = computed(() => this.store.candidates().length + 1);
