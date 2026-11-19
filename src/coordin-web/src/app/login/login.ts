@@ -4,6 +4,8 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { safeReturnUrl } from '../core/auth/return-url';
 import { SessionService } from '../core/auth/session.service';
+import { GlowButton } from '../core/ui/glow-button';
+import { GlowField } from '../core/ui/glow-field';
 import { Icon, type IconName } from '../core/ui/icon';
 import { ThemeService } from '../core/ui/theme.service';
 
@@ -15,7 +17,7 @@ const UNAVAILABLE = 'Não foi possível entrar agora. Tente novamente em instant
 /** Tela de login do gestor (protótipo T01). Não existe cadastro: a conta nasce da configuração (DT-29). */
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, Icon],
+  imports: [ReactiveFormsModule, Icon, GlowField, GlowButton],
   templateUrl: './login.html',
 })
 export class Login {

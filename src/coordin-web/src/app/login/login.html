@@ -5,15 +5,15 @@
   "Esqueceu sua senha?", porque o Coordin não tem essas funções (a conta do gestor nasce da configuração).
 -->
 <div
-  class="relative min-h-[calc(100vh/0.9)] overflow-hidden zoom-90 bg-linear-to-br from-white via-[#f4f8ff] to-[#dbe8ff] font-poppins text-[#0b1b3f] dark:from-[#050a1c] dark:via-[#07112e] dark:to-[#0a1f5c] dark:text-white"
+  class="relative min-h-[calc(100vh/0.9)] overflow-hidden zoom-90 bg-linear-to-br from-white via-[#eefafa] to-[#c9f1f3] font-sans text-[#0a1c1f] dark:from-[#050909] dark:via-[#071314] dark:to-[#0a3a40] dark:text-white"
 >
   <!-- Brilho azul e curvas de fundo (decorativos) -->
   <div aria-hidden="true" class="pointer-events-none absolute inset-0">
     <div
-      class="absolute -top-[10%] -right-[8%] h-[75%] w-[55%] rounded-full bg-[#2f7bff]/30 blur-3xl dark:bg-[#1d5cff]/25"
+      class="absolute -top-[10%] -right-[8%] h-[75%] w-[55%] rounded-full bg-[#1ec1cb]/30 blur-3xl dark:bg-[#1ec1cb]/25"
     ></div>
     <div
-      class="absolute top-[18%] -right-[12%] h-[85%] w-[62%] rounded-full border border-[#2f7bff]/20"
+      class="absolute top-[18%] -right-[12%] h-[85%] w-[62%] rounded-full border border-[#1ec1cb]/20"
     ></div>
   </div>
 
@@ -27,7 +27,7 @@
       </div>
       <button
         type="button"
-        class="grid h-11 w-11 place-items-center rounded-full border border-[#d5e0f5] bg-white/70 text-[#1f6fff] transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b8bff] dark:border-white/15 dark:bg-white/5 dark:text-[#7fb0ff] dark:hover:bg-white/10"
+        class="grid h-11 w-11 place-items-center rounded-full border border-[#c4dcde] bg-white/70 text-[#0d8a93] transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3acfd6] dark:border-white/15 dark:bg-white/5 dark:text-[#66d9df] dark:hover:bg-white/10"
         [attr.aria-label]="theme.isDark() ? 'Usar tema claro' : 'Usar tema escuro'"
         (click)="theme.toggle()"
       >
@@ -40,47 +40,48 @@
     >
       <section class="text-center min-[1250px]:text-left">
         <p
-          class="text-[0.8rem] font-semibold tracking-wide text-[#1f6fff] uppercase dark:text-[#3b8bff]"
+          class="text-[0.8rem] font-semibold tracking-wide text-[#0d8a93] uppercase dark:text-[#3acfd6]"
         >
           Planejamento inteligente
         </p>
         <p class="mt-3 text-[clamp(2rem,3.6vw,3.1rem)] leading-[1.1] font-semibold tracking-tight">
-          Coordene e planeje <span class="text-[#1f6fff] dark:text-[#3b8bff]">com confiança.</span>
+          Coordene e planeje <span class="text-[#0d8a93] dark:text-[#3acfd6]">com confiança.</span>
         </p>
         <p
-          class="mx-auto mt-4 max-w-md text-[1.02rem] min-[1250px]:mx-0 leading-relaxed text-[#46557a] dark:text-[#b7c3e4]"
+          class="mx-auto mt-4 max-w-md text-[1.02rem] min-[1250px]:mx-0 leading-relaxed text-[#3f5a5e] dark:text-[#b3cacd]"
         >
           Transforme demandas em previsões precisas, alinhe seus times e tome decisões estratégicas.
         </p>
 
         <div
-          class="mx-auto mt-8 w-full max-w-[26rem] rounded-3xl text-left min-[1250px]:mx-0 border border-[#e3ebfa] bg-white/90 p-7 shadow-[0_18px_50px_rgb(31_111_255/0.12)] backdrop-blur-md dark:border-white/10 dark:bg-[#0b1531]/80 dark:shadow-[0_18px_50px_rgb(0_0_0/0.4)]"
+          class="mx-auto mt-8 w-full max-w-[26rem] rounded-3xl text-left min-[1250px]:mx-0 border border-[#d5e6e8] bg-white/90 p-7 shadow-[0_18px_50px_rgb(30_193_203/0.18)] backdrop-blur-md dark:border-white/10 dark:bg-[#081314]/80 dark:shadow-[0_18px_50px_rgb(0_0_0/0.4)]"
         >
-          <h2 class="text-xl font-semibold text-[#0b1b3f] dark:text-white">Acesse sua conta</h2>
-          <p class="mt-1 text-sm text-[#5b6a8d] dark:text-[#9fb0d8]">
+          <h2 class="text-xl font-semibold text-[#0a1c1f] dark:text-white">Acesse sua conta</h2>
+          <p class="mt-1 text-sm text-[#587479] dark:text-[#93b0b4]">
             Use a conta do gestor de desenvolvimento.
           </p>
 
           <form class="mt-5" [formGroup]="form" (ngSubmit)="submit()" novalidate>
             <div>
               <label for="email" class="block text-sm font-medium">E-mail</label>
-              <div class="relative mt-1.5">
-                <span
-                  aria-hidden="true"
-                  class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-[#6b7ba3]"
-                >
-                  <app-icon name="mail" />
-                </span>
-                <input
-                  id="email"
-                  type="email"
-                  formControlName="email"
-                  autocomplete="username"
-                  placeholder="exemplo@empresa.com"
-                  [attr.aria-invalid]="showRequired('email')"
-                  class="block h-12 w-full rounded-xl border border-[#e1e8f6] bg-[#f6f9ff] pr-3 pl-11 text-sm text-[#0b1b3f] outline-none transition-colors placeholder:text-[#8b98b8] focus:border-[#1f6fff] focus:ring-2 focus:ring-[#1f6fff]/30 aria-[invalid=true]:border-danger dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#7f8fb5]"
-                />
-              </div>
+              <app-glow-field class="mt-1.5"
+                ><div class="relative">
+                  <span
+                    aria-hidden="true"
+                    class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-[#587479]"
+                  >
+                    <app-icon name="mail" />
+                  </span>
+                  <input
+                    id="email"
+                    type="email"
+                    formControlName="email"
+                    autocomplete="username"
+                    placeholder="exemplo@empresa.com"
+                    [attr.aria-invalid]="showRequired('email')"
+                    class="block h-12 w-full rounded-[0.9rem] border-0 bg-transparent pr-3 pl-11 text-sm text-[#0a1c1f] outline-none placeholder:text-[#84a2a6] aria-[invalid=true]:bg-danger/5 dark:text-white dark:placeholder:text-[#6f9094]"
+                  /></div
+              ></app-glow-field>
               @if (showRequired('email')) {
                 <p class="mt-1 text-xs font-medium text-danger dark:text-[#ff7b7b]">
                   Informe o e-mail.
@@ -90,32 +91,33 @@
 
             <div class="mt-4">
               <label for="password" class="block text-sm font-medium">Senha</label>
-              <div class="relative mt-1.5">
-                <span
-                  aria-hidden="true"
-                  class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-[#6b7ba3]"
-                >
-                  <app-icon name="lock" />
-                </span>
-                <input
-                  id="password"
-                  [type]="showPassword() ? 'text' : 'password'"
-                  formControlName="password"
-                  autocomplete="current-password"
-                  placeholder="Digite sua senha"
-                  [attr.aria-invalid]="showRequired('password')"
-                  class="block h-12 w-full rounded-xl border border-[#e1e8f6] bg-[#f6f9ff] pr-12 pl-11 text-sm text-[#0b1b3f] outline-none transition-colors placeholder:text-[#8b98b8] focus:border-[#1f6fff] focus:ring-2 focus:ring-[#1f6fff]/30 aria-[invalid=true]:border-danger dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#7f8fb5]"
-                />
-                <button
-                  type="button"
-                  class="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-xl text-[#6b7ba3] transition-colors hover:text-[#1f6fff]"
-                  [attr.aria-pressed]="showPassword()"
-                  [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
-                  (click)="showPassword.set(!showPassword())"
-                >
-                  <app-icon [name]="showPassword() ? 'eye' : 'eyeOff'" />
-                </button>
-              </div>
+              <app-glow-field class="mt-1.5"
+                ><div class="relative">
+                  <span
+                    aria-hidden="true"
+                    class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-[#587479]"
+                  >
+                    <app-icon name="lock" />
+                  </span>
+                  <input
+                    id="password"
+                    [type]="showPassword() ? 'text' : 'password'"
+                    formControlName="password"
+                    autocomplete="current-password"
+                    placeholder="Digite sua senha"
+                    [attr.aria-invalid]="showRequired('password')"
+                    class="block h-12 w-full rounded-[0.9rem] border-0 bg-transparent pr-12 pl-11 text-sm text-[#0a1c1f] outline-none placeholder:text-[#84a2a6] aria-[invalid=true]:bg-danger/5 dark:text-white dark:placeholder:text-[#6f9094]"
+                  />
+                  <button
+                    type="button"
+                    class="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-xl text-[#587479] transition-colors hover:text-[#0d8a93]"
+                    [attr.aria-pressed]="showPassword()"
+                    [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
+                    (click)="showPassword.set(!showPassword())"
+                  >
+                    <app-icon [name]="showPassword() ? 'eye' : 'eyeOff'" />
+                  </button></div
+              ></app-glow-field>
               @if (showRequired('password')) {
                 <p class="mt-1 text-xs font-medium text-danger dark:text-[#ff7b7b]">
                   Informe a senha.
@@ -132,13 +134,9 @@
               </p>
             }
 
-            <button
-              type="submit"
-              [disabled]="submitting()"
-              class="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#0a6cff] text-[0.95rem] font-semibold text-white shadow-[0_10px_24px_rgb(10_108_255/0.35)] transition-colors hover:bg-[#0858d6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b8bff] disabled:cursor-not-allowed disabled:opacity-60"
-            >
+            <app-glow-button class="mt-6" type="submit" [block]="true" [disabled]="submitting()">
               {{ submitting() ? 'Entrando...' : 'Entrar' }}
-            </button>
+            </app-glow-button>
           </form>
         </div>
       </section>
@@ -149,9 +147,9 @@
           class="relative mx-auto aspect-[16/10] w-[92%] max-w-[44rem] origin-center [transform:perspective(1600px)_rotateY(-16deg)_rotateX(5deg)_rotateZ(-4deg)]"
         >
           <div
-            class="absolute inset-0 flex overflow-hidden rounded-[1.6rem] border border-white/70 bg-white shadow-[0_40px_80px_rgb(31_111_255/0.28)] dark:border-white/15 dark:bg-[#0c1738] dark:shadow-[0_40px_80px_rgb(0_0_0/0.5)]"
+            class="absolute inset-0 flex overflow-hidden rounded-[1.6rem] border border-white/70 bg-white shadow-[0_40px_80px_rgb(30_193_203/0.3)] dark:border-white/15 dark:bg-[#0a1b1d] dark:shadow-[0_40px_80px_rgb(0_0_0/0.5)]"
           >
-            <div class="flex w-[22%] flex-col gap-2.5 bg-[#0a1230] p-4">
+            <div class="flex w-[22%] flex-col gap-2.5 bg-[#062a2e] p-4">
               <div class="flex items-center gap-1.5">
                 <img src="login/logo.png" alt="" width="512" height="568" class="h-5 w-auto" />
                 <span class="text-[0.7rem] font-semibold text-white">Coordin</span>
@@ -159,7 +157,7 @@
               <div class="mt-3 flex flex-col gap-2">
                 @for (item of previewMenu; track item) {
                   <span
-                    class="rounded-md px-2 py-1 text-[0.58rem] text-[#9fb0d8] first:bg-[#1f6fff]/25 first:text-white"
+                    class="rounded-md px-2 py-1 text-[0.58rem] text-[#93b0b4] first:bg-[#0d8a93]/25 first:text-white"
                     >{{ item }}</span
                   >
                 }
@@ -167,15 +165,15 @@
             </div>
 
             <div class="flex-1 p-5">
-              <p class="text-[0.85rem] font-semibold text-[#0b1b3f] dark:text-white">Visão geral</p>
+              <p class="text-[0.85rem] font-semibold text-[#0a1c1f] dark:text-white">Visão geral</p>
               <div class="mt-3 grid grid-cols-3 gap-3">
                 @for (kpi of previewKpis; track kpi.label) {
                   <div
-                    class="rounded-xl border border-[#e3ebfa] bg-[#f6f9ff] p-2.5 dark:border-white/10 dark:bg-white/5"
+                    class="rounded-xl border border-[#d5e6e8] bg-[#f3fcfc] p-2.5 dark:border-white/10 dark:bg-white/5"
                   >
-                    <p class="text-[0.5rem] text-[#5b6a8d] dark:text-[#9fb0d8]">{{ kpi.label }}</p>
+                    <p class="text-[0.5rem] text-[#587479] dark:text-[#93b0b4]">{{ kpi.label }}</p>
                     <p
-                      class="mt-1 text-[1.2rem] leading-none font-semibold text-[#0b1b3f] dark:text-white"
+                      class="mt-1 text-[1.2rem] leading-none font-semibold text-[#0a1c1f] dark:text-white"
                     >
                       {{ kpi.value }}
                     </p>
@@ -183,23 +181,23 @@
                 }
               </div>
               <div
-                class="mt-3 rounded-xl border border-[#e3ebfa] bg-white p-3 dark:border-white/10 dark:bg-white/5"
+                class="mt-3 rounded-xl border border-[#d5e6e8] bg-white p-3 dark:border-white/10 dark:bg-white/5"
               >
-                <p class="text-[0.58rem] font-semibold text-[#0b1b3f] dark:text-white">
+                <p class="text-[0.58rem] font-semibold text-[#0a1c1f] dark:text-white">
                   Capacidade × Demandas
                 </p>
                 <svg viewBox="0 0 300 110" class="mt-1 h-auto w-full" fill="none">
                   <path
                     d="M0 70 C40 40 70 90 110 60 S180 20 220 55 S280 30 300 25"
-                    stroke="#3b8bff"
+                    stroke="#3acfd6"
                     stroke-width="2.5"
                   />
                   <path
                     d="M0 85 C40 70 80 40 120 70 S190 95 230 50 S280 45 300 40"
-                    stroke="#8b5cf6"
+                    stroke="#0d8a93"
                     stroke-width="2.5"
                   />
-                  <path d="M0 108H300" stroke="#9fb0d8" stroke-opacity=".4" />
+                  <path d="M0 108H300" stroke="#93b0b4" stroke-opacity=".4" />
                 </svg>
               </div>
             </div>
@@ -217,19 +215,19 @@
     </div>
 
     <ul
-      class="flex justify-center gap-6 border-t border-[#d5e0f5] pt-4 sm:grid sm:grid-cols-3 sm:gap-5 sm:pt-6 dark:border-white/10"
+      class="flex justify-center gap-6 border-t border-[#c4dcde] pt-4 sm:grid sm:grid-cols-3 sm:gap-5 sm:pt-6 dark:border-white/10"
       aria-label="Diferenciais do Coordin"
     >
       @for (item of features; track item.title) {
         <li class="flex items-center justify-center gap-3.5 min-[1250px]:justify-start">
           <span
-            class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#e4eeff] text-[#1f6fff] dark:bg-[#1f6fff]/20 dark:text-[#3b8bff]"
+            class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#c9f4f6] text-[#0d8a93] dark:bg-[#0d8a93]/20 dark:text-[#3acfd6]"
           >
             <app-icon [name]="item.icon" />
           </span>
           <span class="sr-only sm:not-sr-only">
             <span class="block text-sm font-semibold">{{ item.title }}</span>
-            <span class="block text-xs text-[#5b6a8d] dark:text-[#9fb0d8]">{{ item.text }}</span>
+            <span class="block text-xs text-[#587479] dark:text-[#93b0b4]">{{ item.text }}</span>
           </span>
         </li>
       }

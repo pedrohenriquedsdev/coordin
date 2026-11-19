@@ -25,6 +25,7 @@ describe('Login', () => {
         provideRouter([
           { path: 'login', component: Login },
           { path: 'cronograma', component: Destination },
+          { path: 'inicio', component: Destination },
           { path: '', component: Destination },
         ]),
         { provide: SessionService, useValue: { login, isAuthenticated: signal(false) } },
@@ -83,7 +84,7 @@ describe('Login', () => {
       await submit('  gestor@coordin.test  ', 'uma-senha-12345');
 
       expect(login).toHaveBeenCalledExactlyOnceWith('gestor@coordin.test', 'uma-senha-12345');
-      expect(url()).toBe('/');
+      expect(url()).toBe('/inicio');
     });
 
     it('opens the page the manager was trying to reach', async () => {
@@ -99,7 +100,7 @@ describe('Login', () => {
 
       await submit();
 
-      expect(url()).toBe('/');
+      expect(url()).toBe('/inicio');
     });
 
     it('disables the button while the request is in flight', async () => {
@@ -119,7 +120,7 @@ describe('Login', () => {
       pending.next();
       pending.complete();
       await settle();
-      expect(url()).toBe('/');
+      expect(url()).toBe('/inicio');
     });
   });
 
@@ -197,7 +198,7 @@ describe('Login', () => {
       await submit();
 
       expect(alert()).toBeUndefined();
-      expect(url()).toBe('/');
+      expect(url()).toBe('/inicio');
     });
   });
 });
