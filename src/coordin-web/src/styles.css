@@ -55,7 +55,7 @@
 @theme {
   --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
 
-  /* Marca: ciano (#1EC1CB). Texto sobre o ciano é sempre o verde-petróleo escuro (#04282b), nunca branco. */
+  /* Marca: ciano (#1EC1CB). Texto sobre o ciano é sempre o verde-petróleo escuro (#021a1d), nunca branco. */
   --color-brand-50: #eafbfc;
   --color-brand-100: #c9f4f6;
   --color-brand-200: #9be8ec;
@@ -80,10 +80,10 @@
   --color-slate-100: #e7f2f3;
   --color-slate-200: #d5e6e8;
   --color-slate-300: #b8cfd2;
-  --color-slate-400: #84a2a6;
-  --color-slate-500: #587479;
-  --color-slate-600: #3f5a5e;
-  --color-slate-700: #2b4145;
+  --color-slate-400: #5f7d81;
+  --color-slate-500: #436064;
+  --color-slate-600: #335054;
+  --color-slate-700: #243a3e;
   --color-slate-800: #172a2d;
   --color-slate-900: #0a1c1f;
   --color-slate-950: #041012;
@@ -139,7 +139,7 @@
     @apply border border-slate-200/70 bg-white/55 backdrop-blur-xl;
   }
   main thead th {
-    @apply bg-slate-50 text-[0.7rem] font-semibold tracking-wider text-slate-500 uppercase;
+    @apply bg-slate-50/60 text-xs font-semibold tracking-wider text-slate-600 uppercase;
   }
   main td:first-child,
   main th:first-child {
@@ -213,7 +213,7 @@
 @layer components {
   /* Cartão: superfície branca com sombra suave. */
   .card {
-    @apply rounded-3xl border border-white/50 bg-white/40 backdrop-blur-3xl backdrop-saturate-150 dark:border-white/15 dark:bg-[#041012]/50;
+    @apply rounded-3xl border border-white/50 bg-white/62 backdrop-blur-3xl backdrop-saturate-150 dark:border-white/15 dark:bg-[#041012]/72;
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.6),
       inset 0 -1px 0 rgb(255 255 255 / 0.12),
@@ -233,10 +233,10 @@
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
   }
   .btn-primary {
-    @apply bg-linear-to-r from-brand-500 to-azure-500 font-bold text-[#04282b] shadow-sm hover:brightness-110;
+    @apply bg-linear-to-r from-brand-500 to-azure-500 font-bold text-[#021a1d] shadow-sm hover:brightness-110;
   }
   .btn-secondary {
-    @apply border border-white/60 bg-white/30 text-slate-700 backdrop-blur-xl hover:bg-white/60 dark:border-white/15;
+    @apply border border-white/60 bg-white/60 text-slate-800 backdrop-blur-xl hover:bg-white/80 dark:border-white/15 dark:bg-white/10;
   }
   .btn-danger {
     @apply border border-red-300 bg-white text-red-700 hover:bg-red-50;
@@ -249,7 +249,7 @@
 
   /* Campos de formulário. */
   .field {
-    @apply block w-full rounded-xl border border-white/60 bg-white/40 px-3 py-2 text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40 aria-[invalid=true]:border-red-500;
+    @apply block w-full rounded-xl border border-white/60 bg-white/65 px-3 py-2 text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40 aria-[invalid=true]:border-red-500;
   }
 
   /* Pílulas de status (sempre com texto: a cor nunca é o único sinal). */
@@ -261,6 +261,11 @@
 /* Tela de login um pouco menor (90%). A altura mínima compensa o zoom, para o fundo ocupar a tela toda. */
 .zoom-90 {
   zoom: 0.9;
+}
+
+/* A cor do texto é definida DENTRO da área, onde as variáveis do tema escuro valem; no `body` ela ficaria escura também no tema escuro. */
+.app-shell {
+  color: var(--color-slate-900);
 }
 
 /*
@@ -275,9 +280,9 @@
   --color-slate-200: #1a2b2e;
   --color-slate-300: #2a4044;
   --color-slate-400: #6f9094;
-  --color-slate-500: #93b0b4;
-  --color-slate-600: #b3cacd;
-  --color-slate-700: #cbdcde;
+  --color-slate-500: #a6c0c3;
+  --color-slate-600: #c6d9db;
+  --color-slate-700: #d8e6e8;
   --color-slate-800: #e1ecee;
   --color-slate-900: #f1f8f9;
   --color-slate-950: #ffffff;
@@ -286,6 +291,10 @@
   --color-brand-200: #17565e;
   --color-brand-600: #3acfd6;
   --color-brand-700: #66d9df;
+  --color-red-700: #ff8a8a;
+  --color-red-800: #ffb0b0;
+  --color-amber-800: #fcd34d;
+  --color-amber-900: #fde68a;
   color-scheme: dark;
 }
 
@@ -498,7 +507,7 @@ html[data-theme='dark'] .glow-field {
 }
 .hub-card:hover .hub-cta {
   background: linear-gradient(90deg, var(--a1), var(--a2));
-  color: #04282b;
+  color: #021a1d;
 }
 .mini-bar {
   transform-origin: bottom;
@@ -621,6 +630,7 @@ html[data-theme='dark'] .glow-field {
   transform: translateY(-50%);
 }
 .gb-core {
+  opacity: 0.45;
   width: 121px;
   height: 121px;
   background: radial-gradient(
@@ -643,7 +653,7 @@ html[data-theme='dark'] .glow-field {
     #9be8ec 60.7%,
     rgb(155 232 236 / 0) 100%
   );
-  opacity: 0.7;
+  opacity: 0.22;
 }
 
 /* ---------- Segurar para confirmar (HoldButton) ---------- */
