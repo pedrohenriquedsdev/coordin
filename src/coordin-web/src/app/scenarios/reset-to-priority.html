@@ -1,24 +1,39 @@
 @if (mode() === 'Custom') {
   <section
     aria-label="Ordem de execução fora da prioridade"
-    class="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+    class="card mb-5 flex flex-col gap-3 border-azure-400/60 p-4 text-sm sm:flex-row sm:items-center sm:justify-between"
   >
-    <p>A ordem de execução difere da ordem de prioridade.</p>
+    <div class="flex items-start gap-3">
+      <span
+        class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+      >
+        <app-icon name="info" />
+      </span>
+      <div>
+        <p class="font-bold text-slate-900">A ordem de execução difere da ordem de prioridade.</p>
+        <p class="mt-0.5 text-xs text-slate-600">
+          As previsões seguem a sequência definida no cenário aprovado.
+        </p>
 
-    @if (message(); as text) {
-      <p role="alert" class="mt-2 font-medium text-red-800">{{ text }}</p>
-    }
+        @if (message(); as text) {
+          <p role="alert" class="mt-2 font-semibold text-red-800">{{ text }}</p>
+        }
+
+        @if (confirming()) {
+          <p class="mt-2 text-slate-900">
+            As previsões passam a seguir a ordem de prioridade. A prioridade registrada não muda.
+          </p>
+        }
+      </div>
+    </div>
 
     @if (confirming()) {
-      <p class="mt-2">
-        As previsões passam a seguir a ordem de prioridade. A prioridade registrada não muda.
-      </p>
-      <div class="mt-2 flex flex-wrap gap-2">
+      <div class="flex flex-wrap gap-2">
         <button
           type="button"
           (click)="confirm()"
           [disabled]="busy()"
-          class="rounded-md bg-slate-900 px-3 py-1.5 font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+          class="btn-primary rounded-full"
         >
           Confirmar
         </button>
@@ -26,7 +41,7 @@
           type="button"
           (click)="cancel()"
           [disabled]="busy()"
-          class="rounded-md border border-slate-300 bg-white px-3 py-1.5 font-medium hover:bg-slate-100 disabled:opacity-50"
+          class="btn-secondary rounded-full"
         >
           Cancelar
         </button>
@@ -36,7 +51,7 @@
         type="button"
         (click)="ask()"
         [disabled]="busy()"
-        class="mt-2 rounded-md border border-amber-400 bg-white px-3 py-1.5 font-medium hover:bg-amber-100 disabled:opacity-50"
+        class="btn-secondary shrink-0 rounded-full"
       >
         Voltar à ordem de prioridade
       </button>
