@@ -11,6 +11,8 @@ import { AbsenceType } from '../api/models/absence-type';
 import { CalendarDatePipe } from '../core/dates/calendar-date.pipe';
 import { isEndBeforeStart } from '../core/dates/calendar-date';
 import { messageFor } from '../core/problems/messages';
+import { HoldButton } from '../core/ui/hold-button';
+import { Icon } from '../core/ui/icon';
 import { readProblem } from '../core/problems/problem';
 import { absenceTypeLabel } from './absence-type-label';
 import { CalendarStore } from './calendar.store';
@@ -28,7 +30,7 @@ function periodValidator(group: AbstractControl): ValidationErrors | null {
  */
 @Component({
   selector: 'app-absences-section',
-  imports: [ReactiveFormsModule, CalendarDatePipe],
+  imports: [ReactiveFormsModule, CalendarDatePipe, Icon, HoldButton],
   templateUrl: './absences-section.html',
 })
 export class AbsencesSection {

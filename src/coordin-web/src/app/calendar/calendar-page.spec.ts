@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -127,6 +128,19 @@ describe('CalendarPage', () => {
     const select = root.querySelector<HTMLSelectElement>(selector)!;
     select.value = value;
     select.dispatchEvent(new Event('change'));
+  };
+
+  /** A confirmação de exclusão é segurar o botão pelo tempo todo (1,6 s). */
+  const hold = async (scope: HTMLElement) => {
+    const holdButton = scope.querySelector<HTMLButtonElement>('.hold-btn');
+    vi.useFakeTimers();
+    try {
+      holdButton?.dispatchEvent(new PointerEvent('pointerdown', { button: 0 }));
+      vi.advanceTimersByTime(1700);
+    } finally {
+      vi.useRealTimers();
+    }
+    await settle();
   };
 
   const click = async (scope: HTMLElement, label: string) => {
@@ -350,7 +364,7 @@ describe('CalendarPage', () => {
         .click();
       await settle();
       http.expectNone((req) => req.method === 'DELETE');
-      await click(scope, 'Confirmar');
+      await hold(scope);
 
       request('DELETE', '/api/absences/a2').flush(null, { status: 204, statusText: 'No Content' });
       await answerLists([ABSENCES[1]]);
@@ -433,7 +447,7 @@ describe('CalendarPage', () => {
         .click();
       await settle();
       http.expectNone((req) => req.method === 'DELETE');
-      await click(scope, 'Confirmar');
+      await hold(scope);
 
       request('DELETE', '/api/holidays/h1').flush(null, { status: 204, statusText: 'No Content' });
       await answerLists(ABSENCES, [HOLIDAYS[1]]);
@@ -445,6 +459,42 @@ describe('CalendarPage', () => {
       await open(ABSENCES, []);
 
       expect(text()).toContain('Ainda não há feriados cadastrados.');
+    });
+  });
+
+  describe('month calendar and hold-to-delete', () => {
+    it('shows the month calendar with the legend of holidays and absences only', async () => {
+      await open();
+
+      const month = root.querySelector('[aria-label="Calendário do mês"]');
+      expect(month).not.toBeNull();
+      expect(month?.textContent).toContain('Feriado');
+      expect(month?.textContent).toContain('Ausência');
+      expect(month?.textContent).not.toContain('Entrega prevista');
+      expect(month?.querySelectorAll('button[aria-pressed]').length).toBe(42);
+    });
+
+    it('does not remove a holiday when the hold button is released early', async () => {
+      await open();
+      const scope = section('Feriados do setor');
+
+      scope
+        .querySelector<HTMLButtonElement>('button[aria-label="Remover feriado de 25/12/2026"]')!
+        .click();
+      await settle();
+      const holdButton = scope.querySelector<HTMLButtonElement>('.hold-btn');
+      vi.useFakeTimers();
+      try {
+        holdButton?.dispatchEvent(new PointerEvent('pointerdown', { button: 0 }));
+        vi.advanceTimersByTime(600);
+        holdButton?.dispatchEvent(new PointerEvent('pointerup'));
+        vi.advanceTimersByTime(2000);
+      } finally {
+        vi.useRealTimers();
+      }
+      await settle();
+
+      http.expectNone((req) => req.method === 'DELETE');
     });
   });
 });

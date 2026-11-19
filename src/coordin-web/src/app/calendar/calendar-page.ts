@@ -1,4 +1,9 @@
 import { Component, inject } from '@angular/core';
+import { Clock } from '../core/dates/calendar-date';
+import { Icon } from '../core/ui/icon';
+import { Loader } from '../core/ui/loader';
+import { PageHeader } from '../core/ui/page-header';
+import { HomeCalendar } from '../home/home-calendar';
 import { AbsencesSection } from './absences-section';
 import { CalendarStore } from './calendar.store';
 import { HolidaysSection } from './holidays-section';
@@ -6,38 +11,15 @@ import { HolidaysSection } from './holidays-section';
 /** Tela "Calendário" (protótipo T08; RF-03): as ausências das pessoas e os feriados do setor. */
 @Component({
   selector: 'app-calendar-page',
-  imports: [AbsencesSection, HolidaysSection],
+  imports: [AbsencesSection, HolidaysSection, PageHeader, Loader, Icon, HomeCalendar],
   providers: [CalendarStore],
-  template: `
-    <h2 class="text-lg font-semibold">Calendário</h2>
-
-    @switch (store.status()) {
-      @case ('loading') {
-        <p class="mt-3 text-slate-600">Carregando…</p>
-      }
-      @case ('failed') {
-        <div role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">
-          <p>Não foi possível carregar o calendário.</p>
-          <button
-            type="button"
-            (click)="store.load()"
-            class="mt-2 rounded-md border border-red-300 px-3 py-1 font-medium hover:bg-red-100"
-          >
-            Tentar de novo
-          </button>
-        </div>
-      }
-      @default {
-        <div class="mt-4 space-y-10">
-          <app-absences-section />
-          <app-holidays-section />
-        </div>
-      }
-    }
-  `,
+  templateUrl: './calendar-page.html',
 })
 export class CalendarPage {
   protected readonly store = inject(CalendarStore);
+  protected readonly today = inject(Clock).today();
+  /** A tela de calendário não carrega o cronograma: o calendário do mês mostra só feriados e ausências. */
+  protected readonly noItems = [] as const;
 
   constructor() {
     this.store.load();
