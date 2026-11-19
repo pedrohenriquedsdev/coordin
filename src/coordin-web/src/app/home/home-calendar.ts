@@ -37,6 +37,8 @@ export class HomeCalendar {
   readonly holidays = input.required<readonly HolidayResponse[]>();
   readonly absences = input.required<readonly AbsenceResponse[]>();
   readonly items = input.required<readonly ScheduleItem[]>();
+  /** Mostra a entrega prevista na legenda (a tela de Calendário não carrega o cronograma e a esconde). */
+  readonly showDeliveries = input(true);
 
   protected readonly weekdays = WEEKDAY_SHORT;
   protected readonly kindLabel = KIND_LABEL;
