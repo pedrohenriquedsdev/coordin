@@ -210,4 +210,25 @@ describe('ScenariosPage', () => {
       'A ordem de execução difere da ordem de prioridade.',
     );
   });
+
+  it('shows the current scenario in numbers: active demands, teams, effort and the sector end', async () => {
+    fixture.detectChanges();
+    await answerSchedule([
+      {
+        ...item('a', 'Alfa'),
+        teams: [
+          { teamId: 't1', teamName: 'Web', estimatedEffortHours: '10' },
+          { teamId: 't2', teamName: 'Dados', estimatedEffortHours: '5' },
+        ],
+        totalEstimatedEffortHours: '15',
+      },
+      { ...item('done', 'Feita', '2027-01-05'), totalEstimatedEffortHours: '99' },
+    ]);
+
+    const overview = element().querySelector('[aria-label="Cenário atual"]')?.textContent ?? '';
+    expect(overview).toContain('15 h'); // só as abertas somam
+    expect(overview).toContain('Demandas ativas');
+    expect(overview).toContain('Times envolvidos');
+    expect(overview).toContain('Entrega prevista (cenário atual)');
+  });
 });

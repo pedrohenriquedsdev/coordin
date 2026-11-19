@@ -1,4 +1,10 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { formatCalendarDate } from '../core/dates/calendar-date';
+import { CountUp, Reveal } from '../core/ui/hub-motion';
+import { Icon } from '../core/ui/icon';
+import { Loader } from '../core/ui/loader';
+import { PageHeader } from '../core/ui/page-header';
+import { summarizeSchedule } from '../schedule/schedule-view';
 import { moveInList, MoveDirection } from './scenario-view';
 import { ResetToPriority } from './reset-to-priority';
 import { ScenarioCard } from './scenario-card';
@@ -15,7 +21,7 @@ const APPLIED_TEXT = 'Ordem de execução alterada. A prioridade registrada não
  */
 @Component({
   selector: 'app-scenarios-page',
-  imports: [ScenarioCard, ResetToPriority],
+  imports: [ScenarioCard, ResetToPriority, PageHeader, Icon, Loader, Reveal, CountUp],
   providers: [ScenariosStore],
   templateUrl: './scenarios-page.html',
 })
@@ -46,6 +52,23 @@ export class ScenariosPage {
       edited.length === current.length &&
       current.every((id) => edited.includes(id));
     return sameDemands ? edited : current;
+  });
+
+  /** Os números do cenário atual (o cronograma vigente), no topo da tela. */
+  protected readonly overview = computed(() => {
+    const items = this.store.schedule()?.items ?? [];
+    const summary = summarizeSchedule(items);
+    const teams = new Set(
+      items
+        .filter((item) => item.completedOn === null)
+        .flatMap((item) => item.teams.map((t) => t.teamId)),
+    );
+    return {
+      active: summary.activeCount,
+      teams: teams.size,
+      effort: summary.openEffortHours.toLocaleString('pt-BR', { maximumFractionDigits: 2 }),
+      end: summary.sectorEnd ? formatCalendarDate(summary.sectorEnd) : '—',
+    };
   });
 
   protected readonly busy = computed(() => this.store.busy() !== 'idle');
