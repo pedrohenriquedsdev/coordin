@@ -4,6 +4,8 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { safeReturnUrl } from '../core/auth/return-url';
 import { SessionService } from '../core/auth/session.service';
+import { Icon, type IconName } from '../core/ui/icon';
+import { ThemeService } from '../core/ui/theme.service';
 
 const INVALID_CREDENTIALS =
   'E-mail ou senha inválidos. Após 5 tentativas erradas, o acesso é bloqueado por 15 minutos.';
@@ -13,20 +15,34 @@ const UNAVAILABLE = 'Não foi possível entrar agora. Tente novamente em instant
 /** Tela de login do gestor (protótipo T01). Não existe cadastro: a conta nasce da configuração (DT-29). */
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, Icon],
   templateUrl: './login.html',
 })
 export class Login {
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  protected readonly theme = inject(ThemeService);
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     email: ['', Validators.required],
     password: ['', Validators.required],
   });
 
+  protected readonly previewMenu = ['Painel', 'Times', 'Demandas', 'Planejamento', 'Relatórios'];
+  protected readonly previewKpis = [
+    { label: 'Demandas ativas', value: '48' },
+    { label: 'Entrega prevista', value: '24/03' },
+    { label: 'Capacidade dos times', value: '92%' },
+  ];
+  protected readonly features: { icon: IconName; title: string; text: string }[] = [
+    { icon: 'report', title: 'Previsões precisas', text: 'Planeje com dados reais' },
+    { icon: 'teams', title: 'Times alinhados', text: 'Maximize a capacidade' },
+    { icon: 'bolt', title: 'Decisões estratégicas', text: 'Com mais confiança' },
+  ];
+
   protected readonly submitting = signal(false);
+  protected readonly showPassword = signal(false);
   protected readonly error = signal<string | null>(null);
 
   /** Mostra o aviso de campo obrigatório depois que o campo foi tocado ou o envio foi tentado. */

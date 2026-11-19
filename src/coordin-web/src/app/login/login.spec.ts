@@ -64,7 +64,7 @@ describe('Login', () => {
   it('shows the fields and the button in pt-BR', async () => {
     await open();
 
-    expect(root.querySelector('h2')?.textContent).toContain('Entrar');
+    expect(root.querySelector('h2')?.textContent).toContain('Acesse sua conta');
     expect(root.querySelector('label[for=email]')?.textContent).toContain('E-mail');
     expect(root.querySelector('label[for=password]')?.textContent).toContain('Senha');
     expect(root.querySelector('button[type=submit]')?.textContent).toContain('Entrar');
