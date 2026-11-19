@@ -1,4 +1,5 @@
 import type { ChartConfiguration } from '../charts/chart-setup';
+import { ChartTheme, LIGHT_CHART_THEME } from '../charts/chart-theme';
 import { formatCalendarDate } from '../core/dates/calendar-date';
 import { deviationLabel } from '../planning/labels';
 import { ValidationResult } from '../api/models/validation-result';
@@ -6,11 +7,26 @@ import { deviationChartSeries, efficiencyChartSeries, priorityRows, toNumber } f
 
 /** Cores dos gráficos da validação. O planejamento com o Coordin usa o verde de destaque. */
 export const RESULT_COLORS = {
-  currentProcess: '#64748b',
-  withCoordin: '#0f766e',
-  signed: '#334155',
-  absolute: '#cbd5e1',
+  currentProcess: '#2f8cff',
+  withCoordin: '#1ec1cb',
+  signed: '#2f8cff',
+  absolute: '#1ec1cb',
 } as const;
+
+function chartOptions(
+  theme: ChartTheme,
+  beginAtZero: boolean,
+): ChartConfiguration<'bar'>['options'] {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: { grid: { display: false }, ticks: { color: theme.text } },
+      y: { beginAtZero, grid: { color: theme.grid }, ticks: { color: theme.text } },
+    },
+    plugins: { legend: { position: 'bottom', labels: { color: theme.text, usePointStyle: true } } },
+  };
+}
 
 /** Um número com uma casa decimal, com a vírgula do pt-BR. O gráfico e a tabela usam o mesmo número. */
 export function formatMetric(value: number): string {
@@ -21,7 +37,10 @@ export function formatMetric(value: number): string {
  * Configuração do gráfico de eficiência (RF-24; DT-36): uma barra por métrica, uma cor por planejamento. Função
  * pura: os números vêm do resultado da API.
  */
-export function buildEfficiencyChart(result: ValidationResult): ChartConfiguration<'bar'> {
+export function buildEfficiencyChart(
+  result: ValidationResult,
+  theme: ChartTheme = LIGHT_CHART_THEME,
+): ChartConfiguration<'bar'> {
   const series = efficiencyChartSeries(result);
   return {
     type: 'bar',
@@ -32,20 +51,17 @@ export function buildEfficiencyChart(result: ValidationResult): ChartConfigurati
           label: 'Planejamento atual',
           data: series.currentProcess,
           backgroundColor: RESULT_COLORS.currentProcess,
+          borderRadius: 6,
         },
         {
           label: 'Com o Coordin',
           data: series.withCoordin,
           backgroundColor: RESULT_COLORS.withCoordin,
+          borderRadius: 6,
         },
       ],
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: { y: { beginAtZero: true } },
-      plugins: { legend: { position: 'bottom' } },
-    },
+    options: chartOptions(theme, true),
   };
 }
 
@@ -53,7 +69,10 @@ export function buildEfficiencyChart(result: ValidationResult): ChartConfigurati
  * Configuração do gráfico de desvios (RF-24; DT-36): para a linha de base e para o Coordin, a média com sinal e a
  * média absoluta, em dias corridos. Positivo é atraso.
  */
-export function buildDeviationChart(result: ValidationResult): ChartConfiguration<'bar'> {
+export function buildDeviationChart(
+  result: ValidationResult,
+  theme: ChartTheme = LIGHT_CHART_THEME,
+): ChartConfiguration<'bar'> {
   const series = deviationChartSeries(result);
   return {
     type: 'bar',
@@ -64,19 +83,17 @@ export function buildDeviationChart(result: ValidationResult): ChartConfiguratio
           label: 'Média com sinal (dias)',
           data: series.signed,
           backgroundColor: RESULT_COLORS.signed,
+          borderRadius: 6,
         },
         {
           label: 'Média absoluta (dias)',
           data: series.absolute,
           backgroundColor: RESULT_COLORS.absolute,
+          borderRadius: 6,
         },
       ],
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom' } },
-    },
+    options: chartOptions(theme, false),
   };
 }
 
