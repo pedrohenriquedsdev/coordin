@@ -36,6 +36,11 @@ export const ICON_PATHS = {
   info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM12 16v-4M12 8h.01',
   alert:
     'M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z',
+  arrowUp: 'M12 19V5M5 12l7-7 7 7',
+  arrowDown: 'M12 5v14M19 12l-7 7-7-7',
+  edit: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z',
+  history: 'M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l4 2',
+  plus: 'M12 5v14M5 12h14',
   bolt: 'M13 2 4 14h7l-1 8 9-12h-7l1-8Z',
   menu: 'M3 6h18M3 12h18M3 18h18',
   close: 'M18 6 6 18M6 6l12 12',

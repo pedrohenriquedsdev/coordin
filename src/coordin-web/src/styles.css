@@ -263,6 +263,15 @@
   zoom: 0.9;
 }
 
+/* No tema escuro, `white` vira um tom escuro dentro da área; bordas e fundos de campos precisam ser claros de verdade para aparecer. */
+html[data-theme='dark'] .app-shell :is(.card, .field, .btn-secondary, main table) {
+  border-color: rgb(255 255 255 / 0.18);
+}
+html[data-theme='dark'] .app-shell .field {
+  background-color: rgb(255 255 255 / 0.07);
+  color-scheme: dark;
+}
+
 /* A cor do texto é definida DENTRO da área, onde as variáveis do tema escuro valem; no `body` ela ficaria escura também no tema escuro. */
 .app-shell {
   color: var(--color-slate-900);
