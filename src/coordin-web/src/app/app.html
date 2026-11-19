@@ -1,102 +1,84 @@
-<div class="flex min-h-screen flex-col bg-slate-50 text-slate-900">
-  <header class="border-b border-slate-200 bg-white">
-    <div
-      class="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 sm:px-6"
+<!-- Autenticado: menu lateral no computador, barra no topo com menu recolhível no celular. -->
+@if (session.isAuthenticated()) {
+  <div class="min-h-screen lg:grid lg:grid-cols-[16rem_1fr]">
+    <header
+      class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur-md lg:h-screen lg:border-r lg:border-b-0"
     >
-      <h1 class="text-xl font-bold tracking-tight">Coordin</h1>
-
-      <!-- Só com sessão: na tela de login não há para onde navegar. -->
-      @if (session.isAuthenticated()) {
-        <nav aria-label="Principal" class="flex flex-1 flex-wrap items-center gap-1">
-          <a
-            routerLink="/"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-          >
-            Cronograma
-          </a>
-          <a
-            routerLink="/demands"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-          >
-            Demandas
-          </a>
-          <a
-            routerLink="/scenarios"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-          >
-            Cenários
-          </a>
-          <a
-            routerLink="/reports/teams"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-          >
-            Relatório por time
-          </a>
-          <a
-            routerLink="/reports/accuracy"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-          >
-            Precisão
-          </a>
-          <a
-            routerLink="/teams"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-          >
-            Times e pessoas
-          </a>
-          <a
-            routerLink="/calendar"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-          >
-            Calendário
-          </a>
-          @if (availability.available()) {
-            <a
-              routerLink="/validation"
-              routerLinkActive="bg-slate-100 text-slate-900"
-              ariaCurrentWhenActive="page"
-              class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
+      <div class="flex h-full flex-col">
+        <div class="flex items-center justify-between gap-3 px-4 py-3 lg:px-6 lg:py-6">
+          <h1 class="flex items-center gap-2.5 text-xl font-bold tracking-tight text-black">
+            <span
+              class="relative grid h-9 w-9 place-items-center bg-black text-base font-bold text-white"
+              aria-hidden="true"
             >
-              Validação
-            </a>
-          }
-          <a
-            routerLink="/settings"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
+              C
+              <span class="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-magenta"></span>
+            </span>
+            Coordin
+          </h1>
+
+          <button
+            type="button"
+            class="btn-secondary px-2.5 py-2 lg:hidden"
+            [attr.aria-expanded]="menuOpen()"
+            aria-controls="main-nav"
+            (click)="toggleMenu()"
           >
-            Configurações
-          </a>
-        </nav>
+            <app-icon [name]="menuOpen() ? 'close' : 'menu'" />
+            <span class="sr-only">{{ menuOpen() ? 'Fechar menu' : 'Abrir menu' }}</span>
+          </button>
+        </div>
 
-        <button
-          type="button"
-          (click)="signOut()"
-          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
+        <!-- Em telas pequenas o menu abre sob a barra; no computador está sempre visível. -->
+        <div
+          id="main-nav"
+          class="flex-1 flex-col overflow-y-auto px-3 pb-4 lg:flex"
+          [class.hidden]="!menuOpen()"
+          [class.flex]="menuOpen()"
         >
-          Sair
-        </button>
-      }
-    </div>
-  </header>
+          <nav aria-label="Principal" class="flex flex-1 flex-col gap-6">
+            @for (group of groups(); track group.title) {
+              <div>
+                <p
+                  class="px-3 pb-1.5 text-[0.68rem] font-semibold tracking-widest text-slate-400 uppercase"
+                >
+                  {{ group.title }}
+                </p>
+                <div class="flex flex-col gap-0.5">
+                  @for (item of group.items; track item.path) {
+                    <a
+                      [routerLink]="item.path"
+                      [routerLinkActiveOptions]="{ exact: item.exact }"
+                      routerLinkActive="bg-brand-50 text-brand-700 shadow-[inset_3px_0_0_0_var(--color-violet)]"
+                      ariaCurrentWhenActive="page"
+                      (click)="closeMenu()"
+                      class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-black"
+                    >
+                      <app-icon [name]="item.icon" />
+                      {{ item.label }}
+                    </a>
+                  }
+                </div>
+              </div>
+            }
+          </nav>
 
-  <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">
+          <button type="button" (click)="signOut()" class="btn-secondary mt-6 w-full">
+            <app-icon name="logout" />
+            Sair
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto w-full max-w-6xl min-w-0 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+      <router-outlet />
+    </main>
+  </div>
+} @else {
+  <!-- Sem sessão (tela de login): sem menu; o `header` leva só a marca. -->
+  <header class="sr-only"><h1>Coordin</h1></header>
+  <main class="min-h-screen">
     <router-outlet />
   </main>
-</div>
+}

@@ -1,1 +1,212 @@
 @import 'tailwindcss';
+
+/* `dark:` passa a depender do atributo `data-theme="dark"` (definido pelo ThemeService). */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* Poppins (SIL OFL, ver public/fonts/Poppins-OFL.txt), servida do próprio site: a CSP só aceita `font-src 'self'`. */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/poppins-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/poppins-latin-500-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/poppins-latin-600-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/poppins-latin-700-normal.woff2') format('woff2');
+}
+
+/*
+ * Design system do Coordin.
+ *
+ * A ideia: em vez de reescrever cada tela, trocamos os "tokens" (cores, raios, sombras) que o Tailwind
+ * usa. Toda classe `bg-slate-*`, `rounded-md` etc. já existente passa a refletir o novo visual, e as
+ * peças novas (botões, cartões, campos) usam as classes de componente definidas mais abaixo.
+ * Sem fonte externa: a CSP do projeto só aceita `font-src 'self'`.
+ */
+@theme {
+  --font-poppins: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  --font-sans: 'Poppins', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Marca: índigo. Usada em ação principal, foco e item ativo do menu. */
+  --color-brand-50: #f3edff;
+  --color-brand-100: #e7dbff;
+  --color-brand-200: #d0b8ff;
+  --color-brand-300: #b48aff;
+  --color-brand-400: #9552ff;
+  --color-brand-500: #7a29ff;
+  --color-brand-600: #5700ff;
+  --color-brand-700: #4a00d9;
+  --color-brand-800: #3d00b3;
+  --color-brand-900: #2f008c;
+  --color-brand-950: #1c0055;
+
+  /* Neutros levemente azulados: menos "cinza de planilha", mais calmos para leitura longa. */
+  --color-slate-50: #fbf8fb;
+  --color-slate-100: #f3eff3;
+  --color-slate-200: #e6e1e6;
+  --color-slate-300: #cfcfd4;
+  --color-slate-400: #9d9da5;
+  --color-slate-500: #6e6e78;
+  --color-slate-600: #555560;
+  --color-slate-700: #3d3d47;
+  --color-slate-800: #26262e;
+  --color-slate-900: #141418;
+  --color-slate-950: #0a0a0d;
+
+  /* Vermelho e laranja da paleta do projeto, para erros e avisos. */
+  --color-red-700: #cc0000;
+  --color-red-800: #a30000;
+  --color-amber-800: #b33c00;
+  --color-amber-900: #8a2e00;
+
+  /* Paleta da tela de login (identidade do projeto). */
+  --color-aqua: #1febcc;
+  --color-magenta: #ed008c;
+  --color-violet: #5700ff;
+  --color-ember: #e24b00;
+  --color-danger: #cc0000;
+
+  --animate-float: float 6s ease-in-out infinite;
+
+  --shadow-card: 0 1px 2px rgb(23 26 46 / 0.04), 0 4px 16px rgb(23 26 46 / 0.05);
+  --shadow-pop: 0 8px 30px rgb(79 70 229 / 0.18);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-[#fdf9fb] font-sans text-slate-900 antialiased;
+  }
+
+  /* Manchas de cor suaves e fixas atrás de todas as telas (as mesmas do login). */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      radial-gradient(38rem 24rem at 0% 6%, rgb(247 182 214 / 0.45), transparent 65%),
+      radial-gradient(34rem 24rem at 100% 10%, rgb(246 107 240 / 0.18), transparent 65%),
+      radial-gradient(40rem 26rem at 75% 100%, rgb(79 220 245 / 0.2), transparent 65%);
+  }
+
+  /* Tabelas: cabeçalho discreto em caixa alta, linhas que respondem ao ponteiro. */
+  main table {
+    @apply border border-slate-200 bg-white;
+  }
+  main thead th {
+    @apply bg-slate-50 text-[0.7rem] font-semibold tracking-wider text-slate-500 uppercase;
+  }
+  main td:first-child,
+  main th:first-child {
+    padding-left: 0.75rem;
+  }
+  main tbody tr:hover {
+    @apply bg-slate-50/70;
+  }
+  main h2 {
+    @apply text-black;
+  }
+
+  /* Foco visível e consistente em tudo que é interativo (RNF-03). */
+  :where(a, button, input, select, textarea, summary):focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+
+  ::selection {
+    @apply bg-brand-200 text-brand-950;
+  }
+}
+
+@layer components {
+  /* Cartão: superfície branca com sombra suave. */
+  .card {
+    @apply rounded-xl border border-slate-200 bg-white/85 shadow-card backdrop-blur-sm;
+  }
+
+  /* Botões. Cada variante só muda a aparência; tamanho e foco vêm do `.btn`. */
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply bg-black text-white shadow-sm hover:bg-brand-600;
+  }
+  .btn-secondary {
+    @apply border border-slate-300 bg-white text-slate-700 hover:bg-slate-100;
+  }
+  .btn-danger {
+    @apply border border-red-300 bg-white text-red-700 hover:bg-red-50;
+  }
+
+  /* Versão compacta, para ações dentro de tabelas e cartões. */
+  .btn-sm {
+    @apply px-2.5 py-1 text-xs;
+  }
+
+  /* Campos de formulário. */
+  .field {
+    @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-black focus:outline-none focus:ring-1 focus:ring-black aria-[invalid=true]:border-red-500;
+  }
+
+  /* Pílulas de status (sempre com texto: a cor nunca é o único sinal). */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+}
+
+/* Tela de login um pouco menor (90%). A altura mínima compensa o zoom, para o fundo ocupar a tela toda. */
+.zoom-90 {
+  zoom: 0.9;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Tabelas largas rolam dentro do próprio contêiner, nunca a página inteira (RNF-03). */
+.table-scroll {
+  overflow-x: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
