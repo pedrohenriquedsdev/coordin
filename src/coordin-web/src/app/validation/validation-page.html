@@ -1,49 +1,99 @@
-<h2 class="text-lg font-semibold">Validação por simulação</h2>
+<app-page-header
+  eyebrow="Análise"
+  title="Validação por simulação"
+  description="Compare o seu planejamento atual com o planejamento do Coordin sobre um conjunto fictício, em quatro etapas. Esta área existe só para validar o sistema."
+/>
 
 @switch (store.load()) {
   @case ('loading') {
-    <p class="mt-3 text-slate-600">Carregando…</p>
+    <div class="card p-6"><app-loader label="Carregando…" /></div>
   }
   @case ('unavailable') {
-    <p class="mt-3 rounded-md bg-slate-100 p-3 text-sm text-slate-700">
-      A validação não está disponível neste ambiente.
-    </p>
+    <div class="card p-8 text-center text-sm text-slate-700">
+      <p>A validação não está disponível neste ambiente.</p>
+    </div>
   }
   @case ('failed') {
-    <div role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">
-      <p>Não foi possível carregar a validação.</p>
-      <button
-        type="button"
-        (click)="store.refresh()"
-        class="mt-2 rounded-md border border-red-300 px-3 py-1 font-medium hover:bg-red-100"
-      >
+    <div role="alert" class="card border-red-700/50 p-5 text-sm">
+      <p class="font-semibold text-red-800">Não foi possível carregar a validação.</p>
+      <button type="button" (click)="store.refresh()" class="btn-danger btn-sm mt-3 rounded-full">
         Tentar de novo
       </button>
     </div>
   }
   @default {
     @if (store.message(); as message) {
-      <p role="status" class="mt-3 rounded-md bg-slate-100 p-3 text-sm text-slate-800">
-        {{ message }}
+      <p
+        role="status"
+        class="card mb-4 flex items-center gap-2 p-3 text-sm font-medium text-slate-800"
+      >
+        <app-icon name="info" /> {{ message }}
       </p>
     }
 
     @if (store.step(); as step) {
-      <section class="mt-4 rounded-md border border-slate-200 bg-white p-4">
-        <p class="text-sm text-slate-500">Etapa atual</p>
-        <h3 class="text-base font-semibold">{{ stepLabel(step) }}</h3>
+      <!-- Indicador de etapas -->
+      <ol aria-label="Etapas da validação" class="mb-5 grid gap-3 sm:grid-cols-4">
+        @for (item of steps; track item.id; let i = $index) {
+          <li
+            class="flex items-center gap-3 rounded-2xl border p-3"
+            [class]="
+              i === stepIndex()
+                ? 'border-brand-500/70 bg-brand-500/15'
+                : 'border-white/50 bg-white/25 dark:border-white/15 dark:bg-white/5'
+            "
+            [attr.aria-current]="i === stepIndex() ? 'step' : null"
+          >
+            <span
+              class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-extrabold"
+              [class]="
+                i < stepIndex()
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-400/25 dark:text-emerald-300'
+                  : i === stepIndex()
+                    ? 'bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]'
+                    : 'bg-slate-200/70 text-slate-600 dark:bg-white/10'
+              "
+            >
+              @if (i < stepIndex()) {
+                <app-icon name="check" />
+              } @else {
+                {{ i + 1 }}
+              }
+            </span>
+            <span class="min-w-0">
+              <span class="block text-sm font-bold text-slate-900">{{ item.short }}</span>
+              <span class="block text-xs text-slate-600">{{
+                i < stepIndex() ? 'Concluída' : i === stepIndex() ? 'Em andamento' : 'Pendente'
+              }}</span>
+            </span>
+          </li>
+        }
+      </ol>
+
+      <section class="card p-5 sm:p-6">
+        <p class="text-xs font-semibold tracking-wide text-brand-700 uppercase">Etapa atual</p>
+        <h3 class="mt-0.5 text-xl font-extrabold tracking-tight text-slate-900">
+          {{ stepLabel(step) }}
+        </h3>
 
         @switch (step) {
           @case ('load') {
-            <p class="mt-2 text-sm text-slate-700">
-              Carregar o conjunto fictício <strong>substitui todo o planejamento</strong>: times,
-              pessoas, demandas, previsões, linha de base e o planejamento guardado.
+            <p
+              class="mt-3 flex items-start gap-2 rounded-2xl bg-amber-100 p-3 text-sm font-medium text-amber-900 dark:bg-amber-400/20 dark:text-amber-300"
+            >
+              <app-icon name="alert" />
+              <span>
+                Carregar o conjunto fictício <strong>substitui todo o planejamento</strong>: times,
+                pessoas, demandas, previsões, linha de base e o planejamento guardado.
+              </span>
             </p>
-            <form class="mt-3 space-y-3" (submit)="submit($event, () => store.loadDataset())">
-              <label class="flex items-start gap-2 text-sm text-slate-700">
+            <form class="mt-4 space-y-4" (submit)="submit($event, () => store.loadDataset())">
+              <label
+                class="flex cursor-pointer items-start gap-2.5 text-sm font-medium text-slate-800"
+              >
                 <input
                   type="checkbox"
-                  class="mt-1"
+                  class="mt-0.5"
                   [checked]="store.confirmed()"
                   (change)="onConfirm($event)"
                 />
@@ -52,7 +102,7 @@
               <button
                 type="submit"
                 [disabled]="!store.confirmed() || store.busy() !== 'idle'"
-                class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+                class="btn-primary rounded-full px-6"
               >
                 Carregar conjunto fictício
               </button>
@@ -60,29 +110,39 @@
           }
 
           @case ('baseline') {
-            <p class="mt-2 text-sm text-slate-700">
+            <p class="mt-3 text-sm text-slate-700">
               Informe a data que você comunicaria ao gestor de produto sem o sistema, para cada
-              demanda. Faltam {{ store.missingDates() }} de {{ store.baseline().length }}.
+              demanda. Faltam
+              {{ store.missingDates() }} de {{ store.baseline().length }}.
             </p>
-            <form class="mt-3 space-y-2" (submit)="submit($event, () => store.saveBaseline())">
+            <div
+              class="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10"
+              aria-hidden="true"
+            >
+              <div
+                class="h-full rounded-full bg-linear-to-r from-brand-500 to-azure-500 transition-all duration-500"
+                [style.width.%]="baselinePercent()"
+              ></div>
+            </div>
+            <form class="mt-4 space-y-2" (submit)="submit($event, () => store.saveBaseline())">
               @for (item of store.baseline(); track item.demandId) {
                 <div
-                  class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 py-2"
+                  class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/50 bg-white/30 px-3 py-2 dark:border-white/15 dark:bg-white/5"
                 >
-                  <span class="text-sm text-slate-800">{{ item.title }}</span>
+                  <span class="text-sm font-semibold text-slate-900">{{ item.title }}</span>
                   <input
                     type="date"
                     [attr.aria-label]="'Data da linha de base de ' + item.title"
                     [value]="store.dates()[item.demandId] ?? ''"
                     (input)="onDate(item.demandId, $event)"
-                    class="rounded-md border border-slate-300 px-2 py-1 text-sm"
+                    class="field w-auto text-sm"
                   />
                 </div>
               }
               <button
                 type="submit"
                 [disabled]="store.missingDates() > 0 || store.busy() !== 'idle'"
-                class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+                class="btn-primary mt-2 rounded-full px-6"
               >
                 Salvar linha de base
               </button>
@@ -90,14 +150,14 @@
           }
 
           @case ('plan') {
-            <p class="mt-2 text-sm text-slate-700">
+            <p class="mt-3 text-sm text-slate-700">
               Guarde o planejamento do processo atual. Ele fica registrado e não muda depois.
             </p>
-            <form class="mt-3" (submit)="submit($event, () => store.capturePlan())">
+            <form class="mt-4" (submit)="submit($event, () => store.capturePlan())">
               <button
                 type="submit"
                 [disabled]="store.busy() !== 'idle'"
-                class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+                class="btn-primary rounded-full px-6"
               >
                 Guardar planejamento atual
               </button>
@@ -107,58 +167,60 @@
           @case ('compare') {
             @if (store.status(); as status) {
               @if (status.currentPlanCapturedAt; as capturedAt) {
-                <p class="mt-2 text-sm text-slate-700">
+                <p
+                  class="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800 dark:bg-emerald-400/20 dark:text-emerald-300"
+                >
+                  <app-icon name="check" />
                   Planejamento guardado em
                   {{ capturedAt | date: 'dd/MM/yyyy HH:mm' : 'America/Sao_Paulo' }}.
                 </p>
               }
             }
-            <p class="mt-2 text-sm text-slate-700">
-              A comparação não grava nada: ela só calcula e mostra o resultado.
+            <p class="mt-3 flex items-start gap-2 text-sm text-slate-700">
+              <app-icon name="info" />
+              <span>A comparação não grava nada: ela só calcula e mostra o resultado.</span>
             </p>
             <form
-              class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3"
+              class="mt-4 grid grid-cols-1 items-end gap-4 sm:grid-cols-4"
               (submit)="submit($event, () => store.evaluate())"
             >
-              <label class="text-sm text-slate-700">
+              <label class="text-sm font-semibold text-slate-800">
                 Fator mínimo do esforço
                 <input
                   type="number"
                   step="0.01"
                   [value]="store.params().minEffortFactor"
                   (input)="onNumber('minEffortFactor', $event)"
-                  class="mt-1 w-full rounded-md border border-slate-300 px-2 py-1"
+                  class="field mt-1 w-full font-normal"
                 />
               </label>
-              <label class="text-sm text-slate-700">
+              <label class="text-sm font-semibold text-slate-800">
                 Fator máximo do esforço
                 <input
                   type="number"
                   step="0.01"
                   [value]="store.params().maxEffortFactor"
                   (input)="onNumber('maxEffortFactor', $event)"
-                  class="mt-1 w-full rounded-md border border-slate-300 px-2 py-1"
+                  class="field mt-1 w-full font-normal"
                 />
               </label>
-              <label class="text-sm text-slate-700">
+              <label class="text-sm font-semibold text-slate-800">
                 Semente
                 <input
                   type="number"
                   step="1"
                   [value]="store.params().seed"
                   (input)="onNumber('seed', $event)"
-                  class="mt-1 w-full rounded-md border border-slate-300 px-2 py-1"
+                  class="field mt-1 w-full font-normal"
                 />
               </label>
-              <div class="sm:col-span-3">
-                <button
-                  type="submit"
-                  [disabled]="store.busy() !== 'idle'"
-                  class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
-                >
-                  Comparar
-                </button>
-              </div>
+              <button
+                type="submit"
+                [disabled]="store.busy() !== 'idle'"
+                class="btn-primary h-11 rounded-full px-6"
+              >
+                Comparar
+              </button>
             </form>
 
             @if (store.result(); as result) {
