@@ -128,4 +128,24 @@ describe('ScenarioCard', () => {
     button(root, 'Rejeitar')?.click();
     expect(rejected).toHaveLength(1);
   });
+
+  it('labels the verdict: improves, worsens or the same, from the criterion difference', () => {
+    expect(render().textContent).toContain('Melhora o critério');
+
+    const worse = scenario({ score: { current: 100, scenario: 130, delta: 30 } });
+    fixture = TestBed.createComponent(ScenarioCard);
+    expect(render(worse).textContent).toContain('Piora o critério');
+
+    const same = scenario({ score: { current: 100, scenario: 100, delta: 0 } });
+    fixture = TestBed.createComponent(ScenarioCard);
+    expect(render(same).textContent).toContain('Critério igual');
+  });
+
+  it('writes each demand difference in words, with the direction as text', () => {
+    const root = render();
+    const table = root.querySelector('[aria-label="Demandas do cenário"]')?.textContent ?? '';
+
+    expect(table).toContain('3 dias de atraso');
+    expect(table).toContain('5 dias antes');
+  });
 });
