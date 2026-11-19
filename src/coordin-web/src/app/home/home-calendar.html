@@ -42,12 +42,12 @@
       class="relative flex h-12 flex-col items-center justify-center rounded-xl border text-sm transition-colors"
       [class]="
         date === selected()
-          ? 'border-transparent bg-linear-to-br from-brand-500 to-azure-500 font-bold text-[#04282b] shadow-pop'
+          ? 'border-transparent bg-linear-to-br from-brand-500 to-azure-500 font-bold text-[#021a1d] shadow-pop'
           : date === today()
             ? 'border-brand-400 bg-brand-50 font-semibold text-brand-700'
             : inMonth(date)
               ? 'border-transparent text-slate-800 hover:bg-white/70 dark:hover:bg-white/10'
-              : 'border-transparent text-slate-400 hover:bg-white/40'
+              : 'border-transparent text-slate-500 hover:bg-white/40'
       "
       [attr.aria-label]="label(date)"
       [attr.aria-pressed]="date === selected()"
@@ -65,7 +65,7 @@
                 : kind === 'absence'
                   ? 'bg-aqua'
                   : date === selected()
-                    ? 'bg-[#04282b]'
+                    ? 'bg-[#021a1d]'
                     : 'bg-azure-500'
             "
           ></span>

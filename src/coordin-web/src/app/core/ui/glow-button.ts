@@ -13,6 +13,8 @@ import {
 const FREQUENCY = 3.4;
 const DAMPING = 0.78;
 const GLOW_RISE = 0.5;
+// O quanto do brilho da borda aparece (1 = máximo). Baixo, para o botão ficar discreto.
+const GLOW_STRENGTH = 0.4;
 
 /**
  * Botão com uma luz que persegue o cursor, com física de mola, e um brilho na borda do lado em que
@@ -92,8 +94,8 @@ export class GlowButton {
         const magnitude = Math.abs(normalized);
         const intensity = Math.pow(magnitude, GLOW_RISE);
         const tuning = `saturate(${(1 + 0.4 * magnitude).toFixed(3)}) brightness(${(1 + 0.1 * magnitude).toFixed(3)})`;
-        rightGlow.style.opacity = (normalized > 0 ? intensity : 0).toFixed(3);
-        leftGlow.style.opacity = (normalized < 0 ? intensity : 0).toFixed(3);
+        rightGlow.style.opacity = (normalized > 0 ? intensity * GLOW_STRENGTH : 0).toFixed(3);
+        leftGlow.style.opacity = (normalized < 0 ? intensity * GLOW_STRENGTH : 0).toFixed(3);
         rightGlow.style.filter = tuning;
         leftGlow.style.filter = tuning;
       };
