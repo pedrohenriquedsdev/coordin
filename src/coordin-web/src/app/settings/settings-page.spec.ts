@@ -7,7 +7,7 @@ import {
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideApiConfiguration } from '../api/api-configuration';
 import { provideLocalePtBr } from '../core/locale';
-import { parseMargin, SettingsPage } from './settings-page';
+import { daysWithMargin, parseMargin, SettingsPage } from './settings-page';
 
 /** Estes testes rodam também com TZ=Asia/Tokyo e America/Los_Angeles (RNF-07). */
 describe('SettingsPage', () => {
@@ -146,6 +146,82 @@ describe('SettingsPage', () => {
 
     expect(input().value).toBe('20');
   });
+
+  describe('example, shortcuts and appearance', () => {
+    const exampleText = (): string =>
+      (element().querySelector('[aria-live="polite"]')?.textContent ?? '').replace(/\s+/g, ' ');
+
+    it('shows how many days a 20-day demand has with the margin in force', async () => {
+      await open(20);
+
+      expect(exampleText()).toContain('20 dias sem margem passa a ter 24 dias com margem');
+    });
+
+    it('follows the typing, rounds up, and never goes below the base', async () => {
+      await open(20);
+
+      type('5');
+      fixture.detectChanges();
+      expect(exampleText()).toContain('21 dias com margem'); // 20 × 1,05 = 21
+
+      type('0');
+      fixture.detectChanges();
+      expect(exampleText()).toContain('20 dias com margem');
+
+      type('12,5');
+      fixture.detectChanges();
+      expect(exampleText()).toContain('23 dias com margem'); // 22,5 sobe para 23
+    });
+
+    it('asks for a valid margin instead of showing an example for a bad value', async () => {
+      await open(20);
+
+      type('abc');
+      fixture.detectChanges();
+
+      expect(exampleText()).toContain('Digite uma margem válida');
+    });
+
+    it('fills the field from a shortcut and from the slider', async () => {
+      await open(20);
+
+      [...element().querySelectorAll('button')]
+        .find((b) => b.textContent?.trim() === '30%')
+        ?.click();
+      fixture.detectChanges();
+      expect(input().value).toBe('30');
+
+      const slider = element().querySelector<HTMLInputElement>('#margin-slider')!;
+      slider.value = '45';
+      slider.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      expect(input().value).toBe('45');
+    });
+
+    it('offers the light and dark themes, with the chosen one marked', async () => {
+      localStorage.setItem('coordin-theme', 'light');
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          provideApiConfiguration(''),
+          provideLocalePtBr(),
+        ],
+      });
+      http = TestBed.inject(HttpTestingController);
+      fixture = TestBed.createComponent(SettingsPage);
+      await open(20);
+
+      const buttons = [...element().querySelectorAll('[aria-label="Tema"] button')];
+      expect(buttons[0].getAttribute('aria-pressed')).toBe('true');
+
+      (buttons[1] as HTMLButtonElement).click();
+      fixture.detectChanges();
+      expect(buttons[1].getAttribute('aria-pressed')).toBe('true');
+      localStorage.removeItem('coordin-theme');
+    });
+  });
 });
 
 describe('parseMargin', () => {
@@ -162,5 +238,15 @@ describe('parseMargin', () => {
     ['abc', null],
   ])('reads "%s"', (text, expected) => {
     expect(parseMargin(text)).toBe(expected);
+  });
+});
+
+describe('daysWithMargin', () => {
+  it('rounds up and never shortens the duration', () => {
+    expect(daysWithMargin(20, 0)).toBe(20);
+    expect(daysWithMargin(20, 20)).toBe(24);
+    expect(daysWithMargin(20, 12.5)).toBe(23);
+    expect(daysWithMargin(7, 10)).toBe(8); // 7,7 sobe para 8
+    expect(daysWithMargin(20, 0.01)).toBe(21); // qualquer margem positiva amplia
   });
 });
