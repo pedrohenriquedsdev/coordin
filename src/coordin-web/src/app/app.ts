@@ -1,5 +1,7 @@
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter, map } from 'rxjs';
 import { SessionService } from './core/auth/session.service';
 import { ThemeService } from './core/ui/theme.service';
 import { Icon, IconName } from './core/ui/icon';
@@ -22,6 +24,10 @@ interface NavGroup {
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
+  host: {
+    '(document:keydown.escape)': 'closeAll()',
+    '(document:click)': 'onDocumentClick($event)',
+  },
 })
 export class App {
   private readonly router = inject(Router);
@@ -35,6 +41,17 @@ export class App {
 
   /** Menu recolhível no celular; no computador o menu lateral está sempre aberto. */
   protected readonly menuOpen = signal(false);
+
+  /** Grupo do menu com a lista aberta no computador (só um por vez). */
+  protected readonly openGroup = signal<string | null>(null);
+
+  private readonly url = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects.split(/[?#]/)[0]),
+    ),
+    { initialValue: this.router.url.split(/[?#]/)[0] },
+  );
 
   /** Itens do menu, agrupados por intenção: planejar, analisar e cadastrar. */
   protected readonly groups = computed<readonly NavGroup[]>(() => {
@@ -68,12 +85,38 @@ export class App {
     ];
   });
 
+  /** O grupo está "ativo" quando a tela aberta é um dos seus itens. */
+  protected isGroupActive(group: NavGroup): boolean {
+    const url = this.url();
+    return group.items.some((item) =>
+      item.exact ? url === item.path : url === item.path || url.startsWith(`${item.path}/`),
+    );
+  }
+
+  protected toggleGroup(title: string): void {
+    this.openGroup.update((open) => (open === title ? null : title));
+  }
+
+  protected closeAll(): void {
+    this.openGroup.set(null);
+    this.menuOpen.set(false);
+  }
+
+  /** Clique fora do menu fecha a lista aberta. */
+  protected onDocumentClick(event: Event): void {
+    const target = event.target;
+    if (!(target instanceof Element) || !target.closest('[data-nav-group]')) {
+      this.openGroup.set(null);
+    }
+  }
+
   protected toggleMenu(): void {
     this.menuOpen.update((open) => !open);
   }
 
   protected closeMenu(): void {
     this.menuOpen.set(false);
+    this.openGroup.set(null);
   }
 
   constructor() {
