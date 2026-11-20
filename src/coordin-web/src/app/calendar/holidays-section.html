@@ -1,47 +1,61 @@
-<section aria-label="Feriados do setor">
-  <h3 class="text-base font-semibold">Feriados do setor</h3>
+<section aria-label="Feriados do setor" class="card p-5 sm:p-6">
+  <div class="flex items-center gap-3">
+    <span
+      class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+      ><app-icon name="calendar"
+    /></span>
+    <h3 class="text-lg font-bold text-slate-900">Feriados do setor</h3>
+  </div>
 
   @if (store.holidays().length === 0) {
-    <p class="mt-3 text-slate-600">
+    <p
+      class="mt-3 rounded-2xl border border-dashed border-slate-300 p-4 text-center text-sm text-slate-700"
+    >
       Ainda não há feriados cadastrados. Use o formulário abaixo para adicionar o primeiro.
     </p>
   } @else {
-    <div class="mt-3 overflow-x-auto">
+    <div class="table-scroll mt-3">
       <table class="w-full text-left text-sm">
-        <thead class="border-b border-slate-200 text-slate-600">
+        <thead>
           <tr>
-            <th scope="col" class="py-2 pr-4 font-medium">Data</th>
-            <th scope="col" class="py-2 pr-4 font-medium">Descrição</th>
-            <th scope="col" class="py-2 font-medium">Ações</th>
+            <th scope="col" class="px-3 py-3">Data</th>
+            <th scope="col" class="px-3 py-3">Descrição</th>
+            <th scope="col" class="px-3 py-3">Ações</th>
           </tr>
         </thead>
         <tbody>
           @for (holiday of store.holidays(); track holiday.id) {
-            <tr class="border-b border-slate-100">
-              <td class="py-2 pr-4">{{ holiday.date | calendarDate }}</td>
-              <td class="py-2 pr-4">{{ holiday.description ?? '—' }}</td>
-              <td class="py-2">
+            <tr class="border-t border-white/40 dark:border-white/10">
+              <td class="px-3 py-3 font-semibold text-slate-900">
+                {{ holiday.date | calendarDate }}
+              </td>
+              <td class="px-3 py-3">{{ holiday.description ?? '—' }}</td>
+              <td class="px-3 py-3">
                 @if (deletingId() === holiday.id) {
-                  <span class="mr-2">Remover este feriado?</span>
-                  <button
-                    type="button"
-                    (click)="confirmDelete(holiday)"
-                    [disabled]="saving()"
-                    class="mr-2 font-medium text-red-700 hover:underline"
-                  >
-                    Confirmar
-                  </button>
-                  <button type="button" (click)="deletingId.set(null)" class="hover:underline">
-                    Cancelar
-                  </button>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="font-semibold">Remover este feriado?</span>
+                    <app-hold-button
+                      label="Segure para remover"
+                      doneLabel="Removido"
+                      [disabled]="saving()"
+                      (confirmed)="confirmDelete(holiday)"
+                    />
+                    <button
+                      type="button"
+                      (click)="deletingId.set(null)"
+                      class="btn-secondary btn-sm rounded-full"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
                 } @else {
                   <button
                     type="button"
                     (click)="deletingId.set(holiday.id)"
                     [attr.aria-label]="'Remover feriado de ' + (holiday.date | calendarDate)"
-                    class="text-red-700 hover:underline"
+                    class="btn-danger btn-sm rounded-full"
                   >
-                    Remover
+                    <app-icon name="trash" /> Remover
                   </button>
                 }
               </td>
@@ -56,51 +70,44 @@
     [formGroup]="form"
     (ngSubmit)="submit()"
     novalidate
-    class="mt-4 max-w-2xl space-y-3 rounded-md border border-slate-200 bg-white p-3"
+    class="mt-5 space-y-3 rounded-2xl border border-white/50 bg-white/30 p-4 dark:border-white/15 dark:bg-white/5"
   >
-    <h4 class="text-sm font-semibold">Adicionar feriado</h4>
+    <h4 class="text-sm font-bold text-slate-900">Adicionar feriado</h4>
 
     <div class="grid gap-3 sm:grid-cols-2">
       <div>
-        <label for="holiday-date" class="block text-sm font-medium text-slate-700">Data</label>
-        <input
-          id="holiday-date"
-          type="date"
-          formControlName="date"
-          class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2"
-        />
+        <label for="holiday-date" class="block text-sm font-semibold text-slate-800">Data</label>
+        <input id="holiday-date" type="date" formControlName="date" class="field mt-1 w-full" />
         @if (form.controls.date.invalid && form.controls.date.touched) {
-          <p class="mt-1 text-sm text-red-700">Informe a data do feriado.</p>
+          <p class="mt-1 text-sm font-medium text-red-800">Informe a data do feriado.</p>
         }
       </div>
 
       <div>
-        <label for="holiday-description" class="block text-sm font-medium text-slate-700">
-          Descrição (opcional)
-        </label>
+        <label for="holiday-description" class="block text-sm font-semibold text-slate-800"
+          >Descrição (opcional)</label
+        >
         <input
           id="holiday-description"
           type="text"
           formControlName="description"
-          class="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2"
+          class="field mt-1 w-full"
         />
         @if (form.controls.description.invalid) {
-          <p class="mt-1 text-sm text-red-700">A descrição deve ter no máximo 200 caracteres.</p>
+          <p class="mt-1 text-sm font-medium text-red-800">
+            A descrição deve ter no máximo 200 caracteres.
+          </p>
         }
       </div>
     </div>
 
-    <p class="text-sm text-slate-500">Em um feriado ninguém contribui com capacidade.</p>
+    <p class="text-sm text-slate-600">Em um feriado ninguém contribui com capacidade.</p>
 
     @if (message(); as text) {
-      <p role="alert" class="text-sm text-red-700">{{ text }}</p>
+      <p role="alert" class="text-sm font-medium text-red-800">{{ text }}</p>
     }
 
-    <button
-      type="submit"
-      [disabled]="saving()"
-      class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60"
-    >
+    <button type="submit" [disabled]="saving()" class="btn-primary rounded-full px-6">
       Adicionar feriado
     </button>
   </form>

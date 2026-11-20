@@ -1,0 +1,37 @@
+<app-page-header
+  eyebrow="Cadastros"
+  title="Calendário"
+  description="Feriados do setor e ausências das pessoas. Nesses dias, quem está de folga ou ausente não contribui com capacidade para as previsões."
+/>
+
+@switch (store.status()) {
+  @case ('loading') {
+    <div class="card p-6"><app-loader label="Carregando…" /></div>
+  }
+  @case ('failed') {
+    <div role="alert" class="card border-red-700/50 p-5 text-sm">
+      <p class="font-semibold text-red-800">Não foi possível carregar o calendário.</p>
+      <button type="button" (click)="store.load()" class="btn-danger btn-sm mt-3 rounded-full">
+        Tentar de novo
+      </button>
+    </div>
+  }
+  @default {
+    <div class="grid items-start gap-5 xl:grid-cols-[26rem_minmax(0,1fr)]">
+      <aside class="card p-5 xl:sticky xl:top-24" aria-label="Calendário do mês">
+        <app-home-calendar
+          [today]="today"
+          [holidays]="store.holidays()"
+          [absences]="store.absences()"
+          [items]="noItems"
+          [showDeliveries]="false"
+        />
+      </aside>
+
+      <div class="min-w-0 space-y-5">
+        <app-absences-section />
+        <app-holidays-section />
+      </div>
+    </div>
+  }
+}

@@ -1,0 +1,344 @@
+<!-- Hero: contexto e ações principais. Os botões são simples e iguais entre si. -->
+<section
+  class="card relative mb-6 overflow-hidden p-6 sm:p-8"
+  [appReveal]="0"
+  aria-labelledby="home-title"
+>
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute -top-24 -right-16 h-72 w-72 rounded-full bg-brand-400/30 blur-3xl"
+  ></div>
+  <div class="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+    <div class="max-w-2xl">
+      <p class="text-xs font-semibold tracking-wide text-brand-700 uppercase">Visão geral</p>
+      <h2 id="home-title" class="mt-1 text-3xl font-extrabold tracking-tight sm:text-4xl">
+        Início
+      </h2>
+      <p class="mt-3 text-sm text-slate-600 sm:text-base">
+        Os números do planejamento atual, a carga dos times e o calendário do setor. Quem decide é
+        você: o sistema calcula e mostra o impacto.
+      </p>
+      @if (store.loading()) {
+        <app-loader class="mt-4" label="Carregando os números do planejamento…" />
+      }
+    </div>
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <a routerLink="/" class="btn-primary h-12 rounded-full px-6">Abrir cronograma</a>
+      <a routerLink="/demands/new" class="btn-secondary h-12 rounded-full px-6">Nova demanda</a>
+    </div>
+  </div>
+</section>
+
+<section aria-label="Indicadores" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  @for (item of indicators(); track item.label; let i = $index) {
+    <div class="card flex items-start gap-3 p-4" [appReveal]="i + 1">
+      <span
+        class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl"
+        [class]="
+          item.attention
+            ? 'bg-amber-100 text-amber-800 dark:bg-amber-400/20 dark:text-amber-300'
+            : 'bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d] shadow-sm'
+        "
+      >
+        <app-icon [name]="item.icon" />
+      </span>
+      <div class="min-w-0">
+        <p class="text-xs font-medium text-slate-500">{{ item.label }}</p>
+        <p class="mt-0.5 text-3xl leading-tight font-extrabold tracking-tight text-slate-900">
+          @if (item.numeric !== null) {
+            <span [appCountUp]="item.numeric"></span>
+          } @else {
+            {{ item.value }}
+          }
+        </p>
+        <p
+          class="mt-0.5 text-xs"
+          [class]="
+            item.attention ? 'font-medium text-amber-800 dark:text-amber-300' : 'text-slate-500'
+          "
+        >
+          {{ item.hint }}
+        </p>
+      </div>
+    </div>
+  }
+</section>
+
+<!-- Carga por semana (gráfico interativo com filtro por time) + ocupação por time -->
+<div class="mt-6 grid gap-4 xl:grid-cols-3">
+  <section class="card p-5 xl:col-span-2" [appReveal]="5" aria-labelledby="load-title">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h3 id="load-title" class="text-base font-bold text-slate-900">
+          Carga das próximas 8 semanas
+        </h3>
+        <p class="text-xs text-slate-500">
+          Horas alocadas e ociosas por semana. Semanas em vermelho têm sobrecarga.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar por time">
+        <button
+          type="button"
+          class="rounded-full border px-3 py-1 text-xs font-semibold transition-colors"
+          [class]="
+            selectedTeam() === null
+              ? 'border-brand-500 bg-brand-500 text-[#021a1d]'
+              : 'border-slate-300 text-slate-700 hover:bg-white/60'
+          "
+          [attr.aria-pressed]="selectedTeam() === null"
+          (click)="selectedTeam.set(null)"
+        >
+          Setor
+        </button>
+        @for (team of teamOptions(); track team.id) {
+          <button
+            type="button"
+            class="rounded-full border px-3 py-1 text-xs font-semibold transition-colors"
+            [class]="
+              selectedTeam() === team.id
+                ? 'border-brand-500 bg-brand-500 text-[#021a1d]'
+                : 'border-slate-300 text-slate-700 hover:bg-white/60'
+            "
+            [attr.aria-pressed]="selectedTeam() === team.id"
+            (click)="selectedTeam.set(team.id)"
+          >
+            {{ team.name }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (reportFailed()) {
+      <p class="mt-4 text-sm text-slate-500">Não foi possível carregar a carga dos times.</p>
+    } @else if (loadWeeks().length === 0) {
+      <p class="mt-4 text-sm text-slate-500">
+        Cadastre times e pessoas para ver a carga por semana.
+      </p>
+    } @else {
+      <app-chart [configuration]="loadChart()" label="Carga por semana: horas alocadas e ociosas" />
+      <details class="mt-2 text-sm">
+        <summary class="cursor-pointer font-medium text-brand-700">
+          Ver os valores em tabela
+        </summary>
+        <div class="table-scroll mt-2">
+          <table class="w-full text-left text-sm">
+            <caption class="sr-only">
+              Carga por semana
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col" class="p-2">Semana</th>
+                <th scope="col" class="p-2">Capacidade</th>
+                <th scope="col" class="p-2">Alocadas</th>
+                <th scope="col" class="p-2">Ociosas</th>
+                <th scope="col" class="p-2">Situação</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (week of loadWeeks(); track week.label) {
+                <tr>
+                  <th scope="row" class="p-2 font-medium">{{ week.label }}</th>
+                  <td class="p-2">{{ week.capacity }} h</td>
+                  <td class="p-2">{{ week.allocated }} h</td>
+                  <td class="p-2">{{ week.idle }} h</td>
+                  <td class="p-2">{{ week.overloaded ? 'Sobrecarga' : 'Normal' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </details>
+    }
+  </section>
+
+  <section class="card p-5" [appReveal]="6" aria-labelledby="occupancy-title">
+    <h3 id="occupancy-title" class="text-base font-bold text-slate-900">Ocupação por time</h3>
+    <p class="text-xs text-slate-500">Horas alocadas sobre a capacidade, nas próximas 8 semanas.</p>
+    @if (occupancy().length === 0) {
+      <p class="mt-4 text-sm text-slate-500">Sem times para mostrar.</p>
+    } @else {
+      <ul class="mt-4 flex flex-col gap-4">
+        @for (team of occupancy(); track team.teamId; let i = $index) {
+          <li>
+            <div class="flex items-baseline justify-between gap-2 text-sm">
+              <a
+                routerLink="/reports/teams"
+                class="truncate font-semibold text-slate-900 hover:text-brand-700"
+                >{{ team.teamName }}</a
+              >
+              <span
+                class="shrink-0 font-bold"
+                [class]="team.overloadedWeeks > 0 ? 'text-red-700' : 'text-slate-900'"
+              >
+                {{ percent(team.occupancy) }}
+              </span>
+            </div>
+            <div class="mt-1.5 h-2.5 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
+              <div
+                class="h-full rounded-full"
+                [class]="team.overloadedWeeks > 0 ? 'bg-red-700' : 'bg-brand-500'"
+                [style.width.%]="barWidth(team.occupancy)"
+                [appGrow]="i * 0.08"
+              ></div>
+            </div>
+            @if (team.overloadedWeeks > 0) {
+              <p class="mt-1 text-xs font-medium text-red-700">
+                Sobrecarga em {{ team.overloadedWeeks }}
+                {{ team.overloadedWeeks === 1 ? 'semana' : 'semanas' }}
+              </p>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>
+
+<!-- Entregas por semana + calendário interativo -->
+<div class="mt-4 grid gap-4 xl:grid-cols-2">
+  <section class="card p-5" [appReveal]="7" aria-labelledby="deliveries-title">
+    <h3 id="deliveries-title" class="text-base font-bold text-slate-900">
+      Entregas previstas por semana
+    </h3>
+    <p class="text-xs text-slate-500">
+      Datas com margem de segurança. Vermelho passa do prazo informado.
+    </p>
+    @if (scheduleFailed()) {
+      <p class="mt-4 text-sm text-slate-500">Não foi possível carregar o cronograma.</p>
+    } @else {
+      <app-chart [configuration]="deliveriesChart()" label="Entregas previstas por semana" />
+      <details class="mt-2 text-sm">
+        <summary class="cursor-pointer font-medium text-brand-700">
+          Ver os valores em tabela
+        </summary>
+        <div class="table-scroll mt-2">
+          <table class="w-full text-left text-sm">
+            <caption class="sr-only">
+              Entregas por semana
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col" class="p-2">Semana de</th>
+                <th scope="col" class="p-2">Dentro do prazo</th>
+                <th scope="col" class="p-2">Passam do prazo</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (label of deliveries().labels; track $index) {
+                <tr>
+                  <th scope="row" class="p-2 font-medium">{{ label }}</th>
+                  <td class="p-2">{{ deliveries().onTime[$index] }}</td>
+                  <td class="p-2">{{ deliveries().late[$index] }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </details>
+    }
+  </section>
+
+  <section class="card p-5" [appReveal]="8" aria-labelledby="calendar-title">
+    <h3 id="calendar-title" class="sr-only">Calendário</h3>
+    <app-home-calendar
+      [today]="today"
+      [holidays]="calendarHolidays()"
+      [absences]="calendarAbsences()"
+      [items]="calendarItems()"
+    />
+  </section>
+</div>
+
+<!-- Linha do tempo -->
+<section class="card mt-4 p-5" [appReveal]="9" aria-labelledby="timeline-title">
+  <h3 id="timeline-title" class="text-base font-bold text-slate-900">
+    Linha do tempo das próximas demandas
+  </h3>
+  <p class="mb-4 text-xs text-slate-500">
+    Em ordem de execução. A parte clara no fim de cada barra é a margem.
+  </p>
+  <app-home-timeline [timeline]="timeline()" />
+</section>
+
+<h3 class="mt-8 mb-3 text-sm font-bold text-slate-700">Áreas do sistema</h3>
+<nav
+  aria-label="Atalhos"
+  class="grid grid-flow-dense gap-4 [perspective:1200px] sm:grid-cols-2 xl:grid-cols-4"
+>
+  @for (item of shortcuts(); track item.path; let i = $index) {
+    <div
+      class="card hub-card group flex flex-col gap-5 p-6"
+      [class]="item.wide ? 'xl:col-span-2' : ''"
+      [style]="'--a1:' + accents[item.accent][0] + ';--a2:' + accents[item.accent][1]"
+      appHubTilt
+      [appReveal]="i + 10"
+    >
+      <span class="hub-blob" aria-hidden="true"></span>
+      @if (item.visual === null) {
+        <span class="hub-watermark" aria-hidden="true"><app-icon [name]="item.icon" /></span>
+      }
+
+      <div class="flex items-start justify-between gap-3">
+        <span
+          class="hub-tile grid h-14 w-14 place-items-center rounded-2xl text-[#021a1d] transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110"
+        >
+          <app-icon [name]="item.icon" />
+        </span>
+        @if (item.stat !== null) {
+          <div class="text-right">
+            <p class="text-4xl leading-none font-extrabold tracking-tight text-slate-900">
+              {{ item.stat }}
+            </p>
+            <p class="mt-1 text-xs font-medium text-slate-600">{{ item.statLabel }}</p>
+          </div>
+        }
+      </div>
+
+      <a [routerLink]="item.path" class="hub-link block">
+        <span class="block text-lg font-extrabold tracking-tight text-slate-900">{{
+          item.title
+        }}</span>
+        <span class="mt-1 block text-sm text-slate-600">{{ item.text }}</span>
+      </a>
+
+      @switch (item.visual) {
+        @case ('bars') {
+          <div class="flex h-14 items-end gap-1.5" aria-hidden="true">
+            @for (height of miniBars(); track $index) {
+              <span
+                class="mini-bar flex-1 rounded-md"
+                [style.height.%]="height"
+                [style.--i]="$index"
+              ></span>
+            }
+          </div>
+        }
+        @case ('progress') {
+          <div aria-hidden="true">
+            <div class="h-3 overflow-hidden rounded-full bg-slate-200/60 dark:bg-white/10">
+              <div class="mini-fill h-full rounded-full" [style.width.%]="activeShare()"></div>
+            </div>
+          </div>
+        }
+        @case ('occupancy') {
+          <div class="flex flex-col gap-1.5" aria-hidden="true">
+            @for (team of occupancy().slice(0, 3); track team.teamId) {
+              <div class="h-2 overflow-hidden rounded-full bg-slate-200/60 dark:bg-white/10">
+                <div
+                  class="mini-fill h-full rounded-full"
+                  [style.width.%]="barWidth(team.occupancy)"
+                ></div>
+              </div>
+            }
+          </div>
+        }
+      }
+
+      <span class="hub-cta mt-auto" aria-hidden="true">
+        Abrir
+        <span class="transition-transform duration-300 group-hover:translate-x-1">→</span>
+      </span>
+    </div>
+  }
+</nav>

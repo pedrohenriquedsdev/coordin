@@ -9,6 +9,7 @@ import { TeamReportPage } from './reports/team-report-page';
 import { SchedulePage } from './schedule/schedule-page';
 import { ScenariosPage } from './scenarios/scenarios-page';
 import { SettingsPage } from './settings/settings-page';
+import { HomePage } from './home/home-page';
 import { Login } from './login/login';
 import { TeamsPage } from './teams/teams-page';
 import { ValidationPage } from './validation/validation-page';
@@ -23,6 +24,7 @@ export const routes: Routes = [
     path: '',
     canActivate: [authGuard],
     children: [
+      { path: 'inicio', component: HomePage },
       { path: '', component: SchedulePage },
       { path: 'demands', component: DemandsPage },
       { path: 'demands/new', component: DemandFormPage },

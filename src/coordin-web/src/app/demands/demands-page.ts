@@ -2,6 +2,13 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Clock, formatCalendarDate, isEndBeforeStart } from '../core/dates/calendar-date';
 import { messageFor } from '../core/problems/messages';
+import { GlowField } from '../core/ui/glow-field';
+import { HoldButton } from '../core/ui/hold-button';
+import { Reveal } from '../core/ui/hub-motion';
+import { Icon } from '../core/ui/icon';
+import { Loader } from '../core/ui/loader';
+import { PageHeader } from '../core/ui/page-header';
+import { normalizeText } from '../schedule/schedule-view';
 import { readProblem } from '../core/problems/problem';
 import { deviationLabel, hoursLabel, unpredictableReasonLabel } from '../planning/labels';
 import { Demand, ScheduleItem } from '../planning/planning';
@@ -21,7 +28,7 @@ const ACTUAL_EFFORT_INVALID = 'Informe um esforço real maior que zero, ou deixe
 
 @Component({
   selector: 'app-demands-page',
-  imports: [RouterLink],
+  imports: [RouterLink, PageHeader, Icon, Loader, GlowField, HoldButton, Reveal],
   providers: [DemandsStore],
   templateUrl: './demands-page.html',
 })
@@ -37,9 +44,32 @@ export class DemandsPage {
   protected readonly completedOn = signal('');
   /** O esforço real digitado na conclusão (RF-22); vazio = não informado. */
   protected readonly actualEffort = signal('');
-  protected readonly visible = computed(() =>
-    this.tab() === 'active' ? this.store.active() : this.store.completed(),
+  protected readonly query = signal('');
+  /** Com uma busca ativa a lista é parcial: reordenar ficaria confuso, então Subir e Descer esperam. */
+  protected readonly searching = computed(() => this.query().trim() !== '');
+
+  private matches(demand: Demand): boolean {
+    const needle = normalizeText(this.query());
+    return needle === '' || normalizeText(demand.title).includes(needle);
+  }
+
+  protected readonly activeList = computed(() =>
+    this.store.active().filter((d) => this.matches(d)),
   );
+  protected readonly completedList = computed(() =>
+    this.store.completed().filter((d) => this.matches(d)),
+  );
+  protected readonly visible = computed(() =>
+    this.tab() === 'active' ? this.activeList() : this.completedList(),
+  );
+
+  protected onSearch(event: Event): void {
+    this.query.set((event.target as HTMLInputElement).value);
+  }
+
+  protected clearSearch(): void {
+    this.query.set('');
+  }
 
   constructor() {
     this.store.load();

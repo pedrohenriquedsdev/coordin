@@ -1,6 +1,7 @@
 import type { ChartConfiguration } from '../charts/chart-setup';
 import { AccuracyIndicatorsResponse } from '../api/models/accuracy-indicators-response';
 import { AccuracyResponse } from '../api/models/accuracy-response';
+import { ChartTheme, LIGHT_CHART_THEME } from '../charts/chart-theme';
 
 /**
  * Apresentação dos indicadores de precisão (RF-23; DT-36). A API já calcula tudo; aqui se monta o texto, as séries
@@ -8,9 +9,9 @@ import { AccuracyResponse } from '../api/models/accuracy-response';
  */
 
 export const ACCURACY_COLORS = {
-  baseline: '#334155',
-  completion: '#94a3b8',
-  estimate: '#0f766e',
+  baseline: '#2f8cff',
+  completion: '#1ec1cb',
+  estimate: '#1ec1cb',
 } as const;
 
 /** O motivo de o período não servir, ou `null` quando serve. A API também recusa, mas a tela avisa antes. */
@@ -91,8 +92,23 @@ export function accuracyRows(response: AccuracyResponse): AccuracyRow[] {
   ];
 }
 
+function chartOptions(theme: ChartTheme): ChartConfiguration<'bar'>['options'] {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: { grid: { display: false }, ticks: { color: theme.text } },
+      y: { grid: { color: theme.grid }, ticks: { color: theme.text } },
+    },
+    plugins: { legend: { position: 'bottom', labels: { color: theme.text, usePointStyle: true } } },
+  };
+}
+
 /** O gráfico de desvio de prazo: a média contra a linha de base e contra a previsão da conclusão, em dias. */
-export function deviationChart(rows: readonly AccuracyRow[]): ChartConfiguration<'bar'> {
+export function deviationChart(
+  rows: readonly AccuracyRow[],
+  theme: ChartTheme = LIGHT_CHART_THEME,
+): ChartConfiguration<'bar'> {
   return {
     type: 'bar',
     data: {
@@ -102,24 +118,25 @@ export function deviationChart(rows: readonly AccuracyRow[]): ChartConfiguration
           label: 'Contra a primeira previsão (dias)',
           data: rows.map((row) => row.baselineDays),
           backgroundColor: ACCURACY_COLORS.baseline,
+          borderRadius: 6,
         },
         {
           label: 'Contra a previsão da conclusão (dias)',
           data: rows.map((row) => row.completionDays),
           backgroundColor: ACCURACY_COLORS.completion,
+          borderRadius: 6,
         },
       ],
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom' } },
-    },
+    options: chartOptions(theme),
   };
 }
 
 /** O gráfico de estimado × real: a diferença média em percentual, por time e para o setor. */
-export function estimateChart(rows: readonly AccuracyRow[]): ChartConfiguration<'bar'> {
+export function estimateChart(
+  rows: readonly AccuracyRow[],
+  theme: ChartTheme = LIGHT_CHART_THEME,
+): ChartConfiguration<'bar'> {
   return {
     type: 'bar',
     data: {
@@ -129,14 +146,11 @@ export function estimateChart(rows: readonly AccuracyRow[]): ChartConfiguration<
           label: 'Real em relação ao estimado (%)',
           data: rows.map((row) => row.estimateDifference),
           backgroundColor: ACCURACY_COLORS.estimate,
+          borderRadius: 6,
         },
       ],
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom' } },
-    },
+    options: chartOptions(theme),
   };
 }
 

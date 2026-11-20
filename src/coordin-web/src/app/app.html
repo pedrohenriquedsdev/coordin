@@ -1,102 +1,127 @@
-<div class="flex min-h-screen flex-col bg-slate-50 text-slate-900">
-  <header class="border-b border-slate-200 bg-white">
-    <div
-      class="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 sm:px-6"
+<!-- Autenticado: barra de navegação no topo (vidro), para as telas aproveitarem toda a largura. -->
+@if (session.isAuthenticated()) {
+  <div class="app-shell min-h-screen">
+    <header
+      class="sticky top-0 z-30 border-b border-white/50 before:absolute before:inset-0 before:-z-10 before:bg-white/60 before:backdrop-blur-2xl before:backdrop-saturate-150 dark:border-white/10 dark:before:bg-black/55"
     >
-      <h1 class="text-xl font-bold tracking-tight">Coordin</h1>
+      <div
+        class="mx-auto flex w-full max-w-[120rem] flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 sm:px-6 lg:px-8"
+      >
+        <h1 class="text-xl font-semibold tracking-tight text-slate-900">
+          <a
+            routerLink="/inicio"
+            class="flex items-center gap-2.5"
+            aria-label="Coordin, ir ao início"
+          >
+            <img src="login/logo.png" alt="" width="512" height="568" class="h-9 w-auto" />
+            Coordin
+          </a>
+        </h1>
 
-      <!-- Só com sessão: na tela de login não há para onde navegar. -->
-      @if (session.isAuthenticated()) {
-        <nav aria-label="Principal" class="flex flex-1 flex-wrap items-center gap-1">
+        <!-- No computador: três listas suspensas. No celular: painel recolhível sob a barra. -->
+        <nav
+          id="main-nav"
+          aria-label="Principal"
+          class="order-last w-full flex-col gap-4 pt-2 lg:order-none lg:ml-6 lg:flex lg:w-auto lg:flex-row lg:items-center lg:gap-1 lg:pt-0"
+          [class.hidden]="!menuOpen()"
+          [class.flex]="menuOpen()"
+        >
           <a
-            routerLink="/"
-            [routerLinkActiveOptions]="{ exact: true }"
-            routerLinkActive="bg-slate-100 text-slate-900"
+            routerLink="/inicio"
+            routerLinkActive="border-brand-200 bg-brand-50/80 !text-brand-700"
             ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
+            (click)="closeMenu()"
+            class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-white/60 lg:px-3.5 lg:py-2 dark:hover:bg-white/10"
           >
-            Cronograma
+            <app-icon name="home" />
+            Início
           </a>
-          <a
-            routerLink="/demands"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-          >
-            Demandas
-          </a>
-          <a
-            routerLink="/scenarios"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-          >
-            Cenários
-          </a>
-          <a
-            routerLink="/reports/teams"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-          >
-            Relatório por time
-          </a>
-          <a
-            routerLink="/reports/accuracy"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-          >
-            Precisão
-          </a>
-          <a
-            routerLink="/teams"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-          >
-            Times e pessoas
-          </a>
-          <a
-            routerLink="/calendar"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-          >
-            Calendário
-          </a>
-          @if (availability.available()) {
-            <a
-              routerLink="/validation"
-              routerLinkActive="bg-slate-100 text-slate-900"
-              ariaCurrentWhenActive="page"
-              class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-            >
-              Validação
-            </a>
+          @for (group of groups(); track group.title) {
+            <div data-nav-group class="relative">
+              <p class="px-1 pb-1 text-sm font-medium text-slate-500 lg:hidden">
+                {{ group.title }}
+              </p>
+              <button
+                type="button"
+                class="hidden items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors hover:bg-white/60 lg:inline-flex dark:hover:bg-white/10"
+                [class]="isGroupActive(group) ? 'bg-brand-50/80 text-brand-700' : 'text-slate-700'"
+                [attr.aria-expanded]="openGroup() === group.title"
+                (click)="toggleGroup(group.title)"
+              >
+                {{ group.title }}
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="h-4 w-4 transition-transform"
+                  [class.rotate-180]="openGroup() === group.title"
+                  aria-hidden="true"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+
+              <div
+                class="flex flex-col gap-1 lg:absolute lg:top-full lg:left-0 lg:z-40 lg:mt-2 lg:w-60 lg:rounded-2xl lg:border lg:border-white/70 lg:bg-white/70 lg:backdrop-saturate-150 dark:lg:bg-[#0a1517]/80 lg:p-2 lg:shadow-pop lg:backdrop-blur-3xl dark:lg:border-white/10"
+                [class]="openGroup() === group.title ? '' : 'lg:hidden'"
+              >
+                @for (item of group.items; track item.path) {
+                  <a
+                    [routerLink]="item.path"
+                    [routerLinkActiveOptions]="{ exact: item.exact }"
+                    routerLinkActive="border-brand-200 bg-brand-50/80 !text-brand-700"
+                    ariaCurrentWhenActive="page"
+                    (click)="closeMenu()"
+                    class="flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-white/60 dark:hover:bg-white/10"
+                  >
+                    <app-icon [name]="item.icon" />
+                    {{ item.label }}
+                  </a>
+                }
+              </div>
+            </div>
           }
-          <a
-            routerLink="/settings"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            ariaCurrentWhenActive="page"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-          >
-            Configurações
-          </a>
         </nav>
 
-        <button
-          type="button"
-          (click)="signOut()"
-          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
-        >
-          Sair
-        </button>
-      }
-    </div>
-  </header>
+        <div class="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            class="btn-secondary h-10 w-10 !p-0"
+            [attr.title]="theme.isDark() ? 'Tema claro' : 'Tema escuro'"
+            (click)="theme.toggle()"
+          >
+            <app-icon [name]="theme.isDark() ? 'sun' : 'moon'" />
+            <span class="sr-only">{{ theme.isDark() ? 'Tema claro' : 'Tema escuro' }}</span>
+          </button>
+          <button type="button" (click)="signOut()" class="btn-secondary h-10 !px-3">
+            <app-icon name="logout" />
+            <span class="sr-only sm:not-sr-only">Sair</span>
+          </button>
+          <button
+            type="button"
+            class="btn-secondary h-10 w-10 !p-0 lg:hidden"
+            [attr.aria-expanded]="menuOpen()"
+            aria-controls="main-nav"
+            (click)="toggleMenu()"
+          >
+            <app-icon [name]="menuOpen() ? 'close' : 'menu'" />
+            <span class="sr-only">{{ menuOpen() ? 'Fechar menu' : 'Abrir menu' }}</span>
+          </button>
+        </div>
+      </div>
+    </header>
 
-  <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">
+    <main class="mx-auto w-full max-w-[120rem] min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      <router-outlet />
+    </main>
+  </div>
+} @else {
+  <!-- Sem sessão (tela de login): sem menu; o `header` leva só a marca. -->
+  <header class="sr-only"><h1>Coordin</h1></header>
+  <main class="min-h-screen">
     <router-outlet />
   </main>
-</div>
+}

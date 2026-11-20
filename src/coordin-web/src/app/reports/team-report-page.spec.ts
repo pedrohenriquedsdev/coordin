@@ -216,4 +216,72 @@ describe('TeamReportPage', () => {
       ?.click();
     request().flush(REPORT);
   });
+
+  describe('presets, totals and the occupancy map', () => {
+    it('sums every team for the period totals', async () => {
+      await answer(REPORT);
+
+      const totals = element().querySelector('[aria-label="Totais do período"]')?.textContent ?? '';
+      expect(totals).toContain('160 h'); // 80 + 80 de capacidade do Web, 0 do Dados
+      expect(totals).toContain('120 h'); // horas alocadas
+      expect(totals).toContain('75%'); // 120 / 160
+      expect(totals).toContain('Nenhuma semana com sobrecarga');
+    });
+
+    it('draws one button per team and week, described in words, and opens the team on click', async () => {
+      await answer(REPORT);
+
+      const cells = [
+        ...element().querySelectorAll<HTMLButtonElement>('button[aria-label*="semana"]'),
+      ];
+      expect(cells).toHaveLength(3);
+      expect(cells[0].getAttribute('aria-label')).toBe(
+        'Web, semana 02/11 a 08/11: 75% de ocupação',
+      );
+      expect(cells[2].getAttribute('aria-label')).toContain('sem capacidade');
+
+      cells[0].click();
+      fixture.detectChanges();
+      expect(element().textContent).toContain('Semanas de Web');
+    });
+
+    it('marks an overloaded week with text, not only with color', async () => {
+      await answer({
+        ...REPORT,
+        teams: [
+          team('t1', 'Web', [
+            week('2026-11-02', '2026-11-08', {
+              capacityHours: '40',
+              allocatedHours: '40',
+              occupancy: '1',
+              idleHours: '0',
+              isOverloaded: true,
+            }),
+          ]),
+        ],
+      });
+
+      const cell = element().querySelector('button[aria-label*="semana"]');
+      expect(cell?.getAttribute('aria-label')).toContain('com sobrecarga');
+      expect(element().querySelector('[aria-label="Totais do período"]')?.textContent).toContain(
+        'Semanas com sobrecarga',
+      );
+      expect(element().textContent).toContain('(sobrecarga)');
+    });
+
+    it('asks again for the period of a shortcut, from this Monday', async () => {
+      await answer(REPORT);
+
+      [...element().querySelectorAll('button')]
+        .find((b) => b.textContent?.trim() === '4 semanas')
+        ?.click();
+      fixture.detectChanges();
+
+      expect((element().querySelector('#report-from') as HTMLInputElement).value).toBe(
+        '2026-11-02',
+      );
+      expect((element().querySelector('#report-to') as HTMLInputElement).value).toBe('2026-11-29');
+      request().flush(REPORT);
+    });
+  });
 });

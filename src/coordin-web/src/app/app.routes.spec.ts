@@ -84,13 +84,13 @@ describe('routes', () => {
     it('sends /login to the home page', async () => {
       const { url } = await open('/login');
 
-      expect(url).toBe('/');
+      expect(url).toBe('/inicio');
     });
 
     it('sends a page that does not exist to the home page', async () => {
       const { url } = await open('/nao-existe');
 
-      expect(url).toBe('/');
+      expect(url).toBe('/inicio');
     });
   });
 });

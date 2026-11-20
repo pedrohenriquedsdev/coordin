@@ -1,5 +1,8 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { ChartComponent } from '../charts/chart.component';
+import { DARK_CHART_THEME } from '../charts/chart-theme';
+import { Icon } from '../core/ui/icon';
+import { ThemeService } from '../core/ui/theme.service';
 import { formatCalendarDate } from '../core/dates/calendar-date';
 import { ValidationResult } from '../api/models/validation-result';
 import { priorityCheckSummary } from './labels';
@@ -18,7 +21,7 @@ import {
  */
 @Component({
   selector: 'app-validation-result',
-  imports: [ChartComponent],
+  imports: [ChartComponent, Icon],
   templateUrl: './validation-result.html',
 })
 export class ValidationResultView {
@@ -31,9 +34,18 @@ export class ValidationResultView {
     return `${formatCalendarDate(current.periodStart)} a ${formatCalendarDate(current.periodEnd)}`;
   });
 
-  protected readonly efficiencyChart = computed(() => buildEfficiencyChart(this.result()));
+  private readonly theme = inject(ThemeService);
+  private readonly chartTheme = computed(() =>
+    this.theme.isDark() ? DARK_CHART_THEME : undefined,
+  );
+
+  protected readonly efficiencyChart = computed(() =>
+    buildEfficiencyChart(this.result(), this.chartTheme()),
+  );
   protected readonly efficiencyRows = computed(() => efficiencyTableRows(this.result()));
-  protected readonly deviationChart = computed(() => buildDeviationChart(this.result()));
+  protected readonly deviationChart = computed(() =>
+    buildDeviationChart(this.result(), this.chartTheme()),
+  );
   protected readonly averages = computed(() => averageRows(this.result()));
   protected readonly deviations = computed(() => deviationRows(this.result(), this.titles()));
   protected readonly priorities = computed(() => priorityTableRows(this.result(), this.titles()));

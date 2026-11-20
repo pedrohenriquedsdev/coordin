@@ -139,4 +139,61 @@ describe('ValidationPage', () => {
       expect(text()).toContain('Planejamento guardado em 30/06/2027');
     });
   });
+
+  describe('progress indicator', () => {
+    const stepItems = () => [
+      ...(fixture.nativeElement as HTMLElement).querySelectorAll(
+        'ol[aria-label="Etapas da validação"] li',
+      ),
+    ];
+
+    it('marks the earlier steps as done, the current one, and the rest as pending, in words', () => {
+      statusRequest().flush({
+        demandCount: 2,
+        baselineCount: 2,
+        currentPlanCaptured: false,
+        currentPlanCapturedAt: null,
+      });
+      fixture.detectChanges();
+
+      const items = stepItems();
+      expect(items).toHaveLength(4);
+      expect(items[0].textContent).toContain('Concluída');
+      expect(items[1].textContent).toContain('Concluída');
+      expect(items[2].textContent).toContain('Em andamento');
+      expect(items[2].getAttribute('aria-current')).toBe('step');
+      expect(items[3].textContent).toContain('Pendente');
+    });
+
+    it('starts at the first step when nothing was loaded', () => {
+      statusRequest().flush({
+        demandCount: 0,
+        baselineCount: 0,
+        currentPlanCaptured: false,
+        currentPlanCapturedAt: null,
+      });
+      fixture.detectChanges();
+
+      expect(stepItems()[0].getAttribute('aria-current')).toBe('step');
+      expect(stepItems()[1].textContent).toContain('Pendente');
+    });
+  });
+
+  it('loads the demand names on the compare step too, so the result shows names instead of codes', () => {
+    statusRequest().flush({
+      demandCount: 2,
+      baselineCount: 2,
+      currentPlanCaptured: true,
+      currentPlanCapturedAt: '2027-06-30T12:00:00Z',
+    });
+    fixture.detectChanges();
+    TestBed.flushEffects();
+
+    http
+      .expectOne((req) => req.url === '/api/validation/baseline')
+      .flush([
+        { demandId: 'a', title: 'Alfa', baselineDate: '2027-06-30' },
+        { demandId: 'b', title: 'Beta', baselineDate: '2027-07-01' },
+      ]);
+  });
 });

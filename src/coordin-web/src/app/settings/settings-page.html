@@ -1,56 +1,169 @@
-<h2 class="text-lg font-semibold">Configurações</h2>
+<app-page-header
+  eyebrow="Cadastros"
+  title="Configurações"
+  description="Ajuste como as previsões são calculadas e a aparência do sistema."
+/>
 
 @switch (store.status()) {
   @case ('loading') {
-    <p class="mt-3 text-slate-600">Carregando…</p>
+    <div class="card p-6"><app-loader label="Carregando…" /></div>
   }
   @case ('failed') {
-    <div role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">
-      <p>Não foi possível carregar as configurações.</p>
-      <button
-        type="button"
-        (click)="reload()"
-        class="mt-2 rounded-md border border-red-300 px-3 py-1 font-medium hover:bg-red-100"
-      >
+    <div role="alert" class="card border-red-700/50 p-5 text-sm">
+      <p class="font-semibold text-red-800">Não foi possível carregar as configurações.</p>
+      <button type="button" (click)="reload()" class="btn-danger btn-sm mt-3 rounded-full">
         Tentar de novo
       </button>
     </div>
   }
   @default {
-    <section class="mt-4 max-w-md rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
-      <h3 class="font-semibold">Margem de segurança</h3>
-      <p class="mt-1 text-sm text-slate-600">
-        A margem só amplia a previsão: a data com margem nunca fica antes da data sem margem.
-      </p>
+    <div class="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]">
+      <section class="card p-5 sm:p-6" aria-labelledby="margin-title">
+        <div class="flex items-center gap-3">
+          <span
+            class="grid h-11 w-11 place-items-center rounded-2xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+            ><app-icon name="validation"
+          /></span>
+          <div>
+            <h3 id="margin-title" class="text-lg font-bold text-slate-900">Margem de segurança</h3>
+            <p class="text-sm text-slate-600">
+              A margem só amplia a previsão: a data com margem nunca fica antes da data sem margem.
+            </p>
+          </div>
+        </div>
 
-      <form (submit)="$event.preventDefault(); save()" novalidate class="mt-4 space-y-3">
-        <label for="safety-margin" class="block text-sm font-medium text-slate-700"
-          >Margem de segurança (%)</label
-        >
-        <input
-          id="safety-margin"
-          type="text"
-          inputmode="decimal"
-          [value]="text()"
-          (input)="setText($event)"
-          class="block w-full rounded-md border border-slate-300 px-3 py-2 sm:w-48"
-        />
+        <form (submit)="$event.preventDefault(); save()" novalidate class="mt-5 space-y-4">
+          <div>
+            <label for="safety-margin" class="block text-sm font-semibold text-slate-800"
+              >Margem de segurança (%)</label
+            >
+            <div class="mt-1 flex flex-wrap items-center gap-3">
+              <input
+                id="safety-margin"
+                type="text"
+                inputmode="decimal"
+                [value]="text()"
+                (input)="setText($event)"
+                class="field w-full sm:w-40"
+              />
+              <div class="flex flex-wrap gap-1.5" role="group" aria-label="Valores rápidos">
+                @for (preset of presets; track preset) {
+                  <button
+                    type="button"
+                    class="btn-secondary btn-sm rounded-full"
+                    (click)="setPreset(preset)"
+                  >
+                    {{ preset }}%
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
 
-        @if (error(); as text) {
-          <p role="alert" class="text-sm text-red-700">{{ text }}</p>
-        }
-        @if (message(); as text) {
-          <p role="status" class="text-sm text-emerald-800">{{ text }}</p>
-        }
+          <div>
+            <label for="margin-slider" class="block text-xs font-medium text-slate-600"
+              >Ajuste rápido de 0% a 100%</label
+            >
+            <input
+              id="margin-slider"
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              [value]="sliderValue()"
+              (input)="onSlider($event)"
+              class="mt-1 w-full accent-[#1ec1cb]"
+            />
+          </div>
 
-        <button
-          type="submit"
-          [disabled]="saving()"
-          class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60"
-        >
-          Salvar
-        </button>
-      </form>
-    </section>
+          <!-- Exemplo ao vivo: mostra, em dias, o que a margem faz. -->
+          <div
+            class="rounded-2xl border border-white/50 bg-white/30 p-4 text-sm dark:border-white/15 dark:bg-white/5"
+            aria-live="polite"
+          >
+            <p class="text-xs font-semibold tracking-wide text-slate-600 uppercase">Exemplo</p>
+            @if (example(); as sample) {
+              <p class="mt-1 text-slate-800">
+                Uma demanda de <strong>{{ sample.base }} dias</strong> sem margem passa a ter
+                <strong class="text-brand-700">{{ sample.withMargin }} dias</strong> com margem.
+              </p>
+              <div
+                class="mt-3 flex h-3 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10"
+                aria-hidden="true"
+              >
+                <span
+                  class="h-full bg-linear-to-r from-brand-500 to-azure-500"
+                  [style.width.%]="(sample.base / sample.withMargin) * 100"
+                ></span>
+                <span class="h-full flex-1 bg-azure-300"></span>
+              </div>
+              <p class="mt-1 text-xs text-slate-600">
+                A parte clara é a margem. O resultado é sempre arredondado para cima.
+              </p>
+            } @else {
+              <p class="mt-1 text-slate-600">Digite uma margem válida para ver o exemplo.</p>
+            }
+          </div>
+
+          @if (error(); as text) {
+            <p role="alert" class="text-sm font-semibold text-red-800">{{ text }}</p>
+          }
+          @if (message(); as text) {
+            <p
+              role="status"
+              class="flex items-center gap-2 text-sm font-semibold text-emerald-800 dark:text-emerald-300"
+            >
+              <app-icon name="check" /> {{ text }}
+            </p>
+          }
+
+          <button type="submit" [disabled]="saving()" class="btn-primary rounded-full px-8">
+            Salvar
+          </button>
+        </form>
+      </section>
+
+      <section class="card p-5" aria-labelledby="appearance-title">
+        <div class="flex items-center gap-3">
+          <span
+            class="grid h-11 w-11 place-items-center rounded-2xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+            ><app-icon name="settings"
+          /></span>
+          <div>
+            <h3 id="appearance-title" class="text-lg font-bold text-slate-900">Aparência</h3>
+            <p class="text-sm text-slate-600">Vale só neste navegador.</p>
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-3" role="group" aria-label="Tema">
+          <button
+            type="button"
+            class="flex flex-col items-center gap-2 rounded-2xl border p-4 text-sm font-semibold transition-colors"
+            [class]="
+              !theme.isDark()
+                ? 'border-brand-500/70 bg-brand-500/15 text-slate-900'
+                : 'border-white/50 bg-white/30 text-slate-700 hover:bg-white/60 dark:border-white/15 dark:bg-white/5'
+            "
+            [attr.aria-pressed]="!theme.isDark()"
+            (click)="theme.isDark() && theme.toggle()"
+          >
+            <app-icon name="sun" /> Claro
+          </button>
+          <button
+            type="button"
+            class="flex flex-col items-center gap-2 rounded-2xl border p-4 text-sm font-semibold transition-colors"
+            [class]="
+              theme.isDark()
+                ? 'border-brand-500/70 bg-brand-500/15 text-slate-900'
+                : 'border-white/50 bg-white/30 text-slate-700 hover:bg-white/60 dark:border-white/15 dark:bg-white/5'
+            "
+            [attr.aria-pressed]="theme.isDark()"
+            (click)="!theme.isDark() && theme.toggle()"
+          >
+            <app-icon name="moon" /> Escuro
+          </button>
+        </div>
+      </section>
+    </div>
   }
 }

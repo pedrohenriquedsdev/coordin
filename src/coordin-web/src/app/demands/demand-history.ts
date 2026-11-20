@@ -83,3 +83,46 @@ export function forecastHistoryRows(
     changedAt: instantText(item.changedAt),
   }));
 }
+
+export type TimelineKind = 'estimate' | 'forecast';
+
+/** Um acontecimento da linha do tempo da demanda: uma mudança de estimativa ou da data prevista. */
+export interface TimelineEvent {
+  readonly kind: TimelineKind;
+  /** O instante (milissegundos), só para ordenar; quem lê vê `changedAt`. */
+  readonly at: number;
+  readonly title: string;
+  readonly text: string;
+  readonly detail: string;
+  readonly changedAt: string;
+}
+
+/**
+ * Junta os dois históricos em uma linha do tempo, do mais recente para o mais antigo. O histórico é somente de
+ * inclusão (DT-14): aqui nada se altera nem se esconde, só se ordena e se escreve em palavras.
+ */
+export function buildTimeline(
+  estimates: readonly EstimateHistoryResponse[],
+  forecasts: readonly ForecastHistoryResponse[],
+): TimelineEvent[] {
+  const events: TimelineEvent[] = [
+    ...estimates.map((item): TimelineEvent => ({
+      kind: 'estimate',
+      at: Date.parse(item.changedAt),
+      title: 'Estimativa alterada',
+      text: `${item.teamName ?? 'Time removido'}: ${hoursText(item.previousHours)} → ${hoursText(item.newHours)} h`,
+      detail: item.reason ?? '',
+      changedAt: instantText(item.changedAt),
+    })),
+    ...forecasts.map((item): TimelineEvent => ({
+      kind: 'forecast',
+      at: Date.parse(item.changedAt),
+      title: 'Previsão atualizada',
+      text: `${calendarText(item.previousEndDate)} → ${calendarText(item.newEndDate)}`,
+      detail: `Causa: ${causeLabel(item.cause)}`,
+      changedAt: instantText(item.changedAt),
+    })),
+  ];
+
+  return events.sort((a, b) => b.at - a.at);
+}

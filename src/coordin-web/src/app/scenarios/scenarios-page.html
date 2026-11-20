@@ -1,17 +1,17 @@
-<h2 class="text-lg font-semibold">Cenários</h2>
+<app-page-header
+  eyebrow="Planejamento"
+  title="Cenários"
+  description="Compare estratégias de execução e veja o impacto no planejamento. O sistema recomenda e mostra o efeito; quem decide é você."
+/>
 
 @switch (store.status()) {
   @case ('loading') {
-    <p class="mt-3 text-slate-600">Carregando…</p>
+    <div class="card p-6"><app-loader label="Carregando…" /></div>
   }
   @case ('failed') {
-    <div role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">
-      <p>Não foi possível carregar a tela de cenários.</p>
-      <button
-        type="button"
-        (click)="store.load()"
-        class="mt-2 rounded-md border border-red-300 px-3 py-1 font-medium hover:bg-red-100"
-      >
+    <div role="alert" class="card border-red-700/50 p-5 text-sm">
+      <p class="font-semibold text-red-800">Não foi possível carregar a tela de cenários.</p>
+      <button type="button" (click)="store.load()" class="btn-danger btn-sm mt-3 rounded-full">
         Tentar de novo
       </button>
     </div>
@@ -25,115 +25,127 @@
     }
 
     @if (store.message(); as text) {
-      <p role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">{{ text }}</p>
-    }
-
-    @if (store.lastApplied()) {
-      <p role="status" class="mt-3 rounded-md bg-emerald-50 p-3 text-sm text-emerald-900">
-        {{ appliedText }}
+      <p role="alert" class="card mb-4 border-red-700/50 p-3 text-sm font-semibold text-red-800">
+        {{ text }}
       </p>
     }
 
-    <!-- Recomendações (RF-13): só buscam quando a pessoa pede. -->
-    <section class="mt-6" aria-labelledby="recommendations-heading">
-      <div class="flex flex-wrap items-center gap-3">
-        <h3 id="recommendations-heading" class="text-base font-semibold">Recomendações</h3>
-        <button
-          type="button"
-          (click)="store.recommend()"
-          [disabled]="busy()"
-          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-50"
-        >
-          @if (store.busy() === 'searching') {
-            Calculando…
-          } @else {
-            Buscar recomendações
-          }
-        </button>
+    @if (store.lastApplied()) {
+      <p
+        role="status"
+        class="card mb-4 flex items-center gap-2 border-emerald-600/40 p-3 text-sm font-semibold text-emerald-800 dark:text-emerald-300"
+      >
+        <app-icon name="check" /> {{ appliedText }}
+      </p>
+    }
+
+    <!-- O cenário atual em números -->
+    <section aria-label="Cenário atual" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div class="card flex items-center gap-3 p-4" [appReveal]="0">
+        <span
+          class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+          ><app-icon name="demands"
+        /></span>
+        <div>
+          <p class="text-3xl leading-none font-extrabold tracking-tight text-slate-900">
+            <span [appCountUp]="overview().active"></span>
+          </p>
+          <p class="mt-1 text-xs font-medium text-slate-600">Demandas ativas</p>
+        </div>
       </div>
-
-      @if (store.searched() && store.recommendations().length === 0) {
-        <p class="mt-3 text-slate-600">Nenhuma alternativa melhora o resultado atual.</p>
-      }
-
-      <div class="mt-3 space-y-4">
-        @for (scenario of store.recommendations(); track $index) {
-          <app-scenario-card
-            [scenario]="scenario"
-            [title]="'Cenário recomendado ' + ($index + 1)"
-            [canApprove]="!busy()"
-            (approve)="approve($event)"
-            (reject)="reject($event)"
-          />
-        }
+      <div class="card flex items-center gap-3 p-4" [appReveal]="1">
+        <span
+          class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+          ><app-icon name="teams"
+        /></span>
+        <div>
+          <p class="text-3xl leading-none font-extrabold tracking-tight text-slate-900">
+            <span [appCountUp]="overview().teams"></span>
+          </p>
+          <p class="mt-1 text-xs font-medium text-slate-600">Times envolvidos</p>
+        </div>
+      </div>
+      <div class="card flex items-center gap-3 p-4" [appReveal]="2">
+        <span
+          class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+          ><app-icon name="calendar"
+        /></span>
+        <div>
+          <p class="text-3xl leading-none font-extrabold tracking-tight text-slate-900">
+            {{ overview().effort }} h
+          </p>
+          <p class="mt-1 text-xs font-medium text-slate-600">Esforço total estimado</p>
+        </div>
+      </div>
+      <div class="card flex items-center gap-3 p-4" [appReveal]="3">
+        <span
+          class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+          ><app-icon name="schedule"
+        /></span>
+        <div>
+          <p class="text-2xl leading-none font-extrabold tracking-tight text-slate-900">
+            {{ overview().end }}
+          </p>
+          <p class="mt-1 text-xs font-medium text-slate-600">Entrega prevista (cenário atual)</p>
+        </div>
       </div>
     </section>
 
-    <!-- Ordem própria (RF-14): só as demandas abertas, com Subir e Descer. -->
-    <section class="mt-8" aria-labelledby="own-order-heading">
-      <h3 id="own-order-heading" class="text-base font-semibold">Simular uma ordem própria</h3>
-
-      @if (openItems().length === 0) {
-        <p class="mt-3 text-slate-600">Não há demandas abertas para reordenar.</p>
-      } @else {
-        <ol class="mt-3 space-y-2">
-          @for (id of editedOrder(); track id; let first = $first; let last = $last) {
-            <li
-              class="flex items-center justify-between gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+    <div class="mt-5 grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]">
+      <div class="min-w-0 space-y-5">
+        <!-- Recomendações (RF-13): só buscam quando a pessoa pede. -->
+        <section class="card p-5 sm:p-6" aria-labelledby="recommendations-heading" [appReveal]="4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span
+                class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+                ><app-icon name="bolt"
+              /></span>
+              <div>
+                <h3 id="recommendations-heading" class="text-lg font-bold text-slate-900">
+                  Recomendações
+                </h3>
+                <p class="text-xs text-slate-600">
+                  Alternativas que melhoram o resultado atual. Só são calculadas quando você pede.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              (click)="store.recommend()"
+              [disabled]="busy()"
+              class="btn-primary rounded-full"
             >
-              <span>{{ $index + 1 }}. {{ titleOf(id) }}</span>
-              <span class="flex gap-1">
-                @if (!first) {
-                  <button
-                    type="button"
-                    (click)="move(id, 'up')"
-                    [disabled]="busy()"
-                    class="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium hover:bg-slate-100 disabled:opacity-50"
-                  >
-                    Subir
-                  </button>
-                }
-                @if (!last) {
-                  <button
-                    type="button"
-                    (click)="move(id, 'down')"
-                    [disabled]="busy()"
-                    class="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium hover:bg-slate-100 disabled:opacity-50"
-                  >
-                    Descer
-                  </button>
-                }
-              </span>
-            </li>
+              @if (store.busy() === 'searching') {
+                Calculando…
+              } @else {
+                Buscar recomendações
+              }
+            </button>
+          </div>
+
+          @if (store.searched() && store.recommendations().length === 0) {
+            <p
+              class="mt-4 rounded-2xl border border-dashed border-slate-300 p-5 text-center text-sm text-slate-700"
+            >
+              Nenhuma alternativa melhora o resultado atual.
+            </p>
           }
-        </ol>
 
-        <div class="mt-3 flex flex-wrap gap-2">
-          <button
-            type="button"
-            (click)="simulate()"
-            [disabled]="busy()"
-            class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
-          >
-            @if (store.busy() === 'simulating') {
-              Simulando…
-            } @else {
-              Simular
+          <div class="mt-4 space-y-4">
+            @for (scenario of store.recommendations(); track $index) {
+              <app-scenario-card
+                [scenario]="scenario"
+                [title]="'Cenário recomendado ' + ($index + 1)"
+                [canApprove]="!busy()"
+                (approve)="approve($event)"
+                (reject)="reject($event)"
+              />
             }
-          </button>
-          <button
-            type="button"
-            (click)="restore()"
-            [disabled]="busy()"
-            class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-50"
-          >
-            Restaurar a ordem atual
-          </button>
-        </div>
-      }
+          </div>
+        </section>
 
-      @if (store.simulation(); as simulated) {
-        <div class="mt-4">
+        @if (store.simulation(); as simulated) {
           <app-scenario-card
             [scenario]="simulated"
             [title]="'Ordem simulada'"
@@ -141,8 +153,87 @@
             (approve)="approve($event)"
             (reject)="reject($event)"
           />
-        </div>
-      }
-    </section>
+        }
+      </div>
+
+      <!-- Ordem própria (RF-14): só as demandas abertas, com Subir e Descer. -->
+      <aside class="min-w-0 xl:sticky xl:top-24">
+        <section class="card p-5" aria-labelledby="own-order-heading" [appReveal]="5">
+          <div class="flex items-center gap-3">
+            <span
+              class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
+              ><app-icon name="scenarios"
+            /></span>
+            <h3 id="own-order-heading" class="text-base font-bold text-slate-900">
+              Simular uma ordem própria
+            </h3>
+          </div>
+          <p class="mt-2 text-xs text-slate-600">
+            Reordene as demandas abertas e simule. Nada é gravado até você aprovar.
+          </p>
+
+          @if (openItems().length === 0) {
+            <p class="mt-3 text-sm text-slate-600">Não há demandas abertas para reordenar.</p>
+          } @else {
+            <ol class="mt-3 space-y-2">
+              @for (id of editedOrder(); track id; let first = $first; let last = $last) {
+                <li
+                  class="flex items-center justify-between gap-2 rounded-xl border border-white/50 bg-white/30 px-3 py-2 text-sm dark:border-white/15 dark:bg-white/5"
+                >
+                  <span class="min-w-0 truncate font-semibold text-slate-900"
+                    >{{ $index + 1 }}. {{ titleOf(id) }}</span
+                  >
+                  <span class="flex shrink-0 gap-1">
+                    @if (!first) {
+                      <button
+                        type="button"
+                        (click)="move(id, 'up')"
+                        [disabled]="busy()"
+                        class="btn-secondary btn-sm rounded-full"
+                      >
+                        Subir
+                      </button>
+                    }
+                    @if (!last) {
+                      <button
+                        type="button"
+                        (click)="move(id, 'down')"
+                        [disabled]="busy()"
+                        class="btn-secondary btn-sm rounded-full"
+                      >
+                        Descer
+                      </button>
+                    }
+                  </span>
+                </li>
+              }
+            </ol>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                (click)="simulate()"
+                [disabled]="busy()"
+                class="btn-primary rounded-full"
+              >
+                @if (store.busy() === 'simulating') {
+                  Simulando…
+                } @else {
+                  Simular
+                }
+              </button>
+              <button
+                type="button"
+                (click)="restore()"
+                [disabled]="busy()"
+                class="btn-secondary rounded-full"
+              >
+                Restaurar a ordem atual
+              </button>
+            </div>
+          }
+        </section>
+      </aside>
+    </div>
   }
 }

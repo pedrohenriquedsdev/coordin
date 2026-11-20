@@ -1,4 +1,6 @@
 import { DecimalPipe } from '@angular/common';
+import { HoldButton } from '../core/ui/hold-button';
+import { Icon } from '../core/ui/icon';
 import { Component, effect, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { absenceTypeLabel } from '../calendar/absence-type-label';
@@ -14,7 +16,7 @@ import { Person, TeamsStore } from './teams.store';
  */
 @Component({
   selector: 'app-people-section',
-  imports: [ReactiveFormsModule, DecimalPipe],
+  imports: [ReactiveFormsModule, DecimalPipe, Icon, HoldButton],
   templateUrl: './people-section.html',
 })
 export class PeopleSection {

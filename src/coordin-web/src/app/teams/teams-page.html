@@ -1,47 +1,58 @@
-<div class="grid gap-6 lg:grid-cols-[18rem_1fr]">
-  <section aria-label="Times">
-    <h2 class="text-lg font-semibold">Times ({{ store.teams().length }})</h2>
+<app-page-header
+  eyebrow="Cadastros"
+  title="Times e pessoas"
+  description="Cadastre os times e as pessoas de cada um. A capacidade do time é a soma das horas por dia útil das pessoas, e é ela que sustenta as previsões."
+/>
+
+<div class="grid items-start gap-5 lg:grid-cols-[19rem_minmax(0,1fr)]">
+  <section aria-label="Times" class="card p-5">
+    <h3 class="text-lg font-bold text-slate-900">Times ({{ store.teams().length }})</h3>
 
     @switch (store.status()) {
       @case ('loading') {
-        <p class="mt-3 text-slate-600">Carregando…</p>
+        <div class="mt-4"><app-loader label="Carregando…" /></div>
       }
       @case ('failed') {
-        <div role="alert" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">
-          <p>Não foi possível carregar os times.</p>
-          <button
-            type="button"
-            (click)="store.load()"
-            class="mt-2 rounded-md border border-red-300 px-3 py-1 font-medium hover:bg-red-100"
-          >
+        <div role="alert" class="mt-3 rounded-2xl border border-red-700/40 p-3 text-sm">
+          <p class="font-semibold text-red-800">Não foi possível carregar os times.</p>
+          <button type="button" (click)="store.load()" class="btn-danger btn-sm mt-3 rounded-full">
             Tentar de novo
           </button>
         </div>
       }
       @default {
         @if (store.teams().length === 0) {
-          <p class="mt-3 text-slate-600">
+          <p
+            class="mt-3 rounded-2xl border border-dashed border-slate-300 p-4 text-center text-sm text-slate-700"
+          >
             Ainda não há times. Use “+ Novo time” para cadastrar o primeiro.
           </p>
         } @else {
-          <ul class="mt-3 space-y-1">
-            @for (team of store.teams(); track team.id) {
-              <li>
+          <ul class="mt-3 space-y-2">
+            @for (team of store.teams(); track team.id; let i = $index) {
+              <li [appReveal]="i">
                 <button
                   type="button"
                   (click)="store.select(team.id)"
                   [attr.aria-current]="team.id === store.selectedId() ? 'true' : null"
-                  class="w-full rounded-md border px-3 py-2 text-left hover:bg-slate-100"
+                  class="flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-colors"
                   [class]="
                     team.id === store.selectedId()
-                      ? 'border-slate-500 bg-slate-100'
-                      : 'border-slate-200 bg-white'
+                      ? 'border-brand-500/70 bg-brand-500/15'
+                      : 'border-white/50 bg-white/30 hover:bg-white/60 dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10'
                   "
                 >
-                  <span class="block font-medium">{{ team.name }}</span>
-                  <span class="block text-sm text-slate-600">
-                    {{ peopleLabel(team.peopleCount) }} ·
-                    {{ team.dailyCapacityHours | number: '1.0-2' }} h/dia
+                  <span
+                    class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-linear-to-br from-brand-400 to-azure-500 text-sm font-extrabold text-[#021a1d]"
+                    aria-hidden="true"
+                    >{{ team.name.slice(0, 1).toUpperCase() }}</span
+                  >
+                  <span class="min-w-0">
+                    <span class="block truncate font-bold text-slate-900">{{ team.name }}</span>
+                    <span class="block text-sm text-slate-600">
+                      {{ peopleLabel(team.peopleCount) }} ·
+                      {{ team.dailyCapacityHours | number: '1.0-2' }} h/dia
+                    </span>
                   </span>
                 </button>
               </li>
@@ -54,46 +65,29 @@
             [formGroup]="newTeamForm"
             (ngSubmit)="saveNew()"
             novalidate
-            class="mt-3 space-y-2 rounded-md border border-slate-200 bg-white p-3"
+            class="mt-3 space-y-2 rounded-2xl border border-white/50 bg-white/30 p-3 dark:border-white/15 dark:bg-white/5"
           >
-            <label for="new-team-name" class="block text-sm font-medium text-slate-700">
-              Nome do novo time
-            </label>
-            <input
-              id="new-team-name"
-              type="text"
-              formControlName="name"
-              class="block w-full rounded-md border border-slate-300 px-3 py-2"
-            />
+            <label for="new-team-name" class="block text-sm font-semibold text-slate-800"
+              >Nome do novo time</label
+            >
+            <input id="new-team-name" type="text" formControlName="name" class="field w-full" />
             @if (newTeamForm.controls.name.invalid && newTeamForm.controls.name.touched) {
-              <p class="text-sm text-red-700">Informe o nome do time.</p>
+              <p class="text-sm font-medium text-red-800">Informe o nome do time.</p>
             }
             @if (message(); as text) {
-              <p role="alert" class="text-sm text-red-700">{{ text }}</p>
+              <p role="alert" class="text-sm font-medium text-red-800">{{ text }}</p>
             }
             <div class="flex gap-2">
-              <button
-                type="submit"
-                [disabled]="saving()"
-                class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60"
-              >
+              <button type="submit" [disabled]="saving()" class="btn-primary rounded-full">
                 Salvar time
               </button>
-              <button
-                type="button"
-                (click)="cancelNew()"
-                class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-              >
+              <button type="button" (click)="cancelNew()" class="btn-secondary rounded-full">
                 Cancelar
               </button>
             </div>
           </form>
         } @else {
-          <button
-            type="button"
-            (click)="startNew()"
-            class="mt-3 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-100"
-          >
+          <button type="button" (click)="startNew()" class="btn-secondary mt-3 w-full rounded-full">
             + Novo time
           </button>
         }
@@ -102,57 +96,70 @@
   </section>
 
   @if (store.status() === 'ready' && store.selectedTeam(); as team) {
-    <section aria-label="Detalhe do time" class="space-y-6">
-      <div>
-        <h2 class="text-lg font-semibold">{{ team.name }}</h2>
-        <p class="text-slate-600">
-          Capacidade do time: {{ team.dailyCapacityHours | number: '1.0-2' }} h/dia útil
-        </p>
-      </div>
-
-      <form [formGroup]="renameForm" (ngSubmit)="saveName()" novalidate class="max-w-md space-y-2">
-        <label for="team-name" class="block text-sm font-medium text-slate-700">Nome do time</label>
-        <div class="flex gap-2">
-          <input
-            id="team-name"
-            type="text"
-            formControlName="name"
-            class="block w-full rounded-md border border-slate-300 px-3 py-2"
-          />
-          <button
-            type="submit"
-            [disabled]="saving()"
-            class="shrink-0 whitespace-nowrap rounded-md border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-100 disabled:opacity-60"
+    <section aria-label="Detalhe do time" class="min-w-0 space-y-5">
+      <div class="card flex flex-wrap items-center justify-between gap-4 p-5">
+        <div class="flex items-center gap-4">
+          <span
+            class="grid h-14 w-14 place-items-center rounded-2xl bg-linear-to-br from-brand-400 to-azure-500 text-xl font-extrabold text-[#021a1d]"
+            aria-hidden="true"
+            >{{ team.name.slice(0, 1).toUpperCase() }}</span
           >
-            Salvar nome
-          </button>
+          <div>
+            <h3 class="text-2xl font-extrabold tracking-tight text-slate-900">{{ team.name }}</h3>
+            <p class="text-sm text-slate-700">
+              Capacidade do time: {{ team.dailyCapacityHours | number: '1.0-2' }} h/dia útil
+            </p>
+          </div>
         </div>
-        @if (renameForm.controls.name.invalid && renameForm.controls.name.touched) {
-          <p class="text-sm text-red-700">Informe o nome do time.</p>
-        }
-        @if (!creating() && message(); as text) {
-          <p role="alert" class="text-sm text-red-700">{{ text }}</p>
-        }
-      </form>
+
+        <form
+          [formGroup]="renameForm"
+          (ngSubmit)="saveName()"
+          novalidate
+          class="w-full max-w-md space-y-2"
+        >
+          <label for="team-name" class="block text-sm font-semibold text-slate-800"
+            >Nome do time</label
+          >
+          <div class="flex gap-2">
+            <input id="team-name" type="text" formControlName="name" class="field w-full" />
+            <button
+              type="submit"
+              [disabled]="saving()"
+              class="btn-secondary shrink-0 rounded-full whitespace-nowrap"
+            >
+              Salvar nome
+            </button>
+          </div>
+          @if (renameForm.controls.name.invalid && renameForm.controls.name.touched) {
+            <p class="text-sm font-medium text-red-800">Informe o nome do time.</p>
+          }
+          @if (!creating() && message(); as text) {
+            <p role="alert" class="text-sm font-medium text-red-800">{{ text }}</p>
+          }
+        </form>
+      </div>
 
       <app-people-section />
 
-      <div class="border-t border-slate-200 pt-4">
+      <div class="card border-red-700/30 p-5">
+        <h4 class="text-sm font-bold text-slate-900">Excluir o time</h4>
         @if (confirmingDelete()) {
-          <p class="text-sm">Excluir o time “{{ team.name }}”?</p>
-          <div class="mt-2 flex gap-2">
-            <button
-              type="button"
-              (click)="confirmDelete()"
+          <p class="mt-2 text-sm font-semibold text-slate-900">Excluir o time “{{ team.name }}”?</p>
+          <p class="mt-0.5 text-xs text-slate-600">
+            Segure o botão para confirmar (ou use a tecla Espaço). Soltar antes cancela.
+          </p>
+          <div class="mt-3 flex flex-wrap items-center gap-3">
+            <app-hold-button
+              label="Segure para excluir"
+              doneLabel="Excluído"
               [disabled]="saving()"
-              class="rounded-md bg-red-700 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60"
-            >
-              Confirmar exclusão
-            </button>
+              (confirmed)="confirmDelete()"
+            />
             <button
               type="button"
               (click)="confirmingDelete.set(false)"
-              class="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+              class="btn-secondary rounded-full"
             >
               Cancelar
             </button>
@@ -162,9 +169,9 @@
             type="button"
             (click)="confirmingDelete.set(true)"
             [disabled]="team.peopleCount > 0"
-            class="rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+            class="btn-danger mt-2 rounded-full"
           >
-            Excluir time
+            <app-icon name="trash" /> Excluir time
           </button>
           @if (team.peopleCount > 0) {
             <p class="mt-2 text-sm text-slate-600">

@@ -1,0 +1,140 @@
+<div class="flex items-center justify-between gap-2">
+  <h3 class="text-base font-bold text-slate-900 first-letter:uppercase">{{ title() }}</h3>
+  <div class="flex items-center gap-1.5">
+    <button
+      type="button"
+      class="btn-secondary h-9 w-9 !p-0"
+      aria-label="Mês anterior"
+      (click)="go(-1)"
+    >
+      <span aria-hidden="true">‹</span>
+    </button>
+    <button type="button" class="btn-secondary h-9 !px-3 text-xs" (click)="goToday()">Hoje</button>
+    <button
+      type="button"
+      class="btn-secondary h-9 w-9 !p-0"
+      aria-label="Próximo mês"
+      (click)="go(1)"
+    >
+      <span aria-hidden="true">›</span>
+    </button>
+  </div>
+</div>
+
+<div
+  class="mt-3 grid grid-cols-7 gap-1 text-center text-[0.7rem] font-semibold tracking-wide text-slate-500 uppercase"
+  aria-hidden="true"
+>
+  @for (weekday of weekdays; track weekday) {
+    <span>{{ weekday }}</span>
+  }
+</div>
+
+<div
+  #grid
+  class="mt-1 grid grid-cols-7 gap-1"
+  role="group"
+  [attr.aria-label]="'Dias de ' + title()"
+>
+  @for (date of days(); track date) {
+    <button
+      type="button"
+      class="relative flex h-12 flex-col items-center justify-center rounded-xl border text-sm transition-colors"
+      [class]="
+        date === selected()
+          ? 'border-transparent bg-linear-to-br from-brand-500 to-azure-500 font-bold text-[#021a1d] shadow-pop'
+          : date === today()
+            ? 'border-brand-400 bg-brand-50 font-semibold text-brand-700'
+            : inMonth(date)
+              ? 'border-transparent text-slate-800 hover:bg-white/70 dark:hover:bg-white/10'
+              : 'border-transparent text-slate-500 hover:bg-white/40'
+      "
+      [attr.aria-label]="label(date)"
+      [attr.aria-pressed]="date === selected()"
+      [attr.aria-current]="date === today() ? 'date' : null"
+      (click)="pick(date)"
+    >
+      {{ dayNumber(date) }}
+      <span class="absolute bottom-1 flex gap-0.5" aria-hidden="true">
+        @for (kind of kinds(date); track kind) {
+          <span
+            class="h-1.5 w-1.5 rounded-full"
+            [class]="
+              kind === 'holiday'
+                ? 'bg-ember'
+                : kind === 'absence'
+                  ? 'bg-aqua'
+                  : date === selected()
+                    ? 'bg-[#021a1d]'
+                    : 'bg-azure-500'
+            "
+          ></span>
+        }
+      </span>
+    </button>
+  }
+</div>
+
+<ul class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600" aria-label="Legenda">
+  <li class="flex items-center gap-1.5">
+    <span class="h-2 w-2 rounded-full bg-ember"></span>Feriado
+  </li>
+  <li class="flex items-center gap-1.5">
+    <span class="h-2 w-2 rounded-full bg-aqua"></span>Ausência
+  </li>
+  @if (showDeliveries()) {
+    <li class="flex items-center gap-1.5">
+      <span class="h-2 w-2 rounded-full bg-azure-500"></span>Entrega prevista
+    </li>
+  }
+</ul>
+
+<div class="mt-4 border-t border-slate-200 pt-3" aria-live="polite">
+  <p class="text-sm font-semibold text-slate-900">{{ selectedTitle() }}</p>
+  @if (selectedEvents().length === 0) {
+    <p class="mt-1 text-sm text-slate-500">Nenhum evento neste dia.</p>
+  } @else {
+    <ul class="mt-2 flex max-h-44 flex-col gap-2 overflow-y-auto pr-1">
+      @for (event of selectedEvents(); track $index) {
+        <li class="flex items-start gap-2.5 rounded-xl bg-white/50 p-2.5 text-sm dark:bg-white/5">
+          <span
+            class="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg"
+            [class]="
+              event.kind === 'holiday'
+                ? 'bg-ember/15 text-ember'
+                : event.kind === 'absence'
+                  ? 'bg-aqua/20 text-teal-700 dark:text-aqua'
+                  : 'bg-brand-50 text-brand-600'
+            "
+          >
+            <app-icon
+              [name]="
+                event.kind === 'holiday'
+                  ? 'calendar'
+                  : event.kind === 'absence'
+                    ? 'teams'
+                    : 'schedule'
+              "
+            />
+          </span>
+          <span class="min-w-0">
+            <span class="block font-medium text-slate-900">
+              <span class="text-xs font-semibold text-slate-500 uppercase">{{
+                kindLabel[event.kind]
+              }}</span>
+              · {{ event.title }}
+            </span>
+            <span
+              class="block text-xs"
+              [class]="
+                event.late ? 'font-medium text-amber-800 dark:text-amber-300' : 'text-slate-500'
+              "
+            >
+              {{ event.detail }}
+            </span>
+          </span>
+        </li>
+      }
+    </ul>
+  }
+</div>

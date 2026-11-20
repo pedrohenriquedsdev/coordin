@@ -22,13 +22,13 @@ describe('safeReturnUrl', () => {
     ['/login?returnUrl=/x', 'the login page with parameters'],
     ['', 'an empty value'],
   ])('rejects %j (%s) and falls back to the home page', (candidate) => {
-    expect(safeReturnUrl(candidate)).toBe('/');
+    expect(safeReturnUrl(candidate)).toBe('/inicio');
   });
 
   it.each([undefined, null, 42, {}, ['/cronograma']])(
     'falls back to the home page for a non-string value (%j)',
     (candidate) => {
-      expect(safeReturnUrl(candidate)).toBe('/');
+      expect(safeReturnUrl(candidate)).toBe('/inicio');
     },
   );
 });

@@ -3,13 +3,15 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { HolidayResponse } from '../api/models/holiday-response';
 import { CalendarDatePipe } from '../core/dates/calendar-date.pipe';
 import { messageFor } from '../core/problems/messages';
+import { HoldButton } from '../core/ui/hold-button';
+import { Icon } from '../core/ui/icon';
 import { readProblem } from '../core/problems/problem';
 import { CalendarStore } from './calendar.store';
 
 /** Os feriados do setor (RF-03; T08): em um feriado ninguém contribui com capacidade; a data é única. */
 @Component({
   selector: 'app-holidays-section',
-  imports: [ReactiveFormsModule, CalendarDatePipe],
+  imports: [ReactiveFormsModule, CalendarDatePipe, Icon, HoldButton],
   templateUrl: './holidays-section.html',
 })
 export class HolidaysSection {

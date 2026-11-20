@@ -312,4 +312,95 @@ describe('SchedulePage', () => {
     );
     expect(element().textContent).toContain('Checkout');
   });
+
+  describe('summary, filters and search', () => {
+    const mixed = () => [
+      item({ demandId: 'a', title: 'Autenticação social', totalEstimatedEffortHours: '40' }),
+      item({
+        demandId: 'b',
+        title: 'Relatório de performance',
+        exceedsInformedEndDate: true,
+        informedEndDate: '2026-12-05',
+        totalEstimatedEffortHours: '10',
+      }),
+      item({
+        demandId: 'c',
+        title: 'Sem estimativa',
+        isPredictable: false,
+        unpredictableReason: 'MissingEstimate',
+        forecastEndDate: null,
+        endDateWithoutMargin: null,
+      }),
+      item({ demandId: 'd', title: 'Já entregue', completedOn: '2026-11-01' }),
+    ];
+
+    const tableRows = () =>
+      element().querySelectorAll('[aria-label="Cronograma em tabela"] tbody tr').length;
+
+    const click = (label: string) =>
+      [...element().querySelectorAll('button')]
+        .find((b) => b.textContent?.trim().startsWith(label))
+        ?.click();
+
+    it('summarizes the open demands', async () => {
+      fixture.detectChanges();
+      await answer(mixed());
+
+      const summary =
+        element().querySelector('[aria-label="Resumo do cronograma"]')?.textContent ?? '';
+      expect(summary).toContain('10/12/2026'); // a entrega do setor
+      expect(summary).toContain('1 sem previsão');
+      expect(summary).toContain('1 concluída');
+      expect(summary).toContain('A previsão passa do prazo desejado');
+    });
+
+    it('filters by situation and shows the counts', async () => {
+      fixture.detectChanges();
+      await answer(mixed());
+      expect(tableRows()).toBe(4);
+
+      click('Sem previsão');
+      fixture.detectChanges();
+      expect(tableRows()).toBe(1);
+      expect(element().querySelector('[aria-label="Cronograma em tabela"]')?.textContent).toContain(
+        'Sem estimativa',
+      );
+
+      click('Concluídas');
+      fixture.detectChanges();
+      expect(tableRows()).toBe(1);
+    });
+
+    it('searches the title ignoring accents, and clears the filters from the empty message', async () => {
+      fixture.detectChanges();
+      await answer(mixed());
+
+      const input = element().querySelector<HTMLInputElement>('input[type="search"]');
+      input!.value = 'RELATORIO';
+      input!.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      expect(tableRows()).toBe(1);
+
+      input!.value = 'nada disso';
+      input!.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      expect(element().textContent).toContain('Nenhuma demanda neste filtro.');
+
+      click('Limpar filtros');
+      fixture.detectChanges();
+      expect(tableRows()).toBe(4);
+    });
+
+    it('keeps the filter buttons pressed state for assistive tech', async () => {
+      fixture.detectChanges();
+      await answer(mixed());
+
+      click('Passam do prazo');
+      fixture.detectChanges();
+      const pressed = [...element().querySelectorAll('[aria-label="Situação"] button')]
+        .filter((b) => b.getAttribute('aria-pressed') === 'true')
+        .map((b) => b.textContent?.trim());
+      expect(pressed).toEqual(['Passam do prazo 1']);
+    });
+  });
 });

@@ -594,6 +594,83 @@ describe('DemandFormPage', () => {
       expect(button('Simular impacto')).toBeUndefined();
     });
   });
+
+  describe('summary and dependency search', () => {
+    const summary = (): string =>
+      element().querySelector('[aria-label="Resumo da demanda"]')?.textContent ?? '';
+
+    it('follows the typing in the summary, and shows "Não salvo" for a new demand', async () => {
+      await open();
+      expect(summary()).toContain('Não salvo');
+      expect(summary()).toContain('No fim da fila');
+
+      field('demand-start').value = '2026-12-01';
+      field('demand-start').dispatchEvent(new Event('input'));
+      checkTeam('t1', true);
+      field('hours-t1').value = '40';
+      field('hours-t1').dispatchEvent(new Event('input'));
+      checkTeam('t2', true);
+      fixture.detectChanges();
+
+      expect(summary()).toContain('01/12/2026');
+      expect(summary()).toContain('Web, Dados');
+      expect(summary()).toContain('40 h');
+      expect(summary()).toContain('1 sem estimativa');
+    });
+
+    it('shows "Editando" in the summary of an existing demand, with the deadline', async () => {
+      await open({ id: 'd1' });
+
+      expect(summary()).toContain('Editando');
+      expect(summary()).toContain('20/12/2026');
+      expect(summary()).toContain('Mantida');
+    });
+
+    it('filters the dependency candidates by title, ignoring accents', async () => {
+      await open({}, undefined, [
+        { ...demand({ id: 'd2', title: 'Pagamentos', teams: [], assignedPersonIds: [] }) },
+        { ...demand({ id: 'd3', title: 'Autenticação', teams: [], assignedPersonIds: [] }) },
+      ]);
+
+      const search = element().querySelector<HTMLInputElement>('input[type="search"]');
+      search!.value = 'AUTENTICACAO';
+      search!.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      const titles = [...element().querySelectorAll('li label')].map((l) => l.textContent?.trim());
+      expect(titles.some((t) => t?.startsWith('Autenticação'))).toBe(true);
+      expect(titles.some((t) => t?.startsWith('Pagamentos'))).toBe(false);
+    });
+
+    it('shows the summary dates of a fresh simulation and drops them when it goes stale', async () => {
+      await open();
+      field('demand-title').value = 'Nova';
+      field('demand-title').dispatchEvent(new Event('input'));
+      checkTeam('t1', true);
+      field('hours-t1').value = '8';
+      field('hours-t1').dispatchEvent(new Event('input'));
+      button('Simular impacto')?.click();
+      request('POST', '/api/demands/simulate').flush({
+        position: 1,
+        isPredictable: true,
+        unpredictableReason: null,
+        forecastStartDate: '2026-12-01',
+        endDateWithoutMargin: '2026-12-08',
+        forecastEndDate: '2026-12-10',
+        sectorEndDate: '2026-12-10',
+        sectorDeltaDays: 0,
+        changes: [],
+      });
+      fixture.detectChanges();
+      expect(summary()).toContain('08/12/2026');
+      expect(summary()).toContain('10/12/2026');
+
+      field('demand-title').value = 'Outra';
+      field('demand-title').dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      expect(summary()).not.toContain('08/12/2026');
+    });
+  });
 });
 
 describe('parseEffort', () => {

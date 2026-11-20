@@ -4,6 +4,7 @@ import { ApiConfiguration } from '../api/api-configuration';
 import { resetToPriority } from '../api/fn/scenarios/reset-to-priority';
 import { messageFor } from '../core/problems/messages';
 import { readProblem } from '../core/problems/problem';
+import { Icon } from '../core/ui/icon';
 
 /**
  * Aviso e botão para voltar a ordem de execução à ordem de prioridade (RF-15). Aparece só quando o modo é
@@ -12,6 +13,7 @@ import { readProblem } from '../core/problems/problem';
  */
 @Component({
   selector: 'app-reset-to-priority',
+  imports: [Icon],
   templateUrl: './reset-to-priority.html',
 })
 export class ResetToPriority {

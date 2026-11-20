@@ -7,9 +7,18 @@ import { getEstimateHistory } from '../api/fn/demands/get-estimate-history';
 import { getForecastHistory } from '../api/fn/demands/get-forecast-history';
 import { EstimateHistoryResponse } from '../api/models/estimate-history-response';
 import { ForecastHistoryResponse } from '../api/models/forecast-history-response';
-import { estimateHistoryRows, forecastHistoryRows } from './demand-history';
+import { buildTimeline, estimateHistoryRows, forecastHistoryRows } from './demand-history';
 
 /** Situação da tela de detalhe: aguardando, pronta, demanda inexistente, ou falha. */
+/** Os campos da demanda que a tela mostra no resumo; todos opcionais, porque só se exibe o que a API trouxe. */
+export interface DemandSummary {
+  readonly priorityRank?: number | string | null;
+  readonly startDate?: string | null;
+  readonly informedEndDate?: string | null;
+  readonly completedOn?: string | null;
+  readonly teams?: readonly { teamName: string; estimatedEffortHours: number | string | null }[];
+}
+
 export type DetailLoad = 'loading' | 'ready' | 'notFound' | 'failed';
 
 /**
@@ -23,11 +32,13 @@ export class DemandHistoryStore {
 
   readonly load = signal<DetailLoad>('loading');
   readonly title = signal('');
+  readonly summary = signal<DemandSummary>({});
   readonly estimates = signal<EstimateHistoryResponse[]>([]);
   readonly forecasts = signal<ForecastHistoryResponse[]>([]);
 
   readonly estimateRows = computed(() => estimateHistoryRows(this.estimates()));
   readonly forecastRows = computed(() => forecastHistoryRows(this.forecasts()));
+  readonly timeline = computed(() => buildTimeline(this.estimates(), this.forecasts()));
 
   /** Uma busca nova cancela a anterior, para a demanda que saiu da tela não sobrescrever a que está nela. */
   private pending: Subscription | null = null;
@@ -46,6 +57,7 @@ export class DemandHistoryStore {
     }).subscribe({
       next: ({ demand, estimates, forecasts }) => {
         this.title.set(demand.title);
+        this.summary.set(demand as DemandSummary);
         this.estimates.set(estimates);
         this.forecasts.set(forecasts);
         this.load.set('ready');

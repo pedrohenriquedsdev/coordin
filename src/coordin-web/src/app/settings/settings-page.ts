@@ -1,6 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { messageFor } from '../core/problems/messages';
 import { readProblem } from '../core/problems/problem';
+import { Icon } from '../core/ui/icon';
+import { Loader } from '../core/ui/loader';
+import { PageHeader } from '../core/ui/page-header';
+import { ThemeService } from '../core/ui/theme.service';
 import { SettingsStore } from './settings.store';
 
 const MARGIN_INVALID = 'A margem deve estar entre 0% e 1000%, com no máximo 2 casas decimais.';
@@ -19,14 +23,40 @@ export function parseMargin(text: string): number | null {
   return value <= 1000 ? value : null;
 }
 
+/**
+ * Quantos dias passa a ter uma duração de `baseDays` dias com a margem de `percent`%, arredondando para cima
+ * (a margem só amplia o prazo e nunca o reduz). Em inteiros, para não depender de erro de ponto flutuante.
+ */
+export function daysWithMargin(baseDays: number, percent: number): number {
+  const hundredths = Math.round(percent * 100);
+  return Math.floor((baseDays * (10000 + hundredths) + 9999) / 10000);
+}
+
 /** Tela "Configurações" (RF-09): a margem de segurança das previsões. */
 @Component({
   selector: 'app-settings-page',
+  imports: [PageHeader, Icon, Loader],
   providers: [SettingsStore],
   templateUrl: './settings-page.html',
 })
 export class SettingsPage {
   protected readonly store = inject(SettingsStore);
+  protected readonly theme = inject(ThemeService);
+
+  /** Atalhos de valor para a margem. */
+  protected readonly presets = [0, 10, 20, 30] as const;
+
+  /** O exemplo ao vivo: uma demanda de 20 dias, com a margem digitada (só quando ela é válida). */
+  protected readonly example = computed(() => {
+    const percent = parseMargin(this.text());
+    return percent === null ? null : { base: 20, withMargin: daysWithMargin(20, percent) };
+  });
+
+  /** O valor do controle deslizante: a margem digitada, de 0 a 100 (acima disso, o campo de texto manda). */
+  protected readonly sliderValue = computed(() => {
+    const percent = parseMargin(this.text());
+    return percent === null ? 0 : Math.min(percent, 100);
+  });
 
   protected readonly text = signal('');
   protected readonly message = signal<string | null>(null);
@@ -42,6 +72,16 @@ export class SettingsPage {
       next: () => this.text.set(String(this.store.safetyMarginPercent() ?? '')),
       error: () => this.store.status.set('failed'),
     });
+  }
+
+  protected setPreset(percent: number): void {
+    this.text.set(String(percent));
+    this.message.set(null);
+    this.error.set(null);
+  }
+
+  protected onSlider(event: Event): void {
+    this.setText(event);
   }
 
   protected setText(event: Event): void {
