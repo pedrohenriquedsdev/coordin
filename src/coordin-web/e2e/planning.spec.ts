@@ -36,7 +36,8 @@ test('a demand created with an estimate shows its predicted end date in the sche
   await expect(page.getByRole('heading', { name: new RegExp(title) })).toBeVisible();
 
   // 3. O cronograma mostra uma data de fim prevista, no formato dd/MM/aaaa, e nenhum "Sem previsão" para ela.
-  await page.getByRole('link', { name: 'Cronograma' }).click();
+  // O cronograma fica em uma lista suspensa do menu: abrir pelo endereço vale para qualquer largura.
+  await page.goto('/');
   const main = page.getByRole('main');
   await expect(main.getByText(title).first()).toBeVisible();
   await expect(main).toContainText(/Com margem: \d{2}\/\d{2}\/\d{4}/);
