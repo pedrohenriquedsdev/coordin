@@ -5,7 +5,7 @@
 />
 
 <!-- Período -->
-<section class="card p-5" aria-label="Período dos indicadores">
+<section class="card p-5 sm:p-6" aria-label="Período dos indicadores">
   <form (submit)="submit($event)" class="flex flex-wrap items-end gap-4">
     <label class="text-sm font-semibold text-slate-800">
       Concluídas de
@@ -144,7 +144,7 @@
         <div class="mt-5 grid gap-5 xl:grid-cols-2">
           <section
             aria-labelledby="deviation-chart-title"
-            class="card min-w-0 space-y-2 p-5"
+            class="card min-w-0 space-y-2 p-5 sm:p-6"
             [appReveal]="4"
           >
             <h3 id="deviation-chart-title" class="text-base font-bold text-slate-900">
@@ -161,7 +161,7 @@
 
           <section
             aria-labelledby="estimate-chart-title"
-            class="card min-w-0 space-y-2 p-5"
+            class="card min-w-0 space-y-2 p-5 sm:p-6"
             [appReveal]="5"
           >
             <h3 id="estimate-chart-title" class="text-base font-bold text-slate-900">

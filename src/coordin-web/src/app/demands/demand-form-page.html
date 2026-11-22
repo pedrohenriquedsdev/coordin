@@ -1,7 +1,7 @@
 <nav aria-label="Você está em" class="mb-3 flex items-center gap-2 text-sm text-slate-600">
   <a
     routerLink="/demands"
-    class="inline-flex items-center gap-1.5 font-semibold text-brand-700 hover:underline"
+    class="inline-flex min-h-10 items-center gap-1.5 font-semibold text-brand-700 hover:underline"
   >
     <app-icon name="demands" /> Demandas
   </a>
@@ -46,8 +46,12 @@
         >
       </div>
     } @else {
+      <!-- O aviso acompanha a rolagem: o formulário é longo e o botão Salvar fica no fim. -->
       @if (message(); as text) {
-        <p role="alert" class="card mb-4 border-red-700/50 p-3 text-sm font-semibold text-red-800">
+        <p
+          role="alert"
+          class="card sticky top-[4.75rem] z-20 mb-4 border-red-700/60 bg-red-100 p-3 text-sm font-semibold text-red-900 dark:bg-red-950 dark:text-red-200"
+        >
           {{ text }}
         </p>
       }
@@ -74,6 +78,7 @@
                 formControlName="title"
                 maxlength="200"
                 placeholder="Ex.: Implementar módulo de notificações"
+                [attr.aria-invalid]="form.controls.title.invalid && message() ? 'true' : null"
                 class="field mt-1 w-full"
               />
             </div>
@@ -304,7 +309,7 @@
         <!-- Lateral: impacto e resumo -->
         <aside class="min-w-0 space-y-5 xl:sticky xl:top-24">
           @if (!editing) {
-            <section class="card p-5" aria-label="Impacto no planejamento">
+            <section class="card p-5 sm:p-6" aria-label="Impacto no planejamento">
               <div class="flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
                   <span
@@ -413,7 +418,7 @@
               }
             </section>
           } @else {
-            <section class="card p-5" aria-label="Impacto no planejamento">
+            <section class="card p-5 sm:p-6" aria-label="Impacto no planejamento">
               <div class="flex items-center gap-3">
                 <span
                   class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
@@ -427,7 +432,7 @@
             </section>
           }
 
-          <section class="card p-5" aria-label="Resumo da demanda">
+          <section class="card p-5 sm:p-6" aria-label="Resumo da demanda">
             <div class="mb-3 flex items-center justify-between gap-3">
               <h3 class="text-base font-bold text-slate-900">Resumo da demanda</h3>
               <span class="badge bg-slate-200/70 text-slate-700 dark:bg-white/10">{{

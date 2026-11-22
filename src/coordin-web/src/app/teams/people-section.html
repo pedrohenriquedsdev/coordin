@@ -1,4 +1,4 @@
-<section aria-label="Pessoas do time" class="card p-5">
+<section aria-label="Pessoas do time" class="card p-5 sm:p-6">
   <div class="flex items-center gap-3">
     <span
       class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-br from-brand-400 to-azure-500 text-[#021a1d]"
@@ -15,7 +15,7 @@
     </p>
   } @else {
     <div class="table-scroll mt-3">
-      <table class="w-full text-left text-sm">
+      <table class="table-stack w-full text-left text-sm">
         <thead>
           <tr>
             <th scope="col" class="px-3 py-3">Pessoa</th>
@@ -28,14 +28,14 @@
           @for (person of store.selectedPeople(); track person.id) {
             <tr class="border-t border-white/40 dark:border-white/10">
               <td class="px-3 py-3 font-semibold text-slate-900">{{ person.name }}</td>
-              <td class="px-3 py-3">
+              <td class="px-3 py-3" data-label="Capacidade (h/dia útil)">
                 @if (person.dailyCapacityHours === 0) {
                   <span class="text-slate-600">não contribui</span>
                 } @else {
                   {{ person.dailyCapacityHours | number: '1.0-2' }}
                 }
               </td>
-              <td class="px-3 py-3">{{ nextAbsence(person) }}</td>
+              <td class="px-3 py-3" data-label="Próxima ausência">{{ nextAbsence(person) }}</td>
               <td class="px-3 py-3">
                 @if (deletingId() === person.id) {
                   <div class="flex flex-wrap items-center gap-2">

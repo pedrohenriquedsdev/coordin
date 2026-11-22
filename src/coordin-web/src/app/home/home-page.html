@@ -80,7 +80,7 @@
       <div class="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar por time">
         <button
           type="button"
-          class="rounded-full border px-3 py-1 text-xs font-semibold transition-colors"
+          class="touch-chip rounded-full border px-3 py-1 text-xs font-semibold transition-colors"
           [class]="
             selectedTeam() === null
               ? 'border-brand-500 bg-brand-500 text-[#021a1d]'
@@ -94,7 +94,7 @@
         @for (team of teamOptions(); track team.id) {
           <button
             type="button"
-            class="rounded-full border px-3 py-1 text-xs font-semibold transition-colors"
+            class="touch-chip rounded-full border px-3 py-1 text-xs font-semibold transition-colors"
             [class]="
               selectedTeam() === team.id
                 ? 'border-brand-500 bg-brand-500 text-[#021a1d]'
@@ -152,7 +152,7 @@
     }
   </section>
 
-  <section class="card p-5" [appReveal]="6" aria-labelledby="occupancy-title">
+  <section class="card p-5 sm:p-6" [appReveal]="6" aria-labelledby="occupancy-title">
     <h3 id="occupancy-title" class="text-base font-bold text-slate-900">Ocupação por time</h3>
     <p class="text-xs text-slate-500">Horas alocadas sobre a capacidade, nas próximas 8 semanas.</p>
     @if (occupancy().length === 0) {
@@ -164,7 +164,7 @@
             <div class="flex items-baseline justify-between gap-2 text-sm">
               <a
                 routerLink="/reports/teams"
-                class="truncate font-semibold text-slate-900 hover:text-brand-700"
+                class="inline-flex min-h-8 items-center truncate font-semibold text-slate-900 hover:text-brand-700 max-sm:min-h-10"
                 >{{ team.teamName }}</a
               >
               <span
@@ -197,7 +197,7 @@
 
 <!-- Entregas por semana + calendário interativo -->
 <div class="mt-4 grid gap-4 xl:grid-cols-2">
-  <section class="card p-5" [appReveal]="7" aria-labelledby="deliveries-title">
+  <section class="card p-5 sm:p-6" [appReveal]="7" aria-labelledby="deliveries-title">
     <h3 id="deliveries-title" class="text-base font-bold text-slate-900">
       Entregas previstas por semana
     </h3>
@@ -206,6 +206,11 @@
     </p>
     @if (scheduleFailed()) {
       <p class="mt-4 text-sm text-slate-500">Não foi possível carregar o cronograma.</p>
+    } @else if (!hasDeliveries()) {
+      <p class="mt-4 text-sm text-slate-600">
+        Nenhuma entrega prevista nas próximas 8 semanas. As próximas entregas aparecem na linha do
+        tempo abaixo.
+      </p>
     } @else {
       <app-chart [configuration]="deliveriesChart()" label="Entregas previstas por semana" />
       <details class="mt-2 text-sm">
@@ -239,7 +244,7 @@
     }
   </section>
 
-  <section class="card p-5" [appReveal]="8" aria-labelledby="calendar-title">
+  <section class="card p-5 sm:p-6" [appReveal]="8" aria-labelledby="calendar-title">
     <h3 id="calendar-title" class="sr-only">Calendário</h3>
     <app-home-calendar
       [today]="today"
@@ -251,7 +256,7 @@
 </div>
 
 <!-- Linha do tempo -->
-<section class="card mt-4 p-5" [appReveal]="9" aria-labelledby="timeline-title">
+<section class="card mt-4 p-5 sm:p-6" [appReveal]="9" aria-labelledby="timeline-title">
   <h3 id="timeline-title" class="text-base font-bold text-slate-900">
     Linha do tempo das próximas demandas
   </h3>
@@ -262,14 +267,10 @@
 </section>
 
 <h3 class="mt-8 mb-3 text-sm font-bold text-slate-700">Áreas do sistema</h3>
-<nav
-  aria-label="Atalhos"
-  class="grid grid-flow-dense gap-4 [perspective:1200px] sm:grid-cols-2 xl:grid-cols-4"
->
+<nav aria-label="Atalhos" class="grid gap-4 [perspective:1200px] sm:grid-cols-2 lg:grid-cols-3">
   @for (item of shortcuts(); track item.path; let i = $index) {
     <div
-      class="card hub-card group flex flex-col gap-5 p-6"
-      [class]="item.wide ? 'xl:col-span-2' : ''"
+      class="card hub-card group flex flex-col gap-4 p-5"
       [style]="'--a1:' + accents[item.accent][0] + ';--a2:' + accents[item.accent][1]"
       appHubTilt
       [appReveal]="i + 10"
@@ -281,7 +282,7 @@
 
       <div class="flex items-start justify-between gap-3">
         <span
-          class="hub-tile grid h-14 w-14 place-items-center rounded-2xl text-[#021a1d] transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110"
+          class="hub-tile grid h-12 w-12 place-items-center rounded-2xl text-[#021a1d] transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110"
         >
           <app-icon [name]="item.icon" />
         </span>

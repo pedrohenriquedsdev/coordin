@@ -141,7 +141,7 @@
         </div>
       </section>
 
-      <!-- Ilustração do painel (decorativa; os números são só de exemplo) -->
+      <!-- Ilustração do painel (decorativa; sem números, só formas de exemplo) -->
       <div aria-hidden="true" class="relative hidden min-[1250px]:block">
         <div
           class="relative mx-auto aspect-[16/10] w-[92%] max-w-[44rem] origin-center [transform:perspective(1600px)_rotateY(-16deg)_rotateX(5deg)_rotateZ(-4deg)]"
@@ -172,11 +172,10 @@
                     class="rounded-xl border border-[#d5e6e8] bg-[#f3fcfc] p-2.5 dark:border-white/10 dark:bg-white/5"
                   >
                     <p class="text-[0.5rem] text-[#587479] dark:text-[#93b0b4]">{{ kpi.label }}</p>
-                    <p
-                      class="mt-1 text-[1.2rem] leading-none font-semibold text-[#0a1c1f] dark:text-white"
-                    >
-                      {{ kpi.value }}
-                    </p>
+                    <!-- Barra de exemplo no lugar de um número: a ilustração não mostra dados inventados. -->
+                    <span
+                      class="mt-2 block h-3.5 w-2/3 rounded-md bg-[#0d8a93]/25 dark:bg-[#3acfd6]/25"
+                    ></span>
                   </div>
                 }
               </div>

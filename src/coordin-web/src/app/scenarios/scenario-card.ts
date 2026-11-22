@@ -49,6 +49,11 @@ export class ScenarioCard {
       : ({ text: 'Critério igual', tone: 'neutral' } as const);
   });
 
+  /** Quantas demandas mudam de data neste cenário: só elas aparecem na lista; a tabela completa fica recolhida. */
+  protected readonly changedCount = computed(
+    () => this.scenario().items.filter((item) => item.deltaDays !== 0).length,
+  );
+
   /** Quantas demandas têm contribuição diferente de zero, para o texto "de N". */
   protected readonly contributingCount = computed(
     () => this.scenario().items.filter((item) => item.scoreContributionDelta !== 0).length,

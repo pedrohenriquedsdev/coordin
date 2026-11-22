@@ -85,12 +85,23 @@
   }
 
   <!-- Justificativa: o gráfico e a tabela trazem os mesmos valores (DT-36). -->
-  <section class="mt-5" aria-label="Por que este cenário é melhor">
-    <h4 class="text-base font-bold text-slate-900">Por que este cenário é melhor</h4>
+  <section
+    class="mt-5"
+    [attr.aria-label]="
+      verdict().tone === 'good' ? 'Por que este cenário é melhor' : 'O que pesa neste cenário'
+    "
+  >
+    <h4 class="text-base font-bold text-slate-900">
+      {{ verdict().tone === 'good' ? 'Por que este cenário é melhor' : 'O que pesa neste cenário' }}
+    </h4>
     @if (justification().length > 0) {
       <p class="text-xs text-slate-600">
-        Mostrando as {{ justification().length }} demandas que mais contribuem, de
-        {{ contributingCount() }}.
+        @if (justification().length === 1) {
+          Mostrando a demanda que mais contribui, de {{ contributingCount() }}.
+        } @else {
+          Mostrando as {{ justification().length }} demandas que mais contribuem, de
+          {{ contributingCount() }}.
+        }
       </p>
       <div class="mt-2">
         <app-chart
@@ -105,19 +116,21 @@
           </caption>
           <thead>
             <tr>
-              <th scope="col" class="px-3 py-2">Demanda</th>
-              <th scope="col" class="px-3 py-2">Peso</th>
-              <th scope="col" class="px-3 py-2">Contribuição</th>
-              <th scope="col" class="px-3 py-2">Sentido</th>
+              <th scope="col" class="px-2 py-2 sm:px-3">Demanda</th>
+              <th scope="col" class="px-2 py-2 sm:px-3">Peso</th>
+              <th scope="col" class="px-2 py-2 sm:px-3">Contribuição</th>
+              <th scope="col" class="px-2 py-2 max-sm:sr-only sm:px-3">Sentido</th>
             </tr>
           </thead>
           <tbody>
             @for (item of justification(); track item.demandId) {
               <tr class="border-t border-white/40 dark:border-white/10">
-                <td class="px-3 py-2">{{ item.title }}</td>
-                <td class="px-3 py-2">{{ scoreOf(item.weight) }}</td>
-                <td class="px-3 py-2">{{ scoreOf(item.scoreContributionDelta) }}</td>
-                <td class="px-3 py-2">{{ contributionOf(item.scoreContributionDelta) }}</td>
+                <td class="px-2 py-2 sm:px-3">{{ item.title }}</td>
+                <td class="px-2 py-2 sm:px-3">{{ scoreOf(item.weight) }}</td>
+                <td class="px-2 py-2 sm:px-3">{{ scoreOf(item.scoreContributionDelta) }}</td>
+                <td class="px-2 py-2 max-sm:sr-only sm:px-3">
+                  {{ contributionOf(item.scoreContributionDelta) }}
+                </td>
               </tr>
             }
           </tbody>
@@ -128,52 +141,103 @@
     }
   </section>
 
-  <!-- Tabela completa: a prioridade registrada ao lado da nova posição (RF-13). -->
+  <!-- O que muda: só as demandas que mudam de data. A tabela completa fica recolhida (RF-13). -->
   <section class="mt-5" aria-label="Demandas do cenário">
-    <div class="table-scroll">
-      <table class="w-full text-left text-xs">
-        <thead>
-          <tr>
-            <th scope="col" class="px-3 py-2">Demanda</th>
-            <th scope="col" class="px-3 py-2">Prioridade</th>
-            <th scope="col" class="px-3 py-2">Nova posição</th>
-            <th scope="col" class="px-3 py-2">Previsão atual</th>
-            <th scope="col" class="px-3 py-2">Nova previsão</th>
-            <th scope="col" class="px-3 py-2">Diferença</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of scenario().items; track item.demandId) {
-            <tr class="border-t border-white/40 dark:border-white/10">
-              <td class="px-3 py-2 font-semibold text-slate-900">{{ item.title }}</td>
-              <td class="px-3 py-2">{{ item.priorityRank }}</td>
-              <td class="px-3 py-2">{{ item.newExecutionRank }}</td>
-              <td class="px-3 py-2">{{ dateOf(item.currentForecastEndDate) }}</td>
-              <td class="px-3 py-2">{{ dateOf(item.forecastEndDate) }}</td>
-              <td class="px-3 py-2">
+    <h4 class="text-base font-bold text-slate-900">Demandas que mudam de data</h4>
+    @if (changedCount() === 0) {
+      <p class="mt-2 text-slate-600">Nenhuma demanda muda de data neste cenário.</p>
+    } @else {
+      <ul class="mt-2 space-y-2">
+        @for (item of scenario().items; track item.demandId) {
+          @if (item.deltaDays !== 0) {
+            <li
+              class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-2xl border border-white/50 bg-white/30 p-3 dark:border-white/15 dark:bg-white/5"
+            >
+              <div class="min-w-0">
+                <p class="font-semibold break-words text-slate-900">{{ item.title }}</p>
+                <p class="text-xs text-slate-600">
+                  Prioridade {{ item.priorityRank }}, nova posição {{ item.newExecutionRank }}
+                </p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs text-slate-700">
+                  <span class="nowrap">{{ dateOf(item.currentForecastEndDate) }}</span> →
+                  <span class="nowrap font-semibold">{{ dateOf(item.forecastEndDate) }}</span>
+                </span>
                 <span
                   class="badge"
                   [class]="
                     item.deltaDays < 0
                       ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-400/20 dark:text-emerald-300'
-                      : item.deltaDays > 0
-                        ? 'bg-amber-100 text-amber-900 dark:bg-amber-400/20 dark:text-amber-300'
-                        : 'bg-slate-200/70 text-slate-700 dark:bg-white/10'
+                      : 'bg-amber-100 text-amber-900 dark:bg-amber-400/20 dark:text-amber-300'
                   "
                 >
                   @if (item.deltaDays < 0) {
                     <app-icon name="arrowDown" />
-                  } @else if (item.deltaDays > 0) {
+                  } @else {
                     <app-icon name="arrowUp" />
                   }
                   {{ deltaOf(item.deltaDays) }}
                 </span>
-              </td>
-            </tr>
+              </div>
+            </li>
           }
-        </tbody>
-      </table>
-    </div>
+        }
+      </ul>
+    }
+
+    <details class="mt-3 text-sm">
+      <summary class="cursor-pointer font-medium text-brand-700">
+        Ver a tabela completa ({{ scenario().items.length }} demandas)
+      </summary>
+      <p class="mt-2 text-xs text-slate-600 md:hidden">
+        Deslize a tabela para o lado para ver todas as colunas.
+      </p>
+      <div class="table-scroll mt-2">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr>
+              <th scope="col" class="px-3 py-2">Demanda</th>
+              <th scope="col" class="px-3 py-2">Prioridade</th>
+              <th scope="col" class="px-3 py-2">Nova posição</th>
+              <th scope="col" class="px-3 py-2">Previsão atual</th>
+              <th scope="col" class="px-3 py-2">Nova previsão</th>
+              <th scope="col" class="px-3 py-2">Diferença</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of scenario().items; track item.demandId) {
+              <tr class="border-t border-white/40 dark:border-white/10">
+                <td class="px-3 py-2 font-semibold text-slate-900">{{ item.title }}</td>
+                <td class="px-3 py-2">{{ item.priorityRank }}</td>
+                <td class="px-3 py-2">{{ item.newExecutionRank }}</td>
+                <td class="px-3 py-2">{{ dateOf(item.currentForecastEndDate) }}</td>
+                <td class="px-3 py-2">{{ dateOf(item.forecastEndDate) }}</td>
+                <td class="px-3 py-2">
+                  <span
+                    class="badge"
+                    [class]="
+                      item.deltaDays < 0
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-400/20 dark:text-emerald-300'
+                        : item.deltaDays > 0
+                          ? 'bg-amber-100 text-amber-900 dark:bg-amber-400/20 dark:text-amber-300'
+                          : 'bg-slate-200/70 text-slate-700 dark:bg-white/10'
+                    "
+                  >
+                    @if (item.deltaDays < 0) {
+                      <app-icon name="arrowDown" />
+                    } @else if (item.deltaDays > 0) {
+                      <app-icon name="arrowUp" />
+                    }
+                    {{ deltaOf(item.deltaDays) }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </details>
   </section>
 
   <!-- Decisão do gestor: nada é aplicado sem a confirmação (RF-15). -->
@@ -191,7 +255,7 @@
         Cancelar
       </button>
     } @else {
-      <p class="min-w-0 flex-1 text-slate-700">
+      <p class="w-full min-w-0 text-slate-700 sm:w-auto sm:flex-1">
         Os cenários são recomendações baseadas na capacidade dos times e nas dependências. A decisão
         final é sempre sua.
       </p>

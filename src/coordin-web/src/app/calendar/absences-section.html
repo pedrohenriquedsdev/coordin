@@ -33,7 +33,7 @@
     </p>
   } @else {
     <div class="table-scroll mt-3">
-      <table class="w-full text-left text-sm">
+      <table class="table-stack w-full text-left text-sm">
         <thead>
           <tr>
             <th scope="col" class="px-3 py-3">Pessoa</th>
@@ -48,15 +48,15 @@
           @for (absence of visible(); track absence.id) {
             <tr class="border-t border-white/40 dark:border-white/10">
               <td class="px-3 py-3 font-semibold text-slate-900">{{ absence.personName }}</td>
-              <td class="px-3 py-3">{{ absence.teamName }}</td>
-              <td class="px-3 py-3">
+              <td class="px-3 py-3" data-label="Time">{{ absence.teamName }}</td>
+              <td class="px-3 py-3" data-label="Tipo">
                 <span
                   class="badge bg-brand-100 text-brand-800 dark:bg-brand-500/20 dark:text-brand-700"
                   >{{ typeLabel(absence.type) }}</span
                 >
               </td>
-              <td class="px-3 py-3">{{ absence.startDate | calendarDate }}</td>
-              <td class="px-3 py-3">{{ absence.endDate | calendarDate }}</td>
+              <td class="px-3 py-3" data-label="Início">{{ absence.startDate | calendarDate }}</td>
+              <td class="px-3 py-3" data-label="Fim">{{ absence.endDate | calendarDate }}</td>
               <td class="px-3 py-3">
                 @if (deletingId() === absence.id) {
                   <div class="flex flex-wrap items-center gap-2">
