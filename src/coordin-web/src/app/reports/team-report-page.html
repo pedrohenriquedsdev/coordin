@@ -5,7 +5,7 @@
 />
 
 <!-- Período -->
-<section class="card p-5" aria-label="Período do relatório">
+<section class="card p-5 sm:p-6" aria-label="Período do relatório">
   <form
     (submit)="$event.preventDefault(); search()"
     novalidate
@@ -153,16 +153,19 @@
         </section>
 
         <!-- Mapa de ocupação: time × semana -->
-        <section class="card mt-5 p-5" [appReveal]="4" aria-labelledby="heat-title">
+        <section class="card mt-5 p-5 sm:p-6" [appReveal]="4" aria-labelledby="heat-title">
           <h3 id="heat-title" class="text-base font-bold text-slate-900">Mapa de ocupação</h3>
           <p class="text-xs text-slate-600">
             Cada quadro é uma semana. Quanto mais forte o ciano, mais ocupado; em vermelho,
             sobrecarga. Clique para ver as semanas do time.
           </p>
+          <p class="mt-2 text-xs text-slate-600 sm:hidden">
+            Deslize o mapa para o lado para ver todas as semanas.
+          </p>
           <div class="table-scroll mt-3">
             <div class="min-w-max">
               <div
-                class="flex items-center gap-1.5 pb-1.5 text-[0.7rem] font-semibold text-slate-600"
+                class="flex items-center gap-1.5 pb-1.5 text-xs font-semibold text-slate-600"
                 aria-hidden="true"
               >
                 <span class="w-28 shrink-0"></span>

@@ -15,7 +15,7 @@
     </p>
   } @else {
     <div class="table-scroll mt-3">
-      <table class="w-full text-left text-sm">
+      <table class="table-stack w-full text-left text-sm">
         <thead>
           <tr>
             <th scope="col" class="px-3 py-3">Data</th>
@@ -29,7 +29,7 @@
               <td class="px-3 py-3 font-semibold text-slate-900">
                 {{ holiday.date | calendarDate }}
               </td>
-              <td class="px-3 py-3">{{ holiday.description ?? '—' }}</td>
+              <td class="px-3 py-3" data-label="Descrição">{{ holiday.description ?? '—' }}</td>
               <td class="px-3 py-3">
                 @if (deletingId() === holiday.id) {
                   <div class="flex flex-wrap items-center gap-2">

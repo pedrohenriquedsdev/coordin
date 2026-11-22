@@ -294,6 +294,12 @@ export class HomePage {
     buildDeliveriesChart(this.deliveries(), this.chartTheme()),
   );
 
+  /** Há alguma entrega prevista nas próximas semanas? Sem isso, o gráfico ficaria só com os eixos. */
+  protected readonly hasDeliveries = computed(() => {
+    const week = this.deliveries();
+    return [...week.onTime, ...week.late].some((count) => count > 0);
+  });
+
   protected readonly timeline = computed(() => buildTimeline(this.scheduleItems(), this.today, 8));
 
   protected readonly occupancy = computed(() => {
