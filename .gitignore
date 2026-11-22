@@ -25,3 +25,6 @@ src/Coordin.Api/wwwroot/
 !.vscode/extensions.json
 Thumbs.db
 .DS_Store
+
+# Prompt local para prototipagem visual (não versionado)
+/docs/prompt-prototipagem.txt
