@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { apiToken, loginAs, uniqueSuffix } from './helpers';
+import { apiToken, loginAs, navigateInApp, uniqueSuffix } from './helpers';
 
 test('the schedule fits a 360 px phone screen without horizontal scrolling', async ({
   page,
@@ -34,7 +34,7 @@ test('the schedule fits a 360 px phone screen without horizontal scrolling', asy
 
   await loginAs(page);
   // O cronograma fica em uma lista suspensa do menu: abrir pelo endereço vale para qualquer largura.
-  await page.goto('/');
+  await navigateInApp(page, '/');
   // Só o cartão visível conta: em 360 px a tabela do computador fica escondida.
   await expect(
     page.getByRole('main').getByText(title).filter({ visible: true }).first(),
