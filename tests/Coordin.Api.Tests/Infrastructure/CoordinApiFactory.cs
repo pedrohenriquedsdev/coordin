@@ -56,6 +56,11 @@ public class CoordinApiFactory(
                 ["Manager:Password"] = TestManager.Password,
                 // Limite alto para os testes poderem fazer muitos logins; o teste do limite o reduz.
                 ["Auth:RateLimit:PermitLimit"] = "1000",
+                // Chaves que mudam o comportamento da API e que alguém pode ter nos user-secrets ou nas
+                // variáveis de ambiente da máquina: ficam fixas no padrão de produção, para o resultado
+                // não depender de quem roda os testes. Cada teste que precisar do contrário a sobrescreve.
+                ["Validation:Enabled"] = "false",
+                ["Manager:ResetPassword"] = "false",
             };
 
             if (_connectionString is not null)
