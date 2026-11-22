@@ -341,7 +341,7 @@ O sistema registra cada alteração na estimativa de esforço de uma demanda.
 
 O sistema registra a evolução da data prevista de cada demanda ao longo do tempo.
 
-- Cada vez que a data prevista de uma demanda muda, o sistema guarda a data anterior, a nova, quando mudou e o evento que causou a mudança (estimativa, alocação, capacidade, ausência, dependência, cenário aprovado ou nova demanda).
+- Cada vez que a data prevista de uma demanda muda, o sistema guarda a data anterior, a nova, quando mudou e o evento que causou a mudança (estimativa, alocação, capacidade, ausência, dependência, cenário aprovado, nova demanda ou margem de segurança).
 - O primeiro registro é a primeira previsão (linha de base do RF-12).
 - O gestor consulta o histórico por demanda, em ordem cronológica.
 

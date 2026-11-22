@@ -21,7 +21,7 @@ O sistema SHALL registrar cada alteração na estimativa de esforço de um time 
 - **THEN** nenhum registro é criado no histórico de estimativas
 
 ### Requirement: Histórico da data prevista
-O sistema SHALL registrar cada mudança na data prevista de uma demanda, com a data anterior, a nova, a data da mudança e a causa que a provocou: estimativa, alocação, capacidade, ausência, dependência, cenário aprovado ou nova demanda (RF-21). A primeira previsão de uma demanda SHALL ser o primeiro registro do histórico.
+O sistema SHALL registrar cada mudança na data prevista de uma demanda, com a data anterior, a nova, a data da mudança e a causa que a provocou: estimativa, alocação, capacidade, ausência, dependência, cenário aprovado, nova demanda ou margem de segurança (RF-21). A primeira previsão de uma demanda SHALL ser o primeiro registro do histórico.
 
 #### Scenario: Primeira previsão
 - **WHEN** uma demanda se torna previsível pela primeira vez
