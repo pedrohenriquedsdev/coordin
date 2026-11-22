@@ -48,3 +48,21 @@ A casca da aplicação SHALL exibir o nome "Coordin" e uma área de conteúdo ut
 #### Scenario: Computador
 - **WHEN** a página inicial é aberta em uma janela de 1280 px de largura
 - **THEN** o nome "Coordin" aparece e a área de conteúdo ocupa a largura disponível
+
+### Requirement: Menu de navegação agrupado
+Para quem tem sessão, a casca SHALL exibir uma barra no topo com a marca "Coordin" (link para `/inicio`), o link "Início" e três grupos: "Planejamento" (Cronograma, Demandas, Cenários), "Análise" (Relatório por time, Precisão e, só quando a área estiver disponível, Validação) e "Cadastros" (Times e pessoas, Calendário, Configurações). A tela atual, e o grupo que a contém, SHALL aparecer destacada. Sem sessão, a casca SHALL NOT exibir o menu (RNF-04).
+
+#### Scenario: Menu no computador
+- **WHEN** o gestor autenticado abre qualquer tela em uma janela de 1280 px
+- **THEN** a barra mostra "Início" e os grupos "Planejamento", "Análise" e "Cadastros", e cada grupo abre a lista de suas telas
+
+#### Scenario: Sem sessão
+- **WHEN** a tela de login é exibida
+- **THEN** não há menu de navegação
+
+### Requirement: Menu recolhível no celular e controles da barra
+No celular, os grupos do menu SHALL ficar em um painel recolhível aberto por um botão "Abrir menu", sem rolagem horizontal. A barra SHALL ter ainda um botão que alterna o tema claro e escuro e o botão "Sair" (RNF-03).
+
+#### Scenario: Menu no celular
+- **WHEN** o gestor autenticado abre qualquer tela em uma janela de 360 px
+- **THEN** os grupos ficam recolhidos e abrem pelo botão "Abrir menu", sem rolagem horizontal

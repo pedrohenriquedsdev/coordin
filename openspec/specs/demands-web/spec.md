@@ -6,11 +6,11 @@ Permite ao gestor cadastrar e manter as demandas pelo navegador: lista com a ord
 ## Requirements
 
 ### Requirement: Navegação de planejamento
-Para quem tem sessão, a casca SHALL exibir os links "Cronograma" (`/`), "Demandas" (`/demands`), "Times e pessoas" (`/teams`), "Calendário" (`/calendar`) e "Configurações" (`/settings`), destacando a tela atual; todas as rotas novas SHALL exigir sessão (RNF-04).
+Para quem tem sessão, o menu da casca (ver `web-shell`) SHALL oferecer os links "Cronograma" (`/`), "Demandas" (`/demands`), "Times e pessoas" (`/teams`), "Calendário" (`/calendar`) e "Configurações" (`/settings`), destacando a tela atual; todas as rotas novas SHALL exigir sessão (RNF-04).
 
 #### Scenario: Links com sessão
 - **WHEN** o gestor está autenticado
-- **THEN** a casca mostra os cinco links, e o da tela aberta aparece destacado
+- **THEN** o menu oferece os cinco links, e o da tela aberta aparece destacado
 
 #### Scenario: Sem sessão
 - **WHEN** alguém sem sessão abre `/demands`, `/demands/new` ou `/settings`
@@ -62,7 +62,7 @@ Cada demanda ativa SHALL ter os botões "Subir" e "Descer", que trocam a posiç�
 - **THEN** a tela mostra a mensagem em português e mantém a ordem anterior
 
 ### Requirement: Excluir uma demanda com confirmação
-Cada demanda ativa SHALL ter "Excluir", que pede confirmação antes de chamar a API; demandas concluídas não têm esse botão (TDD 4.4; DT-18).
+Cada demanda ativa SHALL ter "Excluir", que pede confirmação (segurar o botão "Segure para excluir", ou a tecla Espaço; soltar antes cancela) antes de chamar a API; demandas concluídas não têm esse botão (TDD 4.4; DT-18).
 
 #### Scenario: Confirmar
 - **WHEN** o gestor clica em "Excluir" e confirma

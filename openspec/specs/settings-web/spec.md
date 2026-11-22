@@ -20,6 +20,24 @@ Permite ao gestor ver e ajustar a margem de segurança aplicada às previsões, 
 - **WHEN** o gestor informa 0 e salva
 - **THEN** a API recebe 0 e a tela confirma
 
+### Requirement: Apoios à digitação da margem
+A tela SHALL oferecer valores rápidos (0, 10, 20 e 30), um controle deslizante de 0 a 100 e um exemplo ao vivo que mostra, em dias, o efeito da margem digitada sobre uma demanda de 20 dias; quando o valor digitado é inválido, o exemplo SHALL pedir uma margem válida. Esses apoios só preenchem o campo e não salvam nada (RF-09).
+
+#### Scenario: Valor rápido
+- **WHEN** o gestor aciona um dos valores rápidos
+- **THEN** o campo passa a mostrar esse valor, sem chamar a API
+
+#### Scenario: Exemplo ao vivo
+- **WHEN** o gestor digita uma margem válida
+- **THEN** o exemplo mostra os 20 dias da demanda e o total com a margem
+
+### Requirement: Aparência
+`/settings` SHALL oferecer a escolha entre o tema claro e o tema escuro, e a barra da casca SHALL ter um botão que alterna entre os dois. Sem escolha anterior, a interface SHALL seguir a preferência do sistema operacional. A escolha fica guardada só no navegador do gestor e não altera nenhum dado do planejamento.
+
+#### Scenario: Escolher o tema escuro
+- **WHEN** o gestor escolhe o tema escuro
+- **THEN** a interface passa a usar o tema escuro e o botão de tema da barra passa a oferecer o tema claro
+
 ### Requirement: Validação do percentual
 A tela SHALL aceitar só valores de 0 a 1000 com até duas casas decimais e SHALL mostrar a mensagem do servidor quando ele recusar (RF-09; regra inviolável 1).
 

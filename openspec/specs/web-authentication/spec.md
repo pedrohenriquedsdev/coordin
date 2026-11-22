@@ -10,7 +10,7 @@ A interface SHALL ter a tela de login em `/login`, em português do Brasil, com 
 
 #### Scenario: Login com sucesso
 - **WHEN** o gestor preenche e-mail e senha corretos e aciona "Entrar"
-- **THEN** a interface o leva à página que ele tentava abrir ou, sem destino anterior, à página inicial
+- **THEN** a interface o leva à página que ele tentava abrir ou, sem destino anterior, ao painel inicial (`/inicio`)
 
 #### Scenario: Credenciais inválidas
 - **WHEN** a API responde `401` ao login
@@ -32,8 +32,8 @@ A interface SHALL ter a tela de login em `/login`, em português do Brasil, com 
 Toda rota da interface, exceto `/login`, SHALL exigir sessão ativa; sem sessão, a guarda SHALL redirecionar para `/login` guardando o destino pedido (RNF-04).
 
 #### Scenario: Sem sessão
-- **WHEN** alguém sem sessão abre a página inicial `/`
-- **THEN** é redirecionado para `/login` e nenhum conteúdo da página inicial é exibido
+- **WHEN** alguém sem sessão abre `/` (o cronograma)
+- **THEN** é redirecionado para `/login` e nenhum conteúdo do cronograma é exibido
 
 #### Scenario: Retorno ao destino
 - **WHEN** alguém sem sessão abre `/cronograma`, é levado ao login e entra com sucesso
@@ -41,7 +41,7 @@ Toda rota da interface, exceto `/login`, SHALL exigir sessão ativa; sem sessão
 
 #### Scenario: Login já feito
 - **WHEN** o gestor com sessão ativa abre `/login`
-- **THEN** é redirecionado para a página inicial
+- **THEN** é redirecionado para o painel inicial (`/inicio`)
 
 ### Requirement: Token de acesso só em memória
 A interface SHALL manter o token de acesso apenas na memória da aplicação, sem gravá-lo em `localStorage`, `sessionStorage`, IndexedDB ou cookie legível por JavaScript (DT-28).

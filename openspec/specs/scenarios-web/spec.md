@@ -6,11 +6,11 @@ Dá ao gestor a tela onde ele vê os cenários de sequenciamento recomendados, s
 ## Requirements
 
 ### Requirement: Tela de cenários protegida e no menu
-A rota `/scenarios` SHALL exibir a tela "Cenários", protegida pela sessão (RNF-04), e a casca SHALL mostrar o link "Cenários" para quem tem sessão, destacando-o quando a tela está aberta. A tela SHALL mostrar "Carregando…" enquanto busca os dados e uma mensagem de falha com "Tentar de novo" quando a API falhar.
+A rota `/scenarios` SHALL exibir a tela "Cenários", protegida pela sessão (RNF-04), e o menu da casca SHALL oferecer o link "Cenários" (grupo "Planejamento") para quem tem sessão, destacando-o quando a tela está aberta. A tela SHALL mostrar "Carregando…" enquanto busca os dados e uma mensagem de falha com "Tentar de novo" quando a API falhar.
 
 #### Scenario: Link com sessão
 - **WHEN** o gestor está autenticado
-- **THEN** a casca mostra o link "Cenários" e ele aparece destacado quando `/scenarios` está aberta
+- **THEN** o menu oferece o link "Cenários" e ele aparece destacado quando `/scenarios` está aberta
 
 #### Scenario: Sem sessão
 - **WHEN** alguém sem sessão abre `/scenarios`

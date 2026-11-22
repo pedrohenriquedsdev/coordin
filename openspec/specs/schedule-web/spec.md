@@ -5,7 +5,7 @@ Mostra ao gestor o cronograma consolidado das demandas, na ordem de execução, 
 
 ## Requirements
 
-### Requirement: O cronograma é a tela inicial
+### Requirement: O cronograma na raiz
 A rota `/` SHALL exibir o cronograma, protegida pela sessão, com o título "Cronograma" e os dados de `GET /api/schedule` (RF-11; RNF-04).
 
 #### Scenario: Entrar no sistema

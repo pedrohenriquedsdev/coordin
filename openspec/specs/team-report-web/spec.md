@@ -6,11 +6,11 @@ Mostra ao gestor, por semana e por time, onde há capacidade livre e onde há tr
 ## Requirements
 
 ### Requirement: Navegação e acesso
-A casca SHALL exibir, para quem tem sessão, o link "Relatório por time" (`/reports/teams`), destacando-o quando a tela está aberta; a rota SHALL exigir sessão (RNF-04).
+O menu da casca SHALL oferecer, para quem tem sessão, o link "Relatório por time" (grupo "Análise") (`/reports/teams`), destacando-o quando a tela está aberta; a rota SHALL exigir sessão (RNF-04).
 
 #### Scenario: Link com sessão
 - **WHEN** o gestor está autenticado
-- **THEN** a casca mostra o link "Relatório por time" e o destaca na tela aberta
+- **THEN** o menu oferece o link "Relatório por time" e o destaca na tela aberta
 
 #### Scenario: Sem sessão
 - **WHEN** alguém sem sessão abre `/reports/teams`

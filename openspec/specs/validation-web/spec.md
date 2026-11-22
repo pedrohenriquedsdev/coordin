@@ -6,7 +6,7 @@ Dá ao gestor um assistente na tela para executar a validação por simulação 
 ## Requirements
 
 ### Requirement: Visibilidade condicionada à configuração
-A área de validação SHALL aparecer no menu e a rota `/validation` SHALL ser acessível apenas quando `GET /api/validation/status` responder com sucesso (RF-24). Quando a API responder 404 ou falhar, o item de menu SHALL NOT aparecer, e a rota SHALL mostrar a mensagem de que a área não está disponível neste ambiente.
+A área de validação SHALL aparecer no menu (grupo "Análise") e a rota `/validation` SHALL ser acessível apenas quando `GET /api/validation/status` responder com sucesso (RF-24). Quando a API responder 404 ou falhar, o item de menu SHALL NOT aparecer, e a rota SHALL mostrar a mensagem de que a área não está disponível neste ambiente.
 
 #### Scenario: Área habilitada
 - **WHEN** o gestor está autenticado e `GET /api/validation/status` responde com sucesso

@@ -6,15 +6,22 @@ Entrega ao gestor as telas de cadastro de capacidade: "Times e pessoas" (protót
 ## Requirements
 
 ### Requirement: Navegação entre as telas de cadastro
-A casca SHALL exibir, para quem tem sessão, os links "Times e pessoas" (`/teams`) e "Calendário" (`/calendar`), destacando a tela atual; as duas rotas SHALL exigir sessão (RNF-04).
+O menu da casca (ver `web-shell`) SHALL oferecer, para quem tem sessão, os links "Times e pessoas" (`/teams`) e "Calendário" (`/calendar`), no grupo "Cadastros", destacando a tela atual; as duas rotas SHALL exigir sessão (RNF-04).
 
 #### Scenario: Links com sessão
 - **WHEN** o gestor está autenticado
-- **THEN** a casca mostra os links "Times e pessoas" e "Calendário", e o da tela aberta aparece destacado
+- **THEN** o menu oferece os links "Times e pessoas" e "Calendário", e o da tela aberta aparece destacado
 
 #### Scenario: Sem sessão
 - **WHEN** alguém sem sessão abre `/teams` ou `/calendar`
 - **THEN** é levado a `/login` guardando o destino, e a tela de login não mostra os links
+
+### Requirement: Calendário do mês
+A tela "Calendário" SHALL mostrar, ao lado das listas, um calendário do mês com os feriados e as ausências marcados nos dias correspondentes, sem a legenda de entregas (RF-03).
+
+#### Scenario: Dias marcados
+- **WHEN** a tela é aberta e há feriados ou ausências no mês exibido
+- **THEN** o calendário do mês marca esses dias
 
 ### Requirement: Lista de times com a capacidade de cada um
 A tela "Times e pessoas" SHALL listar os times com a quantidade de pessoas e a capacidade em horas por dia útil, e mostrar o time escolhido com as pessoas dele (RF-01, RF-02; T07).
@@ -51,7 +58,7 @@ O gestor SHALL cadastrar um time por "+ Novo time", renomeá-lo e excluí-lo; no
 - **THEN** "Excluir time" fica indisponível, com a mensagem "Indisponível: o time tem pessoas. Remova ou mova as pessoas antes."
 
 #### Scenario: Excluir time sem pessoas
-- **WHEN** o gestor confirma a exclusão de um time sem pessoas
+- **WHEN** o gestor confirma a exclusão de um time sem pessoas (segurando o botão de confirmação)
 - **THEN** o time sai da lista
 
 ### Requirement: Pessoas do time e capacidade
@@ -74,7 +81,7 @@ No detalhe do time, o gestor SHALL ver, adicionar, editar (inclusive mudar de ti
 - **THEN** ela sai do time atual e entra no escolhido, e os dois times refletem a nova capacidade
 
 #### Scenario: Excluir pessoa
-- **WHEN** o gestor confirma a exclusão
+- **WHEN** o gestor confirma a exclusão (segurando o botão de confirmação)
 - **THEN** a pessoa e as ausências dela saem das telas
 
 ### Requirement: Ausências das pessoas
@@ -97,7 +104,7 @@ A tela "Calendário" SHALL listar as ausências de todas as pessoas (pessoa, tim
 - **THEN** ele pede apenas pessoa, tipo, início e fim
 
 #### Scenario: Editar e excluir
-- **WHEN** o gestor edita o período ou confirma a exclusão de uma ausência
+- **WHEN** o gestor edita o período ou confirma a exclusão de uma ausência (segurando o botão de confirmação)
 - **THEN** a tabela reflete a mudança
 
 ### Requirement: Feriados do setor
@@ -112,7 +119,7 @@ A tela "Calendário" SHALL listar os feriados por data e permitir adicionar (dat
 - **THEN** a tela mostra que essa data já é feriado
 
 #### Scenario: Remover feriado
-- **WHEN** o gestor confirma a remoção
+- **WHEN** o gestor confirma a remoção (segurando o botão de confirmação)
 - **THEN** o feriado sai da lista
 
 ### Requirement: Datas de calendário em pt-BR, sem deslocamento
