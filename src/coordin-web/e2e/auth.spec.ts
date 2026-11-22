@@ -3,7 +3,7 @@ import { loginAs } from './helpers';
 
 test('login leads to the home page, and logout closes the session', async ({ page }) => {
   await loginAs(page);
-  await expect(page.getByRole('heading', { name: 'Início' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Início', exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Sair' }).click();
   await expect(page).toHaveURL(/\/login(\?|$)/);

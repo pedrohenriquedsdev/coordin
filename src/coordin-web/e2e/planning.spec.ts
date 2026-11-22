@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { loginAs, uniqueSuffix } from './helpers';
+import { loginAs, navigateInApp, uniqueSuffix } from './helpers';
 
 test('a demand created with an estimate shows its predicted end date in the schedule', async ({
   page,
@@ -12,7 +12,8 @@ test('a demand created with an estimate shows its predicted end date in the sche
   await loginAs(page);
 
   // 1. Um time, com uma pessoa de capacidade.
-  await page.getByRole('link', { name: 'Times e pessoas' }).click();
+  // As páginas ficam em listas suspensas do menu: abrir pelo endereço vale para qualquer largura.
+  await navigateInApp(page, '/teams');
   await page.getByRole('button', { name: '+ Novo time' }).click();
   await page.getByLabel('Nome do novo time').fill(team);
   await page.getByRole('button', { name: 'Salvar time' }).click();
@@ -25,8 +26,7 @@ test('a demand created with an estimate shows its predicted end date in the sche
   await expect(page.getByText(person)).toBeVisible();
 
   // 2. Uma demanda com início, estimativa do time e a pessoa alocada.
-  await page.getByRole('link', { name: 'Demandas' }).click();
-  await page.getByRole('link', { name: 'Nova demanda' }).click();
+  await navigateInApp(page, '/demands/new');
   await page.getByLabel('Título').fill(title);
   await page.getByLabel('Data de início').fill('2027-01-04');
   await page.getByLabel(`Envolver o time ${team}`).check();
@@ -37,9 +37,9 @@ test('a demand created with an estimate shows its predicted end date in the sche
 
   // 3. O cronograma mostra uma data de fim prevista, no formato dd/MM/aaaa, e nenhum "Sem previsão" para ela.
   // O cronograma fica em uma lista suspensa do menu: abrir pelo endereço vale para qualquer largura.
-  await page.goto('/');
-  const main = page.getByRole('main');
-  await expect(main.getByText(title).first()).toBeVisible();
-  await expect(main).toContainText(/Com margem: \d{2}\/\d{2}\/\d{4}/);
-  await expect(main).not.toContainText('Sem previsão');
+  await navigateInApp(page, '/');
+  // A conferência é na linha da demanda: a página tem um filtro "Sem previsão" que sempre aparece.
+  const row = page.getByRole('row', { name: new RegExp(title) });
+  await expect(row).toContainText(/Com margem: \d{2}\/\d{2}\/\d{4}/);
+  await expect(row).not.toContainText('Sem previsão');
 });
