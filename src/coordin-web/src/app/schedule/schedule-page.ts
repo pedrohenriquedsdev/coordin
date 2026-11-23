@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { addDays, Clock, formatCalendarDate } from '../core/dates/calendar-date';
-import { CountUp, GrowBar, Reveal } from '../core/ui/hub-motion';
+import { CountUp, Reveal } from '../core/ui/hub-motion';
 import { GlowField } from '../core/ui/glow-field';
 import { Icon } from '../core/ui/icon';
 import { Loader } from '../core/ui/loader';
@@ -30,7 +30,6 @@ import { countByFilter, filterItems, ScheduleFilter, summarizeSchedule } from '.
     HomeTimeline,
     Reveal,
     CountUp,
-    GrowBar,
   ],
   providers: [ScheduleStore],
   templateUrl: './schedule-page.html',

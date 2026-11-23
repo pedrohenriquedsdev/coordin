@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import { Clock } from '../core/dates/calendar-date';
-import { Icon } from '../core/ui/icon';
 import { Loader } from '../core/ui/loader';
 import { PageHeader } from '../core/ui/page-header';
 import { HomeCalendar } from '../home/home-calendar';
@@ -11,7 +10,7 @@ import { HolidaysSection } from './holidays-section';
 /** Tela "Calendário" (protótipo T08; RF-03): as ausências das pessoas e os feriados do setor. */
 @Component({
   selector: 'app-calendar-page',
-  imports: [AbsencesSection, HolidaysSection, PageHeader, Loader, Icon, HomeCalendar],
+  imports: [AbsencesSection, HolidaysSection, PageHeader, Loader, HomeCalendar],
   providers: [CalendarStore],
   templateUrl: './calendar-page.html',
 })
