@@ -202,7 +202,11 @@ dotnet user-secrets set "Jwt:SigningKey" "YOUR_RANDOM_KEY_WITH_AT_LEAST_32_BYTES
 dotnet user-secrets set "Manager:Email" "you@example.com" --project src/Coordin.Api
 dotnet user-secrets set "Manager:Password" "A_PASSWORD_WITH_AT_LEAST_12_CHARACTERS" --project src/Coordin.Api
 
-# 6. Run the API (http://localhost:5080; applies the database migrations and creates the manager account on startup)
+# 6. Run the API on port 5080 (applies the database migrations and creates the manager account on startup).
+#    The API listens on the port in the PORT variable (8080 when it is not set), and the front end's dev
+#    proxy expects 5080, so set PORT first:
+#      PowerShell:  $env:PORT = "5080"
+#      bash:        export PORT=5080
 dotnet run --project src/Coordin.Api
 ```
 
@@ -216,7 +220,7 @@ npm start   # http://localhost:4200, proxies /api to the API on port 5080
 
 Open `http://localhost:4200` and sign in with the `Manager:Email` and `Manager:Password` you set in step 5.
 
-While the API runs in `Development`, the OpenAPI document is at `http://localhost:5080/openapi/v1.json` and the interactive documentation at `http://localhost:5080/swagger`. Check that everything is connected at `http://localhost:4200/api/health`, which should answer `{"status":"Healthy"}`.
+While the API runs in `Development`, the OpenAPI document is at `http://localhost:5080/openapi/v1.json` and the interactive documentation at `http://localhost:5080/swagger`. Check that everything is connected at `http://localhost:4200/api/health`, which should answer `{"status":"Healthy"}`. If it answers a proxy error (`ECONNREFUSED`), the API is not on port 5080: check that `PORT` was set in the same terminal that runs `dotnet run`.
 
 ### Authentication
 

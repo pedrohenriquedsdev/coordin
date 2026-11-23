@@ -1,19 +1,12 @@
 import { Routes } from '@angular/router';
 import { authGuard, guestGuard, unknownPageGuard } from './core/auth/auth.guard';
-import { CalendarPage } from './calendar/calendar-page';
-import { DemandFormPage } from './demands/demand-form-page';
-import { DemandHistoryPage } from './demands/demand-history-page';
-import { AccuracyPage } from './reports/accuracy-page';
-import { DemandsPage } from './demands/demands-page';
-import { TeamReportPage } from './reports/team-report-page';
-import { SchedulePage } from './schedule/schedule-page';
-import { ScenariosPage } from './scenarios/scenarios-page';
-import { SettingsPage } from './settings/settings-page';
-import { HomePage } from './home/home-page';
 import { Login } from './login/login';
-import { TeamsPage } from './teams/teams-page';
-import { ValidationPage } from './validation/validation-page';
 
+/*
+ * Cada tela é carregada sob demanda (`loadComponent`): o navegador baixa só o código da tela aberta, e a
+ * primeira carga fica leve. O Chart.js, por exemplo, só vem junto com as telas que desenham gráficos.
+ * A tela de login fica de fora de propósito: é a primeira que quase todo acesso vê.
+ */
 export const routes: Routes = [
   // Pública: a única rota que não exige sessão. Quem já tem sessão é levado à página inicial.
   { path: 'login', component: Login, canActivate: [guestGuard] },
@@ -24,19 +17,59 @@ export const routes: Routes = [
     path: '',
     canActivate: [authGuard],
     children: [
-      { path: 'inicio', component: HomePage },
-      { path: '', component: SchedulePage },
-      { path: 'demands', component: DemandsPage },
-      { path: 'demands/new', component: DemandFormPage },
-      { path: 'demands/:id/edit', component: DemandFormPage },
-      { path: 'demands/:id', component: DemandHistoryPage },
-      { path: 'scenarios', component: ScenariosPage },
-      { path: 'reports/teams', component: TeamReportPage },
-      { path: 'reports/accuracy', component: AccuracyPage },
-      { path: 'settings', component: SettingsPage },
-      { path: 'validation', component: ValidationPage },
-      { path: 'teams', component: TeamsPage },
-      { path: 'calendar', component: CalendarPage },
+      {
+        path: 'inicio',
+        loadComponent: () => import('./home/home-page').then((m) => m.HomePage),
+      },
+      {
+        path: '',
+        loadComponent: () => import('./schedule/schedule-page').then((m) => m.SchedulePage),
+      },
+      {
+        path: 'demands',
+        loadComponent: () => import('./demands/demands-page').then((m) => m.DemandsPage),
+      },
+      {
+        path: 'demands/new',
+        loadComponent: () => import('./demands/demand-form-page').then((m) => m.DemandFormPage),
+      },
+      {
+        path: 'demands/:id/edit',
+        loadComponent: () => import('./demands/demand-form-page').then((m) => m.DemandFormPage),
+      },
+      {
+        path: 'demands/:id',
+        loadComponent: () =>
+          import('./demands/demand-history-page').then((m) => m.DemandHistoryPage),
+      },
+      {
+        path: 'scenarios',
+        loadComponent: () => import('./scenarios/scenarios-page').then((m) => m.ScenariosPage),
+      },
+      {
+        path: 'reports/teams',
+        loadComponent: () => import('./reports/team-report-page').then((m) => m.TeamReportPage),
+      },
+      {
+        path: 'reports/accuracy',
+        loadComponent: () => import('./reports/accuracy-page').then((m) => m.AccuracyPage),
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./settings/settings-page').then((m) => m.SettingsPage),
+      },
+      {
+        path: 'validation',
+        loadComponent: () => import('./validation/validation-page').then((m) => m.ValidationPage),
+      },
+      {
+        path: 'teams',
+        loadComponent: () => import('./teams/teams-page').then((m) => m.TeamsPage),
+      },
+      {
+        path: 'calendar',
+        loadComponent: () => import('./calendar/calendar-page').then((m) => m.CalendarPage),
+      },
     ],
   },
 

@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { Injectable } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -23,6 +24,7 @@ const PEOPLE = [
 ];
 
 /** "Hoje" fixo (13/11/2026 em São Paulo), para a coluna de próxima ausência não depender do dia em que o teste roda. */
+@Injectable()
 class FixedClock extends Clock {
   override now(): number {
     return Date.parse('2026-11-13T15:00:00Z');

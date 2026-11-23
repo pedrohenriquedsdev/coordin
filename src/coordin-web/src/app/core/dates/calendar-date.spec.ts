@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Injectable } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { CalendarDatePipe } from './calendar-date.pipe';
 import {
@@ -60,6 +60,7 @@ describe('calendar dates', () => {
     });
 
     it('is what the Clock service answers, and it can be controlled in tests', () => {
+      @Injectable()
       class FixedClock extends Clock {
         override now(): number {
           return Date.parse('2027-01-01T02:00:00Z');

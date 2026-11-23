@@ -24,7 +24,6 @@ interface Shortcut {
   /** Qual par de cores de destaque (índice em `ACCENTS`). */
   readonly accent: number;
   /** Ocupa duas colunas nas telas largas. */
-  readonly wide: boolean;
   /** Um mini-gráfico decorativo (sempre acompanhado do número e do texto do cartão). */
   readonly visual: 'bars' | 'progress' | 'occupancy' | null;
 }
@@ -134,7 +133,6 @@ export class HomePage {
         statLabel:
           active === null ? null : plural(active, 'demanda em andamento', 'demandas em andamento'),
         accent: 0,
-        wide: true,
         visual: 'bars',
       },
       {
@@ -148,7 +146,6 @@ export class HomePage {
             ? null
             : `${plural(active, 'ativa', 'ativas')} · ${done} ${plural(done, 'concluída', 'concluídas')}`,
         accent: 3,
-        wide: true,
         visual: 'progress',
       },
       {
@@ -159,7 +156,6 @@ export class HomePage {
         stat: null,
         statLabel: null,
         accent: 2,
-        wide: false,
         visual: null,
       },
       {
@@ -170,7 +166,6 @@ export class HomePage {
         stat: teams.state === 'ready' ? String(teams.value.teams) : null,
         statLabel: teams.state === 'ready' ? plural(teams.value.teams, 'time', 'times') : null,
         accent: 1,
-        wide: false,
         visual: 'occupancy',
       },
       {
@@ -181,7 +176,6 @@ export class HomePage {
         stat: null,
         statLabel: null,
         accent: 0,
-        wide: false,
         visual: null,
       },
       {
@@ -195,7 +189,6 @@ export class HomePage {
             ? `${plural(teams.value.people, 'pessoa', 'pessoas')} em ${teams.value.teams} ${plural(teams.value.teams, 'time', 'times')}`
             : null,
         accent: 2,
-        wide: false,
         visual: null,
       },
       {
@@ -209,7 +202,6 @@ export class HomePage {
             ? plural(holidays.value.length, 'feriado cadastrado', 'feriados cadastrados')
             : null,
         accent: 1,
-        wide: true,
         visual: null,
       },
       {
@@ -223,7 +215,6 @@ export class HomePage {
             : null,
         statLabel: margin.state === 'ready' ? 'de margem de segurança' : null,
         accent: 3,
-        wide: true,
         visual: null,
       },
     ];
@@ -237,7 +228,6 @@ export class HomePage {
         stat: null,
         statLabel: null,
         accent: 0,
-        wide: false,
         visual: null,
       });
     }
