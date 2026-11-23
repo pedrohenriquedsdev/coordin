@@ -15,6 +15,7 @@ import { deviationLabel, unpredictableReasonLabel } from '../planning/labels';
 import { Demand, DemandSimulation } from '../planning/planning';
 import { parsePosition } from './demand-position';
 import { DemandFormStore } from './demand-form.store';
+import { DatePicker } from '../core/ui/date-picker';
 
 /** Texto do esforço inválido (RF-06): zero, negativo ou com mais de duas casas. */
 const EFFORT_INVALID = 'O esforço deve ser maior que zero, com no máximo 2 casas decimais.';
@@ -48,7 +49,7 @@ export function parseEffort(text: string): { value: number | null; valid: boolea
  */
 @Component({
   selector: 'app-demand-form-page',
-  imports: [ReactiveFormsModule, RouterLink, PageHeader, Icon, Loader, GlowField],
+  imports: [DatePicker, ReactiveFormsModule, RouterLink, PageHeader, Icon, Loader, GlowField],
   providers: [DemandFormStore],
   templateUrl: './demand-form-page.html',
 })

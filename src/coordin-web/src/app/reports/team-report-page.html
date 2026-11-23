@@ -16,6 +16,7 @@
       <input
         id="report-from"
         type="date"
+        appDatePicker
         [value]="from()"
         (input)="setFrom($event)"
         class="field mt-1"
@@ -23,7 +24,14 @@
     </div>
     <div>
       <label for="report-to" class="block text-sm font-semibold text-slate-800">Fim</label>
-      <input id="report-to" type="date" [value]="to()" (input)="setTo($event)" class="field mt-1" />
+      <input
+        id="report-to"
+        type="date"
+        appDatePicker
+        [value]="to()"
+        (input)="setTo($event)"
+        class="field mt-1"
+      />
     </div>
     <button type="submit" class="btn-primary h-11 rounded-full px-6">Ver relatório</button>
     <div

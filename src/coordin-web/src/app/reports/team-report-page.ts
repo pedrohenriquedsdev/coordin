@@ -18,6 +18,7 @@ import {
   weekLabel,
 } from './team-report';
 import { TeamReportStore } from './team-report.store';
+import { DatePicker } from '../core/ui/date-picker';
 
 /** Limite do período (DT-18): o mesmo da API. */
 const MAX_WEEKS = 52;
@@ -68,6 +69,7 @@ function hoursOf(value: number): string {
 @Component({
   selector: 'app-team-report-page',
   imports: [
+    DatePicker,
     RouterLink,
     ChartComponent,
     CalendarDatePipe,

@@ -6,10 +6,14 @@ import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideApiConfiguration } from './api/api-configuration';
 import { routes } from './app.routes';
+import { preloadPages } from './testing/preload-pages';
 import { SessionService } from './core/auth/session.service';
 
 /** As rotas de verdade, com as guardas de verdade e só a sessão simulada (RNF-04). */
 describe('routes', () => {
+  // As telas são carregadas sob demanda: carrega todas antes, fora do tempo de cada teste.
+  beforeAll(() => preloadPages());
+
   const authenticated = signal(false);
   const homeText = 'Cronograma';
 

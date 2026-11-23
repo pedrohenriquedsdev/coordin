@@ -16,6 +16,7 @@ import { Icon } from '../core/ui/icon';
 import { readProblem } from '../core/problems/problem';
 import { absenceTypeLabel } from './absence-type-label';
 import { CalendarStore } from './calendar.store';
+import { DatePicker } from '../core/ui/date-picker';
 
 /** O fim de uma ausência não pode ser anterior ao início. As datas são texto `yyyy-MM-dd`, sem `Date`. */
 function periodValidator(group: AbstractControl): ValidationErrors | null {
@@ -30,7 +31,7 @@ function periodValidator(group: AbstractControl): ValidationErrors | null {
  */
 @Component({
   selector: 'app-absences-section',
-  imports: [ReactiveFormsModule, CalendarDatePipe, Icon, HoldButton],
+  imports: [DatePicker, ReactiveFormsModule, CalendarDatePipe, Icon, HoldButton],
   templateUrl: './absences-section.html',
 })
 export class AbsencesSection {

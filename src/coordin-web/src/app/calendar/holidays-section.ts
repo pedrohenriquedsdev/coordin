@@ -7,11 +7,12 @@ import { HoldButton } from '../core/ui/hold-button';
 import { Icon } from '../core/ui/icon';
 import { readProblem } from '../core/problems/problem';
 import { CalendarStore } from './calendar.store';
+import { DatePicker } from '../core/ui/date-picker';
 
 /** Os feriados do setor (RF-03; T08): em um feriado ninguém contribui com capacidade; a data é única. */
 @Component({
   selector: 'app-holidays-section',
-  imports: [ReactiveFormsModule, CalendarDatePipe, Icon, HoldButton],
+  imports: [DatePicker, ReactiveFormsModule, CalendarDatePipe, Icon, HoldButton],
   templateUrl: './holidays-section.html',
 })
 export class HolidaysSection {

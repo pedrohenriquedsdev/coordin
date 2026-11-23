@@ -7,9 +7,13 @@ import { of } from 'rxjs';
 import { App } from './app';
 import { provideApiConfiguration } from './api/api-configuration';
 import { routes } from './app.routes';
+import { preloadPages } from './testing/preload-pages';
 import { SessionService } from './core/auth/session.service';
 
 describe('App', () => {
+  // As telas são carregadas sob demanda: carrega todas antes, fora do tempo de cada teste.
+  beforeAll(() => preloadPages());
+
   const authenticated = signal(true);
   let logout: ReturnType<typeof vi.fn<() => ReturnType<SessionService['logout']>>>;
 

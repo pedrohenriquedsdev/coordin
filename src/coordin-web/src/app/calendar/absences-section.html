@@ -143,6 +143,7 @@
         <input
           id="absence-start"
           type="date"
+          appDatePicker
           formControlName="startDate"
           class="field mt-1 w-full"
         />
@@ -153,7 +154,13 @@
 
       <div>
         <label for="absence-end" class="block text-sm font-semibold text-slate-800">Fim</label>
-        <input id="absence-end" type="date" formControlName="endDate" class="field mt-1 w-full" />
+        <input
+          id="absence-end"
+          type="date"
+          appDatePicker
+          formControlName="endDate"
+          class="field mt-1 w-full"
+        />
         @if (form.controls.endDate.invalid && form.controls.endDate.touched) {
           <p class="mt-1 text-sm font-medium text-red-800">Informe a data de fim.</p>
         } @else if (form.errors?.['endBeforeStart'] && form.controls.endDate.touched) {

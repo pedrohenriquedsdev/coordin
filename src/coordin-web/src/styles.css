@@ -859,18 +859,24 @@ input[type='date'] {
   font-variant-numeric: tabular-nums;
 }
 input[type='date']::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  margin-left: 0.25rem;
-  padding: 0.25rem;
-  border-radius: 0.5rem;
-  opacity: 0.85;
-  transition:
-    opacity 0.15s,
-    background-color 0.15s;
+  display: none;
 }
-input[type='date']::-webkit-calendar-picker-indicator:hover {
-  opacity: 1;
-  background-color: color-mix(in srgb, var(--color-brand-500) 20%, transparent);
+/*
+ * O ícone do calendário é desenhado aqui, e não pelo navegador (que abriria a janela do Chrome): a diretiva
+ * `DatePicker` abre o calendário do Coordin quando o clique cai na faixa do ícone, na direita do campo.
+ */
+input[type='date'] {
+  padding-right: 2.75rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23587479' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cpath d='M16 2v4M8 2v4M3 10h18'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 1.15rem;
+}
+html[data-theme='dark'] input[type='date'] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a6c0c3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cpath d='M16 2v4M8 2v4M3 10h18'/%3E%3C/svg%3E");
+}
+input[type='date'].date-hot {
+  cursor: pointer;
 }
 input[type='date']::-webkit-datetime-edit-day-field:focus,
 input[type='date']::-webkit-datetime-edit-month-field:focus,
@@ -879,6 +885,72 @@ input[type='date']::-webkit-datetime-edit-year-field:focus {
   color: #021a1d;
   border-radius: 0.25rem;
   outline: none;
+}
+
+/*
+ * Listas de seleção. Primeiro, o básico para qualquer navegador: as opções usam o fundo e o texto do tema
+ * (antes, no escuro, o texto era claro sobre o fundo branco da lista e quase não se lia). Depois, nos
+ * navegadores com `appearance: base-select` (Chrome 135 ou mais), a lista inteira é estilizada: cantos
+ * arredondados, sombra, destaque ao passar o ponteiro e a opção escolhida em ciano.
+ */
+select.field option {
+  background-color: var(--color-white);
+  color: var(--color-slate-900);
+}
+
+@supports (appearance: base-select) {
+  select.field,
+  select.field::picker(select) {
+    appearance: base-select;
+  }
+  /* O campo fechado: o texto à esquerda e a seta à direita, na mesma linha (o `.field` é `block`, e a seta cairia para baixo). */
+  select.field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+  select.field::picker-icon {
+    color: var(--color-slate-600);
+    font-size: 0.7rem;
+    transition: rotate 0.2s;
+  }
+  select.field:open::picker-icon {
+    rotate: 180deg;
+  }
+  select.field::picker(select) {
+    margin-top: 0.35rem;
+    max-height: 18rem;
+    padding: 0.35rem;
+    border: 1px solid var(--color-slate-300);
+    border-radius: 0.9rem;
+    background-color: var(--color-white);
+    box-shadow: 0 18px 44px rgb(4 40 43 / 0.28);
+  }
+  html[data-theme='dark'] select.field::picker(select) {
+    border-color: rgb(255 255 255 / 0.18);
+    box-shadow: 0 18px 44px rgb(0 0 0 / 0.6);
+  }
+  select.field option {
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.6rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  select.field option:hover,
+  select.field option:focus-visible {
+    background-color: color-mix(in srgb, var(--color-brand-500) 20%, transparent);
+    outline: none;
+  }
+  select.field option:checked {
+    background-image: linear-gradient(to right, var(--color-brand-500), var(--color-azure-500));
+    color: #021a1d;
+    font-weight: 700;
+  }
+  select.field option::checkmark {
+    color: #021a1d;
+  }
 }
 
 /* Tabelas largas rolam dentro do próprio contêiner, nunca a página inteira (RNF-03). */
