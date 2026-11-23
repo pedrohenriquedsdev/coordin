@@ -134,19 +134,24 @@
     background-image: url('/backgrounds/spheres-dark.svg');
   }
 
-  /* Tabelas: cabeçalho discreto em caixa alta, linhas que respondem ao ponteiro. */
+  /*
+   * Tabelas: superfície própria e quase opaca (as manchas de luz do fundo não aparecem através dela),
+   * cabeçalho forte em caixa alta e texto das células um tom abaixo do nome, que traz a própria cor.
+   * Os separadores de linha e a zebra estão no bloco sem camada, mais abaixo.
+   */
   main table {
-    @apply border border-slate-200/70 bg-white/55 backdrop-blur-xl;
+    @apply border border-slate-300/80 bg-white/95 shadow-sm;
   }
   main thead th {
-    @apply bg-slate-50/60 text-xs font-semibold tracking-wider text-slate-600 uppercase;
+    @apply bg-slate-100 text-xs font-bold tracking-wider text-slate-700 uppercase;
+  }
+  main tbody td,
+  main tbody th {
+    @apply text-slate-700;
   }
   main td:first-child,
   main th:first-child {
     padding-left: 0.75rem;
-  }
-  main tbody tr:hover {
-    @apply bg-slate-50/70;
   }
   main h2 {
     @apply text-slate-900;
@@ -266,7 +271,7 @@
 
   /* Campos de formulário. */
   .field {
-    @apply block w-full rounded-xl border border-white/60 bg-white/65 px-3 py-2 text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40 aria-[invalid=true]:border-red-500;
+    @apply block w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2 text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40 aria-[invalid=true]:border-red-500;
   }
 
   /* Pílulas de status (sempre com texto: a cor nunca é o único sinal). */
@@ -819,6 +824,61 @@ html[data-theme='dark'] .glow-field {
     font-weight: 600;
     color: var(--color-slate-600);
   }
+}
+
+/*
+ * Linhas da tabela: separador visível, zebra suave e destaque ao passar o ponteiro. Fica fora das camadas de
+ * propósito: assim vence a utilidade `border-white/40` que as linhas já trazem nos templates (branca sobre branco).
+ */
+main tbody tr {
+  border-top: 1px solid var(--color-slate-200);
+}
+main tbody tr:nth-child(even) {
+  background-color: color-mix(in srgb, var(--color-slate-100) 70%, transparent);
+}
+main tbody tr:hover {
+  background-color: color-mix(in srgb, var(--color-brand-100) 55%, transparent);
+}
+html[data-theme='dark'] main tbody tr {
+  border-top-color: rgb(255 255 255 / 0.1);
+}
+html[data-theme='dark'] main tbody tr:nth-child(even) {
+  background-color: rgb(255 255 255 / 0.04);
+}
+html[data-theme='dark'] main tbody tr:hover {
+  background-color: rgb(58 207 214 / 0.1);
+}
+
+/*
+ * Campos de data (nativos): mesma altura dos outros campos, largura que não corta "dd/mm/aaaa", ícone do
+ * calendário com área de toque e o trecho em edição (dia, mês, ano) destacado.
+ */
+input[type='date'] {
+  min-height: 2.75rem;
+  min-width: 10.5rem;
+  font-variant-numeric: tabular-nums;
+}
+input[type='date']::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  margin-left: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  opacity: 0.85;
+  transition:
+    opacity 0.15s,
+    background-color 0.15s;
+}
+input[type='date']::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background-color: color-mix(in srgb, var(--color-brand-500) 20%, transparent);
+}
+input[type='date']::-webkit-datetime-edit-day-field:focus,
+input[type='date']::-webkit-datetime-edit-month-field:focus,
+input[type='date']::-webkit-datetime-edit-year-field:focus {
+  background-color: var(--color-brand-500);
+  color: #021a1d;
+  border-radius: 0.25rem;
+  outline: none;
 }
 
 /* Tabelas largas rolam dentro do próprio contêiner, nunca a página inteira (RNF-03). */
