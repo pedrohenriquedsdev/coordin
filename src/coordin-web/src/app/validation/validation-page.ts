@@ -6,6 +6,7 @@ import { PageHeader } from '../core/ui/page-header';
 import { stepLabel, WizardStep } from './wizard-step';
 import { ValidationResultView } from './validation-result';
 import { ValidationStore } from './validation.store';
+import { DatePicker } from '../core/ui/date-picker';
 
 /**
  * Tela "Validação" (RF-24): o assistente em quatro etapas do PRD 7.3 (carregar, linha de base, plano atual e
@@ -13,7 +14,7 @@ import { ValidationStore } from './validation.store';
  */
 @Component({
   selector: 'app-validation-page',
-  imports: [DatePipe, ValidationResultView, PageHeader, Icon, Loader],
+  imports: [DatePicker, DatePipe, ValidationResultView, PageHeader, Icon, Loader],
   providers: [ValidationStore],
   templateUrl: './validation-page.html',
 })

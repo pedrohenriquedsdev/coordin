@@ -15,6 +15,7 @@ import { readProblem } from '../core/problems/problem';
 import { deviationLabel, hoursLabel, unpredictableReasonLabel } from '../planning/labels';
 import { Demand, ScheduleItem } from '../planning/planning';
 import { DemandsStore, MoveDirection } from './demands.store';
+import { DatePicker } from '../core/ui/date-picker';
 
 export type DemandTab = 'active' | 'completed';
 
@@ -30,7 +31,17 @@ const ACTUAL_EFFORT_INVALID = 'Informe um esforço real maior que zero, ou deixe
 
 @Component({
   selector: 'app-demands-page',
-  imports: [RouterLink, PageHeader, Icon, Loader, GlowField, HoldButton, Reveal, ShowMore],
+  imports: [
+    DatePicker,
+    RouterLink,
+    PageHeader,
+    Icon,
+    Loader,
+    GlowField,
+    HoldButton,
+    Reveal,
+    ShowMore,
+  ],
   providers: [DemandsStore],
   templateUrl: './demands-page.html',
 })

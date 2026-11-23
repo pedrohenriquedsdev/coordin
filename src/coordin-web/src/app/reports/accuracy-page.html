@@ -11,6 +11,7 @@
       Concluídas de
       <input
         type="date"
+        appDatePicker
         [value]="store.from()"
         (input)="setFrom($event)"
         class="field mt-1 font-normal"
@@ -20,6 +21,7 @@
       até
       <input
         type="date"
+        appDatePicker
         [value]="store.to()"
         (input)="setTo($event)"
         class="field mt-1 font-normal"

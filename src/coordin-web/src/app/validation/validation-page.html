@@ -132,6 +132,7 @@
                   <span class="text-sm font-semibold text-slate-900">{{ item.title }}</span>
                   <input
                     type="date"
+                    appDatePicker
                     [attr.aria-label]="'Data da linha de base de ' + item.title"
                     [value]="store.dates()[item.demandId] ?? ''"
                     (input)="onDate(item.demandId, $event)"

@@ -232,6 +232,7 @@
                     <input
                       id="completed-on-{{ demand.id }}"
                       type="date"
+                      appDatePicker
                       [value]="completedOn()"
                       (input)="setCompletedOn($event)"
                       class="field mt-1"

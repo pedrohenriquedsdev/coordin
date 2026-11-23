@@ -9,6 +9,7 @@ import { Reveal } from '../core/ui/hub-motion';
 import { ThemeService } from '../core/ui/theme.service';
 import { AccuracyStore } from './accuracy.store';
 import { deviationChart, estimateChart, excludedNotes } from './accuracy-view';
+import { DatePicker } from '../core/ui/date-picker';
 
 /**
  * Página de indicadores de precisão (RF-23): filtro por período de conclusão, gráficos de desvio e de estimado ×
@@ -16,7 +17,7 @@ import { deviationChart, estimateChart, excludedNotes } from './accuracy-view';
  */
 @Component({
   selector: 'app-accuracy-page',
-  imports: [ChartComponent, PageHeader, Icon, Loader, Reveal],
+  imports: [DatePicker, ChartComponent, PageHeader, Icon, Loader, Reveal],
   providers: [AccuracyStore],
   templateUrl: './accuracy-page.html',
 })
