@@ -371,6 +371,74 @@ describe('SchedulePage', () => {
       expect(tableRows()).toBe(1);
     });
 
+    describe('long lists ("Mostrar mais")', () => {
+      const many = (count: number) =>
+        Array.from({ length: count }, (_, i) =>
+          item({ demandId: `d${i + 1}`, title: `Demanda ${i + 1}`, priorityRank: i + 1 }),
+        );
+      const cards = () =>
+        element().querySelectorAll('[aria-label="Cronograma em cartões"] li').length;
+
+      it('shows the first 10 rows and cards, and reveals 10 more each time', async () => {
+        fixture.detectChanges();
+        await answer(many(23));
+
+        expect(tableRows()).toBe(10);
+        expect(cards()).toBe(10);
+        expect(element().textContent).toContain('Mostrando 10 de 23');
+
+        click('Mostrar mais');
+        fixture.detectChanges();
+        expect(tableRows()).toBe(20);
+        expect(cards()).toBe(20);
+
+        click('Mostrar mais');
+        fixture.detectChanges();
+        expect(tableRows()).toBe(23);
+        expect(
+          [...element().querySelectorAll('button')].some((b) =>
+            b.textContent?.includes('Mostrar mais'),
+          ),
+        ).toBe(false);
+      });
+
+      it('keeps the counts and the summary on the whole schedule, not only on the shown part', async () => {
+        fixture.detectChanges();
+        await answer(many(23));
+
+        const summary =
+          element().querySelector('[aria-label="Resumo do cronograma"]')?.textContent ?? '';
+        expect(summary).toContain('23');
+        expect(element().textContent).toContain('Todas');
+      });
+
+      it('goes back to the first page when a filter is chosen', async () => {
+        fixture.detectChanges();
+        await answer([
+          ...many(23),
+          item({
+            demandId: 'x',
+            title: 'Sem data',
+            isPredictable: false,
+            unpredictableReason: 'MissingEstimate',
+            forecastEndDate: null,
+            endDateWithoutMargin: null,
+          }),
+        ]);
+        click('Mostrar mais');
+        fixture.detectChanges();
+        expect(tableRows()).toBe(20);
+
+        click('Sem previsão');
+        fixture.detectChanges();
+        expect(tableRows()).toBe(1);
+
+        click('Todas');
+        fixture.detectChanges();
+        expect(tableRows()).toBe(10);
+      });
+    });
+
     it('searches the title ignoring accents, and clears the filters from the empty message', async () => {
       fixture.detectChanges();
       await answer(mixed());

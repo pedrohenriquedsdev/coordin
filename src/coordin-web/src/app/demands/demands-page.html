@@ -109,7 +109,7 @@
       </div>
     } @else if (tab() === 'active') {
       <ol aria-label="Demandas ativas" class="mt-4 space-y-3">
-        @for (demand of activeList(); track demand.id; let i = $index) {
+        @for (demand of activeShown(); track demand.id; let i = $index) {
           <li class="card p-4 text-sm" [appReveal]="i">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div class="flex min-w-0 items-start gap-3">
@@ -271,9 +271,14 @@
           </li>
         }
       </ol>
+      <app-show-more
+        [shown]="activeShown().length"
+        [total]="activeList().length"
+        (more)="pager.more()"
+      />
     } @else {
       <ul aria-label="Demandas concluídas" class="mt-4 space-y-3">
-        @for (demand of completedList(); track demand.id; let i = $index) {
+        @for (demand of completedShown(); track demand.id; let i = $index) {
           <li
             class="card flex flex-col gap-3 p-4 text-sm sm:flex-row sm:items-start sm:justify-between"
             [appReveal]="i"
@@ -307,6 +312,11 @@
           </li>
         }
       </ul>
+      <app-show-more
+        [shown]="completedShown().length"
+        [total]="completedList().length"
+        (more)="pager.more()"
+      />
     }
   }
 }

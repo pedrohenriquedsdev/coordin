@@ -6,6 +6,8 @@ import { GlowField } from '../core/ui/glow-field';
 import { HoldButton } from '../core/ui/hold-button';
 import { Reveal } from '../core/ui/hub-motion';
 import { Icon } from '../core/ui/icon';
+import { Pager } from '../core/ui/pager';
+import { ShowMore } from '../core/ui/show-more';
 import { Loader } from '../core/ui/loader';
 import { PageHeader } from '../core/ui/page-header';
 import { normalizeText } from '../schedule/schedule-view';
@@ -28,7 +30,7 @@ const ACTUAL_EFFORT_INVALID = 'Informe um esforço real maior que zero, ou deixe
 
 @Component({
   selector: 'app-demands-page',
-  imports: [RouterLink, PageHeader, Icon, Loader, GlowField, HoldButton, Reveal],
+  imports: [RouterLink, PageHeader, Icon, Loader, GlowField, HoldButton, Reveal, ShowMore],
   providers: [DemandsStore],
   templateUrl: './demands-page.html',
 })
@@ -63,12 +65,19 @@ export class DemandsPage {
     this.tab() === 'active' ? this.activeList() : this.completedList(),
   );
 
+  /** "Mostrar mais": só os primeiros itens aparecem; Subir, Descer e a busca continuam olhando a lista inteira. */
+  protected readonly pager = new Pager();
+  protected readonly activeShown = computed(() => this.pager.slice(this.activeList()));
+  protected readonly completedShown = computed(() => this.pager.slice(this.completedList()));
+
   protected onSearch(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
+    this.pager.reset();
   }
 
   protected clearSearch(): void {
     this.query.set('');
+    this.pager.reset();
   }
 
   constructor() {
@@ -77,6 +86,7 @@ export class DemandsPage {
 
   protected selectTab(tab: DemandTab): void {
     this.tab.set(tab);
+    this.pager.reset();
     this.cancelAll();
   }
 

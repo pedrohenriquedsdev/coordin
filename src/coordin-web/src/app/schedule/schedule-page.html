@@ -181,7 +181,7 @@
                       : 'border-slate-300 bg-white/40 text-slate-700 hover:bg-white/70'
                   "
                   [attr.aria-pressed]="filter() === option.id"
-                  (click)="filter.set(option.id)"
+                  (click)="setFilter(option.id)"
                 >
                   {{ option.label }}
                   <span
@@ -243,7 +243,7 @@
                 </tr>
               </thead>
               <tbody>
-                @for (item of visible(); track item.demandId) {
+                @for (item of shown(); track item.demandId) {
                   <tr class="border-t border-white/40 align-top dark:border-white/10">
                     <td class="px-3 py-3">
                       <span
@@ -335,7 +335,7 @@
 
           <!-- Celular: cartões, um por demanda. Abaixo de 768 px. -->
           <ul aria-label="Cronograma em cartões" class="mt-4 space-y-3 md:hidden">
-            @for (item of visible(); track item.demandId) {
+            @for (item of shown(); track item.demandId) {
               <li class="card p-4 text-sm">
                 <h3 class="font-bold text-slate-900">{{ item.priorityRank }}. {{ item.title }}</h3>
                 @if (prerequisitesOf(item); as text) {
@@ -376,6 +376,11 @@
               </li>
             }
           </ul>
+          <app-show-more
+            [shown]="shown().length"
+            [total]="visible().length"
+            (more)="pager.more()"
+          />
         }
       }
     }

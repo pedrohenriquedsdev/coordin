@@ -4,6 +4,8 @@ import { addDays, Clock, formatCalendarDate } from '../core/dates/calendar-date'
 import { CountUp, Reveal } from '../core/ui/hub-motion';
 import { GlowField } from '../core/ui/glow-field';
 import { Icon } from '../core/ui/icon';
+import { Pager } from '../core/ui/pager';
+import { ShowMore } from '../core/ui/show-more';
 import { Loader } from '../core/ui/loader';
 import { PageHeader } from '../core/ui/page-header';
 import { buildTimeline } from '../home/home-data';
@@ -30,6 +32,7 @@ import { countByFilter, filterItems, ScheduleFilter, summarizeSchedule } from '.
     HomeTimeline,
     Reveal,
     CountUp,
+    ShowMore,
   ],
   providers: [ScheduleStore],
   templateUrl: './schedule-page.html',
@@ -63,6 +66,10 @@ export class SchedulePage {
     filterItems(this.items(), this.filter(), this.query()),
   );
 
+  /** "Mostrar mais": só os primeiros itens aparecem na tabela e nos cartões; os filtros e as contagens olham tudo. */
+  protected readonly pager = new Pager();
+  protected readonly shown = computed(() => this.pager.slice(this.visible()));
+
   /** A linha do tempo mostra as demandas que terminam dentro do período escolhido (ou todas). */
   protected readonly timeline = computed(() => {
     const days = this.range();
@@ -79,11 +86,18 @@ export class SchedulePage {
 
   protected onSearch(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
+    this.pager.reset();
+  }
+
+  protected setFilter(filter: ScheduleFilter): void {
+    this.filter.set(filter);
+    this.pager.reset();
   }
 
   protected clearFilters(): void {
     this.filter.set('all');
     this.query.set('');
+    this.pager.reset();
   }
 
   /** Data de calendário em `dd/MM/yyyy`; sem data, um travessão (nunca uma data inventada). */
