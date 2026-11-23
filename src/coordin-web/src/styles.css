@@ -483,6 +483,13 @@ html[data-theme='dark'] .glow-field {
 .hub-card > * {
   position: relative;
   z-index: 2;
+  /* O clique atravessa os elementos decorativos e cai no link, que cobre o cartão inteiro. */
+  pointer-events: none;
+}
+/* O link fica sem posição própria: assim o ::after dele se ancora no cartão e cobre tudo (incluindo o "Abrir"). */
+.hub-card > .hub-link {
+  position: static;
+  pointer-events: auto;
 }
 .hub-card > .hub-blob {
   position: absolute;
