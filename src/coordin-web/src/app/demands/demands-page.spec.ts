@@ -228,6 +228,68 @@ describe('DemandsPage', () => {
     expect(element().textContent).toContain('Limpe a busca para reordenar');
   });
 
+  describe('long lists ("Mostrar mais")', () => {
+    const many = (count: number) =>
+      Array.from({ length: count }, (_, i) => demand(`d${i + 1}`, `Demanda ${i + 1}`, i + 1));
+    const rows = () => listOf('Demandas ativas')?.querySelectorAll('li').length;
+
+    it('shows the first 10 active demands and reveals 10 more each time, until the end', async () => {
+      await open(many(23));
+
+      expect(rows()).toBe(10);
+      expect(element().textContent).toContain('Mostrando 10 de 23');
+
+      buttonIn(element(), 'Mostrar mais')?.click();
+      fixture.detectChanges();
+      expect(rows()).toBe(20);
+
+      buttonIn(element(), 'Mostrar mais')?.click();
+      fixture.detectChanges();
+      expect(rows()).toBe(23);
+      expect(buttonIn(element(), 'Mostrar mais')).toBeUndefined();
+    });
+
+    it('offers nothing extra when the list fits in one page', async () => {
+      await open(many(10));
+
+      expect(rows()).toBe(10);
+      expect(buttonIn(element(), 'Mostrar mais')).toBeUndefined();
+      expect(element().textContent).not.toContain('Mostrando');
+    });
+
+    it('keeps Subir and Descer working on the whole list, not only on the shown part', async () => {
+      await open(many(23));
+      const tenth = listOf('Demandas ativas')?.querySelectorAll('li')[9] as HTMLElement;
+
+      // A décima demanda não é a última da fila: ela ainda pode descer.
+      expect(buttonIn(tenth, 'Descer')?.disabled).toBe(false);
+      buttonIn(tenth, 'Descer')?.click();
+
+      const reorder = request('PUT', '/api/demands/priority-order');
+      const ids = (reorder.request.body as { demandIds: string[] }).demandIds;
+      expect(ids).toHaveLength(23);
+      expect(ids.slice(8, 11)).toEqual(['d9', 'd11', 'd10']);
+      reorder.flush(null, { status: 204, statusText: 'No Content' });
+      await answerLists(many(23));
+    });
+
+    it('goes back to the first page when the search changes', async () => {
+      await open(many(23));
+      buttonIn(element(), 'Mostrar mais')?.click();
+      fixture.detectChanges();
+      expect(rows()).toBe(20);
+
+      const input = element().querySelector<HTMLInputElement>('input[type="search"]');
+      input!.value = 'Demanda 1';
+      input!.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      // "Demanda 1" casa com 1, 10 a 19: onze demandas; a primeira página tem dez.
+      expect(rows()).toBe(10);
+      expect(element().textContent).toContain('Mostrando 10 de 11');
+    });
+  });
+
   it('suggests today as the completion date, and completes the demand with that date', async () => {
     await open([demand('a', 'Alfa', 1)]);
     buttonIn(listOf('Demandas ativas')?.querySelector('li') as HTMLElement, 'Concluir')?.click();
