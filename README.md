@@ -8,7 +8,7 @@
 
 ## Demonstração
 
-<video src="https://github.com/user-attachments/assets/0dc20095-0e77-4d43-aade-13679d41c452" controls muted width="100%"></video>
+https://github.com/user-attachments/assets/0dc20095-0e77-4d43-aade-13679d41c452
 
 *Vídeo sem áudio. Mostra o fluxo principal: cadastro, cronograma, relatório por time e cenários.*
 

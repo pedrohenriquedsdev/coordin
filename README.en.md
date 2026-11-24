@@ -8,7 +8,7 @@
 
 ## Demo
 
-<video src="https://github.com/user-attachments/assets/0dc20095-0e77-4d43-aade-13679d41c452" controls muted width="100%"></video>
+https://github.com/user-attachments/assets/0dc20095-0e77-4d43-aade-13679d41c452
 
 *Video without audio. It shows the main flow: registration, schedule, team report, and scenarios.*
 
