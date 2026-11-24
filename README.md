@@ -1,312 +1,269 @@
 # Coordin
 
-> A decision-support system that forecasts delivery dates, balances team capacity, and recommends optimized demand sequencing for software development teams.
+> Sistema de apoio à decisão que transforma demandas priorizadas, esforço estimado e capacidade dos times em **previsões de entrega**, compara sequências alternativas de execução e aponta ociosidade e sobrecarga.
 
-Coordin helps development managers turn a list of demands, their effort estimates, and team availability into a **predictable delivery schedule**. Beyond calculating dates, it compares scenarios, highlights idle capacity and overload, and recommends alternative ways to organize the work, always leaving the final decision to the manager.
-
-> **Project status:** 🚧 Early stage. This repository starts from an academic project (TCC) proposal. Several calculation rules are still being specified (see [Open Design Decisions](#open-design-decisions)).
+🇧🇷 Português · 🇺🇸 [English](README.en.md)
 
 ---
 
-## Table of Contents
+## Demonstração
 
-- [Overview](#overview)
-- [The Problem](#the-problem)
-- [How It Works](#how-it-works)
-- [Key Features](#key-features)
-- [Inputs](#inputs)
-- [Forecast Calculation](#forecast-calculation)
-- [Sequencing Optimization](#sequencing-optimization)
-- [Reports and Indicators](#reports-and-indicators)
-- [Expected Outcomes](#expected-outcomes)
-- [Open Design Decisions](#open-design-decisions)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [Academic Context](#academic-context)
-- [License](#license)
+<video src="https://github.com/user-attachments/assets/0dc20095-0e77-4d43-aade-13679d41c452" controls muted width="100%"></video>
+
+*Vídeo sem áudio. Mostra o fluxo principal: cadastro, cronograma, relatório por time e cenários.*
 
 ---
 
-## Overview
+## Sumário
 
-The central goal of Coordin is to give managers enough visibility to answer the product team one question with confidence:
+- [Sobre o projeto](#sobre-o-projeto)
+- [O problema](#o-problema)
+- [Como funciona](#como-funciona)
+- [Funcionalidades](#funcionalidades)
+- [Regras de negócio](#regras-de-negócio)
+- [Arquitetura](#arquitetura)
+- [Tecnologias](#tecnologias)
+- [Estrutura do repositório](#estrutura-do-repositório)
+- [Como executar localmente](#como-executar-localmente)
+- [Testes e verificações](#testes-e-verificações)
+- [Implantação](#implantação)
+- [Documentação do projeto](#documentação-do-projeto)
+- [Status](#status)
+- [Contribuição](#contribuição)
+- [Contexto acadêmico](#contexto-acadêmico)
+- [Licença](#licença)
 
-> **"When can each demand be delivered, considering the real capacity of the teams?"**
+---
 
-The system takes the demands, the effort estimated by the teams, and each team's availability, and produces:
+## Sobre o projeto
 
-- A **delivery schedule** with forecasted completion dates.
-- **Alternative scenarios** for demand sequencing.
-- **Capacity insights** per team (idle periods, overload, available capacity).
-- **Recommendations** that the manager can approve or reject.
+O Coordin foi feito para o **gestor de desenvolvimento**, que precisa responder a uma pergunta ao gestor de produto com segurança:
 
-## The Problem
+> **"Quando cada demanda pode ser entregue, considerando a capacidade real dos times?"**
 
-Planning deliveries becomes hard when many demands compete for attention and several teams are involved. Not every demand needs every team: some are executed by a single team, while others require several teams working together.
+A partir das demandas, das estimativas dos times e da disponibilidade das pessoas, o sistema calcula:
 
-Common pain points:
+- um **cronograma** com a data prevista de cada demanda, com e sem margem de segurança;
+- o **relatório por time**, com ocupação, ociosidade e sobrecarga semana a semana;
+- **cenários** de sequenciamento, com o impacto de cada alternativa;
+- **recomendações** que o gestor pode aprovar ou rejeitar.
 
-- No consolidated view of demands, owners, effort, and forecasted dates.
-- Uneven distribution of work, with some teams idle while others are overloaded.
-- Difficulty understanding the impact of new demands on an existing schedule.
-- Difficulty comparing alternative sequences to find a more efficient organization.
-- Delivery forecasts that depend on estimates made by the teams themselves, not only on demand priority.
+O princípio central: **o gestor decide; o sistema calcula, mostra o impacto e recomenda.**
 
-The challenge is not just tracking tasks. It is **coordinating the capacity of multiple teams** to forecast and improve the department's deliveries.
+## O problema
 
-## How It Works
+Planejar entregas fica difícil quando muitas demandas disputam atenção e vários times participam de cada uma. Algumas demandas envolvem um único time; outras exigem vários trabalhando juntos.
 
-The workflow starts with product and development alignment and ends with forecasting and tracking deliveries.
+Dores comuns:
 
-| Step | Stage | Responsibility / Outcome |
-|------|-------|--------------------------|
-| 1 | **Prioritization** | The development manager aligns the list of demands and their priorities with the product manager. |
-| 2 | **Distribution** | The manager defines which teams will work on each demand. A demand can involve one or several teams, and a team can work on multiple demands within its capacity. |
-| 3 | **Estimation** | The teams analyze the work and report the required effort (e.g., in hours or estimated duration). This information does not need to exist when the demand is received. |
-| 4 | **Planning** | The manager records the information in the system, including allocation and start date. An end date can be provided when applicable. |
-| 5 | **Calculation** | The system considers effort, people, teams, availability, sequence, and a safety margin to calculate forecasts. |
-| 6 | **Decision** | The system presents the schedule and alternative scenarios. The manager approves or rejects the recommendations. |
+- Não há uma visão consolidada de demandas, responsáveis, esforço e datas previstas.
+- O trabalho é mal distribuído: alguns times ficam ociosos enquanto outros estouram.
+- É difícil entender o impacto de uma demanda nova sobre o cronograma existente.
+- Comparar sequências alternativas para achar uma organização mais eficiente é trabalhoso e feito à mão.
+- A previsão depende das estimativas dos times, e não só da prioridade.
 
-## Key Features
+O desafio não é só registrar tarefas. É **coordenar a capacidade de vários times** para prever e melhorar as entregas do setor.
 
-- **Demand management** with priorities, involved teams, and effort estimates.
-- **Delivery forecasting** based on effort, allocated people, availability, and execution order.
-- **Automatic safety margin** that makes forecasts more conservative (it only extends the deadline, never shortens it).
-- **Scenario comparison** between the current sequence and alternative orderings.
-- **Sequencing recommendations** that are suggestions, never silent changes.
-- **Team capacity reports** showing occupancy, idle time, and overload.
-- **General planning report** to compare sequences and their impact on the department schedule.
+## Como funciona
 
-## Inputs
+1. **Cadastros:** o gestor registra times, pessoas (com horas por dia útil), ausências e feriados do setor.
+2. **Demandas:** cada demanda recebe título, data de início, times envolvidos, esforço estimado por time e pessoas alocadas. Uma demanda pode entrar sem estimativa ou sem data: o sistema a trata como **não previsível** até a informação chegar.
+3. **Previsão:** o motor simula, dia a dia, o trabalho de cada pessoa na ordem de execução e calcula a data de término. Depois aplica a margem de segurança, que só amplia o prazo.
+4. **Análise:** o cronograma e o relatório por time mostram a folga e a sobrecarga do setor.
+5. **Decisão:** o sistema recomenda cenários de sequenciamento com o impacto de cada um. Nada muda sem a aprovação do gestor.
 
-A demand arrives with its priority. The remaining information is completed throughout planning, especially after the teams provide their estimates.
+## Funcionalidades
 
-| Input | How it is used |
-|-------|----------------|
-| **Demand and priority** | Identifies the work and its order of importance, as defined in the product/development alignment. |
-| **Involved teams** | Defines which teams will take part in executing each demand. |
-| **Estimated effort** | Represents the work required, as estimated by the teams and recorded by the manager. |
-| **Number of people / capacity** | Helps estimate the possible duration according to the resources actually allocated and available. |
-| **Start date** | Indicates when execution is planned to begin. |
-| **End date** *(optional)* | Lets the manager provide a date when needed, in addition to the calculated forecast. |
-| **Safety margin** | Applied automatically to make the forecast more conservative. |
+### Cadastros
+- **Times**, com nome único e capacidade calculada pela soma das pessoas.
+- **Pessoas**, com horas por dia útil (de 0 a 24) e ausências.
+- **Ausências** (férias ou outro tipo), com período de início e fim.
+- **Feriados do setor**, que não contam como dia de trabalho.
 
-## Forecast Calculation
+### Demandas
+- Cadastro com título, data de início, fim informado (opcional), times com esforço por time (opcional) e pessoas alocadas.
+- **Ordem de prioridade** com Subir e Descer, sem arrastar.
+- **Dependências** entre demandas, com bloqueio de ciclos e de exclusão de um pré-requisito que ainda tem dependentes.
+- **Conclusão** com data e esforço real, que alimenta os indicadores de precisão.
+- **Histórico** de alterações de estimativa e de previsão, com o motivo registrado.
 
-The system converts estimated effort into a forecasted duration and, from the start date and available capacity, calculates the expected completion date. The forecast takes into account:
+### Cronograma e previsão
+- Data prevista **sem margem** e **com margem**, com o motivo quando a demanda não é previsível (sem data, sem estimativa, sem capacidade ou com pré-requisito não previsível).
+- **Margem de segurança** configurável (padrão de 20%), aplicada em dias úteis.
+- **Exportação para planilha** (CSV em pt-BR, com as mesmas datas da tela).
 
-- The participation of one or more teams.
-- The number of people allocated.
-- Availability of people and teams.
-- The execution order of the demands.
+### Relatório por time
+- Capacidade, horas alocadas, ocupação e horas ociosas por semana (de segunda a domingo).
+- **Sobrecarga**: a semana em que o time usou toda a capacidade e ainda ficou trabalho esperando.
+- Mapa de ocupação e tabela com os mesmos valores do gráfico.
 
-**Safety margin:** the system automatically adds a margin to the calculated deadline. This margin must always *extend* the forecast, never reduce it, to avoid overly optimistic dates.
+### Cenários de sequenciamento
+- **Recomendações sob pedido:** o sistema busca sequências melhores que a atual e mostra o critério atual, o critério do cenário e a contribuição de cada demanda.
+- **Simulação** de uma ordem específica, sem gravar nada.
+- **Aprovação** com confirmação em dois passos, e **voltar à prioridade** a qualquer momento.
+- A prioridade definida entre produto e desenvolvimento é preservada: a alternativa aparece como recomendação, nunca como substituição silenciosa.
 
-**A note on parallelism:** a demand estimated at 100 hours for one team may, under balanced division and parallelizable work, have its duration reduced when a second team joins. Coordin recalculates the forecast based on *effective* capacity and does **not** assume that adding a team always cuts the deadline exactly in half.
+### Simulação de demanda nova
+- Mostra quais demandas existentes mudam de data se a nova demanda entrar na posição escolhida. Nada é gravado.
 
-## Sequencing Optimization
+### Precisão e validação
+- **Precisão das previsões:** indicadores comparando a previsão com a data e o esforço reais das demandas concluídas.
+- **Validação por simulação:** ferramenta para testar o cálculo com um conjunto de dados fictício. Fica **desligada por padrão** e, quando ligada, substitui os dados do banco.
 
-Besides calculating dates for the sequence defined by the manager, Coordin analyzes alternative execution combinations and identifies those that could improve the overall result, for example by reducing total duration, bringing deliveries forward, or making better use of available capacity.
+### Acesso
+- Login do gestor com sessão de 15 minutos renovada automaticamente, bloqueio após 5 erros de senha e limite de requisições por IP.
 
-**Example scenario**
+## Regras de negócio
 
-| Current sequence | Suggested alternative |
-|------------------|-----------------------|
-| `A → B → C → D` | `B → A → C → D` |
-| Dates calculated with the current order. | New start and end dates calculated for the alternative order. |
+Estas regras valem para todo o sistema e só mudam com aprovação explícita do gestor de produto e do gestor de desenvolvimento.
 
-Important principles:
+1. **A margem de segurança nunca reduz o prazo.** Ela só pode ampliar a previsão.
+2. **O sistema nunca reordena demandas sozinho.** Uma mudança de sequência é sempre um cenário com impacto, aguardando aprovação ou rejeição.
+3. **A prioridade entre produto e desenvolvimento é preservada.** Alternativas são recomendações.
+4. **Adicionar um time não divide o prazo pela metade.** A previsão considera a capacidade efetiva.
+5. **Uma demanda pode não ter esforço.** Ela é aceita e tratada como não previsível até a estimativa chegar.
 
-- A change is a **recommendation, not an automatic modification**.
-- The system shows the schedule impact of the alternative and **waits for the manager's approval or rejection**.
-- Priority remains a relevant input. Any change of order is presented as a scenario to evaluate, never as a silent replacement of priority.
+## Arquitetura
 
-## Reports and Indicators
+O cálculo fica isolado em uma biblioteca pura, sem banco, HTTP ou relógio do sistema. A API e a interface consomem o motor, e as regras de negócio não ficam espalhadas em controllers ou componentes.
 
-### General productivity and planning report
+```mermaid
+flowchart LR
+    Web["Interface<br/>Angular 22"] -->|"HTTP/JSON<br/>JWT + cookie HttpOnly"| Api["API<br/>ASP.NET Core 10"]
+    Api --> Engine["Coordin.Engine<br/>cálculo puro"]
+    Api --> Db[("PostgreSQL 18")]
+    Api -.->|"serve o build"| Web
+```
 
-- Compare possible demand sequences and their delivery forecasts.
-- Show the impact of alternatives on the department schedule.
-- Help identify a combination that speeds up deliveries and makes better use of combined capacity.
+- **`Coordin.Engine`**: previsão, margem, capacidade, cenários, simulação e indicadores. Entradas e saídas explícitas e resultado determinístico.
+- **`Coordin.Api`**: endpoints, autenticação, persistência (EF Core), validação e exportação.
+- **`coordin-web`**: interface, que também é servida pela própria API na mesma origem.
 
-### Individual team report
+## Tecnologias
 
-- View occupancy, availability, idle periods, and possible overload.
-- Identify improvement opportunities and potential productivity gaps.
-- Find teams with capacity to take on new demands or support other teams.
-- Support workload redistribution based on identified availability.
+| Camada | Tecnologia |
+|--------|------------|
+| Linguagem e runtime | C# com .NET 10 (LTS) |
+| API | ASP.NET Core Minimal APIs, Problem Details, OpenAPI |
+| Persistência | EF Core 10 com Npgsql, PostgreSQL 18 |
+| Autenticação | ASP.NET Core Identity, JWT de 15 minutos, refresh token em cookie `HttpOnly` com rotação |
+| Motor de cálculo | `Coordin.Engine`, biblioteca em C# sem dependências de infraestrutura |
+| Interface | Angular 22 (componentes standalone e signals), TypeScript 6, Tailwind CSS 4 |
+| Gráficos | Chart.js 4.6 |
+| Testes | xUnit v3, Testcontainers (PostgreSQL real), Vitest, Playwright |
+| Qualidade | `dotnet format`, ESLint, Prettier, analisadores do .NET |
+| Infraestrutura | Docker (uma imagem com a API e o build do Angular), Docker Compose, GitHub Actions |
+| Hospedagem | Container em serviço de PaaS, com PostgreSQL gerenciado (ver [Implantação](#implantação)) |
 
-## Expected Outcomes
+As decisões técnicas e as alternativas consideradas estão em [`docs/TDD.md`](docs/TDD.md).
 
-- Greater predictability of delivery dates.
-- Centralized view of demands and team capacity.
-- Better synchronization between teams working on the same demand.
-- Early identification of idle time, overload, and reallocation opportunities.
-- Scenario comparison to support sequencing decisions.
-- Clearer communication between development and product managers.
+## Estrutura do repositório
 
-## Open Design Decisions
+```
+coordin/
+├── docs/                        # PRD, TDD, especificações e design
+├── openspec/                    # specs vigentes e changes (SDD)
+├── src/
+│   ├── Coordin.Engine/          # motor de cálculo puro
+│   ├── Coordin.Api/             # API ASP.NET Core
+│   └── coordin-web/             # interface Angular
+├── tests/
+│   ├── Coordin.Engine.Tests/    # testes de unidade do motor
+│   └── Coordin.Api.Tests/       # testes de integração da API
+├── compose.yaml                 # PostgreSQL local e perfil de produção
+├── Dockerfile                   # imagem única (API + interface)
+└── .github/workflows/ci.yml     # CI: jobs .NET e web
+```
 
-Some rules still need to be detailed during specification and development. They do not invalidate the proposal; they are decisions required for the calculations to be reliable.
+## Como executar localmente
 
-- **Capacity model:** how to represent available hours per person and per team, considering vacations, absences, and other allocations.
-- **Parallelism:** how to estimate duration reduction when several teams work on the same demand, and which activities can truly run in parallel.
-- **Dependencies:** how to represent demands or stages that must wait for others to finish.
-- **Safety margin:** whether it will be a percentage, a fixed value, or configurable, and at which stage it is applied.
-- **Optimization criteria:** whether recommendations will prioritize total duration, priority deliveries, team utilization, or a combination.
-- **Estimate updates:** how to record effort changes and compare forecasts against actual results.
+### Pré-requisitos
 
-## Tech Stack
+- [.NET SDK 10](https://dotnet.microsoft.com/download) (a versão exata está em `global.json`)
+- [Node.js 24 LTS](https://nodejs.org) e npm
+- [Docker](https://www.docker.com/products/docker-desktop/) (PostgreSQL local e testes de integração)
 
-The decisions and their rationale are recorded in [`docs/TDD.md`](docs/TDD.md).
-
-| Layer | Technology |
-|-------|------------|
-| Backend | .NET 10 (LTS), ASP.NET Core Minimal APIs, EF Core 10 |
-| Calculation engine | `Coordin.Engine`: a pure C# library with no database, HTTP, or clock access |
-| Frontend | Angular 22 (standalone components, signals), TypeScript 6, Tailwind CSS 4 |
-| Database | PostgreSQL 18 |
-| Infrastructure | Docker (a single image with the API and the Angular build), GitHub Actions |
-
-## Getting Started
-
-### Prerequisites
-
-- [.NET SDK](https://dotnet.microsoft.com/download) 10 (the exact version is pinned in `global.json`)
-- [Node.js](https://nodejs.org) 24 LTS and npm
-- [Docker](https://www.docker.com/products/docker-desktop/) (local PostgreSQL and the integration tests)
-
-### Run locally
+### Passo a passo
 
 ```bash
-# 1. Clone the repository
+# 1. Clone o repositório
 git clone https://github.com/pedrohenriquedsdev/coordin.git
 cd coordin
 
-# 2. Create your local .env and set POSTGRES_PASSWORD (letters and numbers only).
-#    The .env file is ignored by Git. Never commit passwords or other secrets.
-echo "POSTGRES_PASSWORD=YOUR_PASSWORD" > .env
+# 2. Crie o .env local com a senha do banco (letras e números).
+#    O .env é ignorado pelo Git. Nunca faça commit de senhas.
+echo "POSTGRES_PASSWORD=SUA_SENHA" > .env
 
-# 3. Start PostgreSQL
+# 3. Suba o PostgreSQL
 docker compose up -d
 
-# 4. Give the API its secrets as user secrets (stored outside the repository, never in a file Git tracks).
-#    The password in the connection string must be the same one you set in .env.
-dotnet user-secrets set "ConnectionStrings:Default" "Host=localhost;Port=5432;Database=coordin;Username=coordin;Password=YOUR_PASSWORD" --project src/Coordin.Api
+# 4. Configure os segredos da API com user secrets (fora do repositório).
+#    A senha precisa ser a mesma do .env.
+dotnet user-secrets set "ConnectionStrings:Default" "Host=localhost;Port=5432;Database=coordin;Username=coordin;Password=SUA_SENHA" --project src/Coordin.Api
 
-# 5. Configure authentication (see "Authentication" below for how to generate the key).
-#    Without Jwt:SigningKey the API refuses to start; without the Manager values nobody can sign in.
-dotnet user-secrets set "Jwt:SigningKey" "YOUR_RANDOM_KEY_WITH_AT_LEAST_32_BYTES" --project src/Coordin.Api
-dotnet user-secrets set "Manager:Email" "you@example.com" --project src/Coordin.Api
-dotnet user-secrets set "Manager:Password" "A_PASSWORD_WITH_AT_LEAST_12_CHARACTERS" --project src/Coordin.Api
+# 5. Configure a autenticação (veja a seção "Autenticação" abaixo).
+dotnet user-secrets set "Jwt:SigningKey" "UMA_CHAVE_ALEATORIA_COM_PELO_MENOS_32_BYTES" --project src/Coordin.Api
+dotnet user-secrets set "Manager:Email" "voce@exemplo.com" --project src/Coordin.Api
+dotnet user-secrets set "Manager:Password" "UMA_SENHA_COM_PELO_MENOS_12_CARACTERES" --project src/Coordin.Api
 
-# 6. Run the API on port 5080 (applies the database migrations and creates the manager account on startup).
-#    The API listens on the port in the PORT variable (8080 when it is not set), and the front end's dev
-#    proxy expects 5080, so set PORT first:
+# 6. Rode a API na porta 5080. Ela aplica as migrations e cria a conta do gestor ao iniciar.
+#    A API escuta na variável PORT (8080 se não definida), e o proxy do front espera a 5080:
 #      PowerShell:  $env:PORT = "5080"
 #      bash:        export PORT=5080
 dotnet run --project src/Coordin.Api
 ```
 
-In a second terminal, run the front end:
+Em um segundo terminal, rode a interface:
 
 ```bash
 cd src/coordin-web
 npm ci
-npm start   # http://localhost:4200, proxies /api to the API on port 5080
+npm start   # http://localhost:4200, com proxy de /api para a porta 5080
 ```
 
-Open `http://localhost:4200` and sign in with the `Manager:Email` and `Manager:Password` you set in step 5.
+Abra `http://localhost:4200` e entre com o `Manager:Email` e o `Manager:Password` definidos no passo 5.
 
-While the API runs in `Development`, the OpenAPI document is at `http://localhost:5080/openapi/v1.json` and the interactive documentation at `http://localhost:5080/swagger`. Check that everything is connected at `http://localhost:4200/api/health`, which should answer `{"status":"Healthy"}`. If it answers a proxy error (`ECONNREFUSED`), the API is not on port 5080: check that `PORT` was set in the same terminal that runs `dotnet run`.
+Com a API em `Development`, a documentação OpenAPI fica em `http://localhost:5080/openapi/v1.json` e a Swagger UI em `http://localhost:5080/swagger`. Para checar a conexão, acesse `http://localhost:4200/api/health`, que deve responder `{"status":"Healthy"}`. Se aparecer `ECONNREFUSED`, a API não está na porta 5080: confira se a variável `PORT` foi definida no mesmo terminal do `dotnet run`.
 
-### Authentication
+### Autenticação
 
-There is a single account, the development manager's, and no sign-up screen. The account is created when the API starts, from configuration, so no credential ever passes through the repository.
+Há uma única conta, a do gestor, e não existe tela de cadastro. A conta é criada na inicialização da API, a partir da configuração. Nenhuma credencial passa pelo repositório.
 
-| Setting | Environment variable (production) | What it is |
-|---------|-----------------------------------|------------|
-| `Jwt:SigningKey` | `Jwt__SigningKey` | Secret that signs the access tokens. At least 32 bytes; the API refuses to start without it. |
-| `Manager:Email` | `Manager__Email` | E-mail of the manager account, created if no account exists yet. |
-| `Manager:Password` | `Manager__Password` | Password of the account, at least 12 characters. |
-| `Manager:ResetPassword` | `Manager__ResetPassword` | `true` replaces the password of the existing account (see below). |
+| Configuração | Variável de ambiente (produção) | O que é |
+|--------------|---------------------------------|---------|
+| `Jwt:SigningKey` | `Jwt__SigningKey` | Chave que assina os tokens de acesso. Pelo menos 32 bytes; sem ela a API não sobe. |
+| `Manager:Email` | `Manager__Email` | E-mail da conta do gestor, criada se ainda não existir. |
+| `Manager:Password` | `Manager__Password` | Senha da conta, com pelo menos 12 caracteres. |
+| `Manager:ResetPassword` | `Manager__ResetPassword` | `true` troca a senha da conta existente (veja abaixo). |
 
-`Jwt:Issuer` and `Jwt:Audience` are not secrets and live in `appsettings.json`.
+`Jwt:Issuer` e `Jwt:Audience` não são segredos e ficam no `appsettings.json`.
 
-Generate a random key with one of:
+Para gerar uma chave aleatória:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"
 ```
 
-```powershell
-$bytes = New-Object byte[] 48; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes); [Convert]::ToBase64String($bytes)
-```
+**Como funciona a sessão:** o login devolve um token de acesso válido por 15 minutos, guardado só na memória do navegador (nunca no `localStorage`). A sessão é renovada em silêncio por um refresh token em cookie `HttpOnly`, válido por 7 dias e trocado a cada renovação. Recarregar a página mantém o login. Cinco senhas erradas bloqueiam a conta por 15 minutos, e login e renovação são limitados a 10 requisições por minuto por IP.
 
-**How a session works:** signing in returns an access token that lives for 15 minutes and is kept only in the browser's memory (never in `localStorage`). The session is renewed silently by a refresh token in an `HttpOnly` cookie, valid for 7 days and replaced on every renewal. Reloading the page keeps you signed in. Five wrong passwords lock the account for 15 minutes, and sign-in and renewal are limited to 10 requests per minute per IP address.
+**Esqueceu a senha?** Defina `Manager:Password` com a nova senha e `Manager:ResetPassword` como `true`, reinicie a API e depois remova a flag `ResetPassword`. Isso também libera um bloqueio e encerra as sessões abertas. Só a senha muda, não o e-mail.
 
-**Forgot the password?** Set `Manager:Password` to the new value and `Manager:ResetPassword` to `true`, restart the API, then remove the `ResetPassword` flag. This also clears a lockout and ends every open session. Only the password changes, not the e-mail.
+**Trocar `Jwt:SigningKey`** invalida os tokens de acesso já emitidos. O navegador os renova sozinho com o refresh token, então ninguém precisa entrar de novo.
 
-**Changing `Jwt:SigningKey`** invalidates the access tokens already issued; the browser renews them on its own from the refresh token, so nobody has to sign in again.
+Observações:
+- O cookie de renovação é `Secure`. Chrome, Edge e Firefox aceitam em `http://localhost`; o Safari não, então use outro navegador no desenvolvimento local.
+- Se rodar a API compilada diretamente (`dotnet bin/Debug/net10.0/Coordin.Api.dll`), faça-o a partir da pasta `src/Coordin.Api`, senão o `appsettings.json` não é encontrado e a API não sobe.
 
-Notes:
+### Rodar a imagem de produção localmente
 
-- The refresh cookie is `Secure`. Chrome, Edge, and Firefox accept it on `http://localhost`; Safari does not, so use another browser for local development. In production the host serves HTTPS.
-- If you run the built API directly (`dotnet bin/Debug/net10.0/Coordin.Api.dll`), do it from the `src/Coordin.Api` folder: the application looks for `appsettings.json` in the current folder and, without it, refuses to start because the issuer and audience are missing.
-
-### Tests and checks
-
-```bash
-# .NET: build, formatting and tests (Docker must be running: the integration tests start a PostgreSQL container)
-dotnet build Coordin.slnx
-dotnet format Coordin.slnx --verify-no-changes
-dotnet test Coordin.slnx
-
-# Front end (inside src/coordin-web)
-npm run lint
-npm test
-npm run build
-```
-
-### End-to-end smoke test
-
-Three browser scenarios (login and logout; from a new demand to its predicted date; the schedule on a 360 px phone screen) run against a throwaway stack: a new PostgreSQL container, the API serving a fresh build of the front end, and temporary credentials. Nothing is read from your `.env` or your development database, and nothing is written to disk.
-
-Prerequisites:
-
-- Docker running (the stack starts a PostgreSQL 18 container).
-- The .NET SDK from `global.json` on your `PATH`.
-- Google Chrome installed (the tests use the system Chrome; no browser is downloaded).
-
-```bash
-# Inside src/coordin-web
-npm run test:e2e
-```
-
-The first run is slow (the API and the front end are built). Playwright removes the container when the run ends. The smoke test is not part of the CI pipeline: run it locally before a pull request that changes the screens.
-
-### Regenerate the typed API client
-
-With the API running in `Development`, from `src/coordin-web`:
-
-```bash
-npm run generate:api
-```
-
-The generated code in `src/coordin-web/src/app/api/` is committed, so a contract change shows up in the pull request diff.
-
-### Run the production image locally
-
-Besides `POSTGRES_PASSWORD`, the image needs the authentication values, which Compose reads from the same `.env` file (ignored by Git):
+Além de `POSTGRES_PASSWORD`, a imagem precisa dos valores de autenticação, lidos do mesmo `.env`:
 
 ```bash
 # .env
-POSTGRES_PASSWORD=YOUR_PASSWORD
-JWT_SIGNING_KEY=YOUR_RANDOM_KEY_WITH_AT_LEAST_32_BYTES
-MANAGER_EMAIL=you@example.com
-MANAGER_PASSWORD=A_PASSWORD_WITH_AT_LEAST_12_CHARACTERS
+POSTGRES_PASSWORD=SUA_SENHA
+JWT_SIGNING_KEY=UMA_CHAVE_ALEATORIA_COM_PELO_MENOS_32_BYTES
+MANAGER_EMAIL=voce@exemplo.com
+MANAGER_PASSWORD=UMA_SENHA_COM_PELO_MENOS_12_CARACTERES
 ```
 
 ```bash
@@ -314,36 +271,72 @@ docker compose --profile app up -d --build   # http://localhost:8080
 docker compose --profile app down
 ```
 
-This builds the single image (API plus the Angular build) and runs it next to the database. It runs as `Staging`: identical to production except that HTTPS is not forced, since there is no TLS-terminating proxy in front of it locally.
+A imagem roda como `Staging`, igual à produção, exceto pelo HTTPS obrigatório, que não se aplica localmente. Se o contêiner sair logo após subir, leia `docker compose logs app`: a falta de `JWT_SIGNING_KEY` aparece ali. Sem `MANAGER_EMAIL` e `MANAGER_PASSWORD` a aplicação sobe, mas ninguém consegue entrar. O `docker compose up -d` comum (só o banco) não precisa desses valores.
 
-If the container exits right after starting, read its log with `docker compose logs app`: a missing `JWT_SIGNING_KEY` is reported there. A missing `MANAGER_EMAIL` or `MANAGER_PASSWORD` does not stop the application, but nobody will be able to sign in. The plain `docker compose up -d` (database only) does not need any of these three values.
+### Gerar o cliente tipado da API
 
-## Roadmap
+Com a API rodando em `Development`, dentro de `src/coordin-web`:
 
-- Finalize the specification of the open design decisions
-- Domain model: demands, teams, people, capacity, and estimates
-- Forecast engine (effort → duration → completion date) with safety margin
-- Schedule view with the manager's sequence
-- Scenario generation and comparison for alternative sequences
-- Approval/rejection flow for recommendations
-- General planning report
-- Individual team report (occupancy, idle time, overload)
-- Tracking of forecast vs. actual results
+```bash
+npm run generate:api
+```
 
-## Contributing
+O código gerado em `src/coordin-web/src/app/api/` fica no repositório, então uma mudança de contrato aparece no diff do pull request.
 
-Contributions, ideas, and feedback are welcome. Since the project is still taking shape, please open an issue to discuss what you would like to change before submitting a pull request.
+## Testes e verificações
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Commit your changes (`git commit -m "Add my feature"`)
-4. Push to the branch (`git push origin feature/my-feature`)
-5. Open a pull request
+```bash
+# .NET: build, formatação e testes (o Docker precisa estar rodando: os testes de integração sobem um PostgreSQL)
+dotnet build Coordin.slnx
+dotnet format Coordin.slnx --verify-no-changes
+dotnet test Coordin.slnx
 
-## Academic Context
+# Interface (dentro de src/coordin-web)
+npm run lint
+npm test
+npm run build
+```
 
-Coordin originated as a final undergraduate project (TCC) proposal: *Planning and Demand Optimization — a system to support delivery forecasting and the distribution of development team capacity.* The manager remains responsible for decisions; the system provides the calculations, visibility, and scenarios needed to make them.
+- **Motor de cálculo:** testes de unidade cobrindo os casos de borda (esforço zero ou ausente, time sem capacidade, ausência no meio do período, várias equipes na mesma demanda, dependência em cadeia, ciclo de dependência, margem aplicada e arredondada para cima). Há também testes de propriedade sobre centenas de cenários gerados com semente fixa.
+- **API:** testes de integração contra PostgreSQL real.
+- **Interface:** testes unitários que rodam em mais de um fuso horário, para garantir que datas de calendário não mudem de dia.
+- **Ponta a ponta:** três cenários de fumaça com Playwright (login, do cadastro à previsão, e o cronograma em 360 px). Eles sobem uma pilha descartável com o próprio banco de teste. Rodam localmente, fora da CI:
 
-## License
+  ```bash
+  # dentro de src/coordin-web, com Docker e o Google Chrome instalados
+  npm run test:e2e
+  ```
 
-License to be defined. Add a `LICENSE` file to the repository root (for example, MIT) and update this section.
+O pipeline de integração contínua (`.github/workflows/ci.yml`) roda os jobs `dotnet` (build, formatação, testes e testes de desempenho) e `web` (lint, testes, build) em todo pull request e push para a `main`.
+
+## Implantação
+
+O roteiro completo, com os limites das plataformas gratuitas e a verificação ponta a ponta, está em [`docs/deployment.md`](docs/deployment.md). O `render.yaml` descreve o serviço, e o banco fica em um PostgreSQL gerenciado.
+
+## Documentação do projeto
+
+| Documento | Conteúdo |
+|-----------|----------|
+| [`docs/PRD.md`](docs/PRD.md) | Problema, personas, requisitos (MoSCoW), critérios de aceite, métricas e escopo |
+| [`docs/TDD.md`](docs/TDD.md) | Arquitetura, stack, modelo de dados, contratos, algoritmos e estratégia de testes |
+| [`docs/design/`](docs/design/) | Modelo entidade-relacionamento, protótipos e especificações consolidadas |
+| [`openspec/specs/`](openspec/specs/) | Comportamento vigente do sistema, fonte da verdade |
+| [`docs/deployment.md`](docs/deployment.md) | Implantação e verificação em produção |
+
+O fluxo de desenvolvimento segue **PRD → TDD → SDD (OpenSpec) → Pull Request**, com cada requisito rastreável por um identificador (`RF-*`, `RNF-*`, `DT-*`).
+
+## Status
+
+Sistema em produção, com todas as funcionalidades do escopo planejado implementadas (changes 1 a 13 do roadmap do TDD).
+
+## Contribuição
+
+Este é um projeto proprietário. Contribuições externas acontecem somente por convite do autor. Se você quiser sugerir algo, abra uma *issue* para discutir antes.
+
+## Contexto acadêmico
+
+O Coordin nasceu como proposta de Trabalho de Conclusão de Curso: *Planejamento e otimização de demandas, um sistema de apoio à previsão de entregas e à distribuição da capacidade dos times de desenvolvimento.* O gestor continua responsável pelas decisões; o sistema oferece os cálculos, a visibilidade e os cenários necessários para tomá-las.
+
+## Licença
+
+**Proprietária. Todos os direitos reservados.** Copyright © 2026 Pedro Henrique dos Santos. O software e o código-fonte não podem ser usados, copiados, modificados ou distribuídos sem autorização prévia por escrito. Veja o arquivo [`LICENSE`](LICENSE).
